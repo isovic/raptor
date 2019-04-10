@@ -835,7 +835,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
 TEST(MinimizerIndexTest, TestCollectHits3) {
     // Test the collection of hits with the default parameters (k = 15, w = 5).
     // This is like a realistic scenario, but the query and the target are the same.
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     // Create the parameters.
     auto index_params = mindex::createIndexParams();

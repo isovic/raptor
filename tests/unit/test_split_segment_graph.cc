@@ -19,13 +19,14 @@
 namespace raptor {
 namespace unit {
 
+bool VERBOSE_DEBUG_QID_SG = false;
+
 TEST(SplitSegmentGraph, CreateSplitSegmentGraph1) {
     /*
      * Simple empty case.
     */
     std::string test_name("CreateSplitSegmentGraph1");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -35,7 +36,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph1) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -52,7 +53,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph1) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -62,8 +63,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph2) {
      * A single node, no edges.
     */
     std::string test_name("CreateSplitSegmentGraph2");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -74,7 +74,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph2) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -95,7 +95,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph2) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -105,8 +105,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph3) {
      * Single node with a circular edge.
     */
     std::string test_name("CreateSplitSegmentGraph3");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -118,7 +117,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph3) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -140,7 +139,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph3) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -151,8 +150,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph4) {
      * segment graph.
     */
     std::string test_name("CreateSplitSegmentGraph4");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -164,7 +162,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph4) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -202,7 +200,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph4) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -213,8 +211,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph5) {
      * segment graph.
     */
     std::string test_name("CreateSplitSegmentGraph5");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -227,7 +224,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph5) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -265,7 +262,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph5) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -276,8 +273,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph6) {
      * segment graph.
     */
     std::string test_name("CreateSplitSegmentGraph6");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -307,7 +303,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph6) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_SG);
 
     raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -440,7 +436,7 @@ TEST(SplitSegmentGraph, CreateSplitSegmentGraph6) {
         "}\n"
         "]\n";
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }

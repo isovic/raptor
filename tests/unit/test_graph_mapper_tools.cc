@@ -19,6 +19,8 @@
 namespace raptor {
 namespace unit {
 
+bool VERBOSE_DEBUG_QID_GM_TOOLS = false;
+
 std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> WrapGroupTargetSeedHits(
             std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>> seed_hits,  // Copy.
             int32_t k,
@@ -112,8 +114,7 @@ TEST(GraphMapperTools, BreakAnchors1) {
      * Empty input.
     */
     std::string test_name("BreakAnchors1");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -123,7 +124,7 @@ TEST(GraphMapperTools, BreakAnchors1) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_GM_TOOLS);
 
     // raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -148,7 +149,7 @@ TEST(GraphMapperTools, BreakAnchors1) {
     std::string result_str = result_linear_mapping->WriteAsCSV(',');
 
     std::string expected_str = "";
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -159,8 +160,7 @@ TEST(GraphMapperTools, BreakAnchors2) {
      * and everything should be as is.
     */
     std::string test_name("BreakAnchors2");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -170,7 +170,7 @@ TEST(GraphMapperTools, BreakAnchors2) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_GM_TOOLS);
 
     // raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -299,7 +299,7 @@ TEST(GraphMapperTools, BreakAnchors2) {
             // A (for anchor), group_id, qid, tid, score, num_seeds, qrev, qstart, qend, qlen, trev, tstart, tend, tlen, cov_bases_q, cov_bases_t, num_seeds
             "A,0,0,0,671,50,0,2,675,1000,0,2,680,0,671,671,50\n"
         ;
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }
@@ -310,8 +310,7 @@ TEST(GraphMapperTools, BreakAnchors3) {
      * edges stemming out of the same nodes.
     */
     std::string test_name("BreakAnchors3");
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
-    bool verbose_debug_qid = true;
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -337,7 +336,7 @@ TEST(GraphMapperTools, BreakAnchors3) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_GM_TOOLS);
 
     // raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
@@ -476,7 +475,7 @@ TEST(GraphMapperTools, BreakAnchors3) {
             "A,0,0,0,128,9,0,472,586,1000,0,467,581,0,128,128,9\n"
             "A,0,0,0,89,7,0,600,675,1000,0,605,680,0,89,89,7\n"
         ;
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ASSERT_EQ(result_str, expected_str);
 }

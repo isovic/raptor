@@ -43,7 +43,7 @@ std::vector<std::string> qnames_1 = {
 ///////////////////////////////////////////////
 
 TEST(APIExamples, APITest1) {
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     // Create the index parameters;
     auto index_params = mindex::createIndexParams();
@@ -98,7 +98,7 @@ TEST(APIExamples, APITest1) {
 }
 
 TEST(APIExamples, FullPipelineWithValueAccessAPI) {
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     ////////////////////////////
     /// Sample input data.   ///

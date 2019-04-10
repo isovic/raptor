@@ -43,6 +43,8 @@
 namespace raptor {
 namespace unit {
 
+bool VERBOSE_DEBUG_QID_MAPPER = false;
+
 // struct AnchorM4Plus {
 //     int32_t qid = 0, tid = 0,
 // };
@@ -204,8 +206,8 @@ void CompareEdges(const raptor::AnchorGraphPtr& local_graph, const std::vector<s
         const auto& sink = local_graph->GetNode(edge_item->sink_name())->anchor();
         edge_set.emplace(std::make_tuple(source->id(), sink->id(), edge->SummarizeSegmentEdgesAsString()));
 
-        std::cerr << "source->id() = " << source->id() << ", sink->id() = " << sink->id() << "\n";
-        std::cerr << edge->SummarizeSegmentEdgesAsString() << "\n";
+        // std::cerr << "source->id() = " << source->id() << ", sink->id() = " << sink->id() << "\n";
+        // std::cerr << edge->SummarizeSegmentEdgesAsString() << "\n";
     }
     EXPECT_EQ(edge_set.size(), expected_edges.size());
     for (const auto exp_edge: expected_edges) {
@@ -248,7 +250,7 @@ raptor::AnchorGraphPtr WrapConstructAnchorGraph(const std::string& test_name,
                                                 bool verbose_debug_qid
                                                 ) {
 
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
 
     // Create the anchors from the M4-like formatted vector above.
     auto target_anchors = ConstructTargetAnchors(anchors_m4_plus);
@@ -261,12 +263,12 @@ raptor::AnchorGraphPtr WrapConstructAnchorGraph(const std::string& test_name,
                                             predecessor_lookup_window,
                                             max_path_edges,
                                             chain_max_skip,
-                                            verbose_debug_qid);
+                                            VERBOSE_DEBUG_QID_MAPPER);
 
     if (verbose_debug_qid) {
         LOG_ALL("Local graph:\n%s\n", anchor_graph->Verbose().c_str());
     }
-	LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     // std::ofstream ofs_graph("test.graph." + test_name + ".html");
     // local_graph->WriteAsHTML(ofs_graph);
@@ -285,7 +287,6 @@ TEST(GraphMapper, ConstructAnchorGraph1) {
     int32_t predecessor_lookup_window = 10000;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -307,13 +308,13 @@ TEST(GraphMapper, ConstructAnchorGraph1) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 
@@ -329,7 +330,6 @@ TEST(GraphMapper, ConstructAnchorGraph2) {
     int32_t predecessor_lookup_window = 10000;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -374,13 +374,13 @@ TEST(GraphMapper, ConstructAnchorGraph2) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -394,7 +394,6 @@ TEST(GraphMapper, ConstructAnchorGraph3) {
     int32_t predecessor_lookup_window = 10000;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -460,13 +459,13 @@ TEST(GraphMapper, ConstructAnchorGraph3) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -480,7 +479,6 @@ TEST(GraphMapper, ConstructAnchorGraph4) {
     int32_t predecessor_lookup_window = 1000;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -525,13 +523,13 @@ TEST(GraphMapper, ConstructAnchorGraph4) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -545,7 +543,6 @@ TEST(GraphMapper, ConstructAnchorGraph5) {
     int32_t predecessor_lookup_window = 100;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -575,13 +572,13 @@ TEST(GraphMapper, ConstructAnchorGraph5) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -596,7 +593,6 @@ TEST(GraphMapper, ConstructAnchorGraph6) {
     int32_t predecessor_lookup_window = 1000;
     int32_t max_path_edges = -1;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -626,13 +622,13 @@ TEST(GraphMapper, ConstructAnchorGraph6) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -646,7 +642,6 @@ TEST(GraphMapper, ConstructAnchorGraph7) {
     int32_t predecessor_lookup_window = 1000;
     int32_t max_path_edges = 10;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -678,13 +673,13 @@ TEST(GraphMapper, ConstructAnchorGraph7) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -698,7 +693,6 @@ TEST(GraphMapper, ConstructAnchorGraph8) {
     int32_t predecessor_lookup_window = 1000;
     int32_t max_path_edges = 10;
     int32_t chain_max_skip = 25;
-    bool verbose_debug_qid = true;
 
     // Define the test inputs.
     std::vector<std::vector<std::string>> nodes_str = {
@@ -724,13 +718,13 @@ TEST(GraphMapper, ConstructAnchorGraph8) {
     raptor::SegmentGraphPtr seg_graph = WrapConstructSegmentGraph(test_name,
                                                 nodes_str,
                                                 edges_gfa2,
-                                                verbose_debug_qid);
+                                                VERBOSE_DEBUG_QID_MAPPER);
 
     raptor::AnchorGraphPtr local_graph = WrapConstructAnchorGraph(
             test_name,
             seg_graph, anchors_m4_plus,
             max_allowed_dist, predecessor_lookup_window,
-            max_path_edges, chain_max_skip, verbose_debug_qid);
+            max_path_edges, chain_max_skip, VERBOSE_DEBUG_QID_MAPPER);
 
     CompareEdges(local_graph, expected_edges);
 }
@@ -744,7 +738,6 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents1) {
     std::string test_name("CreateAnchorGraphConnectedComponents1");
 
     double graph_allowed_score_diff_frac = 0.95;
-    bool verbose_debug_qid = false;
 
     //////////////////////////////////////////////////
     /// Inputs.                                    ///
@@ -768,7 +761,7 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents1) {
                     raptor::GraphMapper::CreateAnchorGraphConnectedComponents(
                                             mapped_graph,
                                             graph_allowed_score_diff_frac,
-                                            verbose_debug_qid);
+                                            VERBOSE_DEBUG_QID_MAPPER);
 
     //////////////////////////////////////////////////
     /// Eval.                                      ///
@@ -794,7 +787,6 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents2) {
     std::string test_name("CreateAnchorGraphConnectedComponents2");
 
     double graph_allowed_score_diff_frac = 0.95;
-    bool verbose_debug_qid = false;
 
     //////////////////////////////////////////////////
     /// Inputs.                                    ///
@@ -854,7 +846,7 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents2) {
                     raptor::GraphMapper::CreateAnchorGraphConnectedComponents(
                                             mapped_graph,
                                             graph_allowed_score_diff_frac,
-                                            verbose_debug_qid);
+                                            VERBOSE_DEBUG_QID_MAPPER);
 
     //////////////////////////////////////////////////
     /// Eval.                                      ///
@@ -881,7 +873,6 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents3) {
     std::string test_name("CreateAnchorGraphConnectedComponents3");
 
     double graph_allowed_score_diff_frac = 0.95;
-    bool verbose_debug_qid = false;
 
     //////////////////////////////////////////////////
     /// Inputs.                                    ///
@@ -971,7 +962,7 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents3) {
                     raptor::GraphMapper::CreateAnchorGraphConnectedComponents(
                                             mapped_graph,
                                             graph_allowed_score_diff_frac,
-                                            verbose_debug_qid);
+                                            VERBOSE_DEBUG_QID_MAPPER);
 
     //////////////////////////////////////////////////
     /// Eval.                                      ///
@@ -999,7 +990,6 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents4) {
     std::string test_name("CreateAnchorGraphConnectedComponents4");
 
     double graph_allowed_score_diff_frac = 0.95;
-    bool verbose_debug_qid = false;
 
     //////////////////////////////////////////////////
     /// Inputs.                                    ///
@@ -1069,13 +1059,13 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents4) {
     //////////////////////////////////////////////////
     /// Run the UUT.                               ///
     //////////////////////////////////////////////////
-	// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
+	// /// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
     std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> pgraphs =
                     raptor::GraphMapper::CreateAnchorGraphConnectedComponents(
                                             mapped_graph,
                                             graph_allowed_score_diff_frac,
-                                            verbose_debug_qid);
-	// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+                                            VERBOSE_DEBUG_QID_MAPPER);
+	// /// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     //////////////////////////////////////////////////
     /// Eval.                                      ///
@@ -1105,7 +1095,6 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents5) {
     std::string test_name("CreateAnchorGraphConnectedComponents5");
 
     double graph_allowed_score_diff_frac = 0.95;
-    bool verbose_debug_qid = false;
 
     //////////////////////////////////////////////////
     /// Inputs.                                    ///
@@ -1203,13 +1192,13 @@ TEST(GraphMapper, CreateAnchorGraphConnectedComponents5) {
     //////////////////////////////////////////////////
     /// Run the UUT.                               ///
     //////////////////////////////////////////////////
-	// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
+	// /// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(9);
     std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> pgraphs =
                     raptor::GraphMapper::CreateAnchorGraphConnectedComponents(
                                             mapped_graph,
                                             graph_allowed_score_diff_frac,
-                                            verbose_debug_qid);
-	// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
+                                            VERBOSE_DEBUG_QID_MAPPER);
+	// /// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     //////////////////////////////////////////////////
     /// Eval.                                      ///
