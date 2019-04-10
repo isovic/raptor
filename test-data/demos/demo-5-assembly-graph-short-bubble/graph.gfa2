@@ -1,0 +1,9 @@
+H	VN:Z:2.0
+S	part1	12000	*
+S	part2a	10000	*
+S	part2b	10000	*
+S	part3	27467	*
+E	edge1	part1+	part2a+	12000$	12000$	0	0	*
+E	edge2	part1+	part2b+	12000$	12000$	0	0	*
+E	edge3	part2a+	part3+	10000$	10000$	0	0	*
+E	edge4	part2b+	part3+	10000$	10000$	0	0	*
