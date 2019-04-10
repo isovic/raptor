@@ -1,0 +1,2 @@
+option('RAPTOR_TESTING_MODE', type : 'boolean', value : false)
+option('RAPTOR_DEBUG_TIMINGS', type : 'boolean', value : false)

@@ -1,0 +1,26 @@
+/*
+ * version.h.in
+ *
+ *  Created on: Nov 27, 2017
+ *      Author: Ivan Sovic
+ */
+
+#ifndef SRC_VERSION_H_
+#define SRC_VERSION_H_
+
+#include <string>
+
+static const std::string SOFTWARE_NAME = std::string("Raptor");
+
+static const int32_t RAPTOR_VERSION_MAJOR = @RAPTOR_VERSION_MAJOR@;
+static const int32_t RAPTOR_VERSION_MINOR = @RAPTOR_VERSION_MINOR@;
+static const int32_t RAPTOR_VERSION_PATCH = @RAPTOR_VERSION_PATCH@;
+static const std::string RAPTOR_VERSION_COMMIT("@RAPTOR_VERSION_COMMIT@");
+
+static const std::string RAPTOR_VERSION_STRING = std::to_string(RAPTOR_VERSION_MAJOR) + "." + std::to_string(RAPTOR_VERSION_MINOR) + "." + std::to_string(RAPTOR_VERSION_PATCH) + "-" + RAPTOR_VERSION_COMMIT;
+
+static const std::string RELEASE_DATE = (std::string(__DATE__) + std::string(" at ") + std::string(__TIME__));
+
+static const std::string LICENCE_INFORMATION = std::string("Raptor by Ivan Sovic, 2017-2019.\n");
+
+#endif

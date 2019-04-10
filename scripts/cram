@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+###################################
+### This script is a workaround
+### to run Cram tests, without actually
+### installing the Python package.
+### Based on: https://github.com/PacificBiosciences/unanimity/blob/develop/scripts/cram
+###################################
+
+# if we have cram already, use that
+if [[ -x "$(which cram)" ]]; then
+    exec cram "$@"
+fi
+
+CRAM_SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+PROJECT_DIR=${CRAM_SCRIPT_PATH}/../
+BIN_DIR=${CRAM_SCRIPT_PATH}/../build/
+CRAM_DIR=${PROJECT_DIR}/third-party/cram/
+export PROJECT_DIR
+export CRAM_DIR
+export BIN_DIR
+exec env PYTHONPATH=$CRAM_DIR $CRAM_DIR/scripts/cram "$@"
