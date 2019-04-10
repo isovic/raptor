@@ -1,0 +1,57 @@
+sudo: true
+
+os:
+    - linux
+#    - osx
+
+language: cpp
+
+python: '3.6'
+
+compiler:
+#    - clang
+    - gcc
+
+addons:
+  apt:
+    packages:
+        - ninja
+
+before_install:
+
+#    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+#    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install --with-toolchain llvm; fi
+
+    # At the time of writing this config file, the default image was Ubuntu 14.04 which had Ninja 1.3.x installed. Meson requires >= 1.5.
+    - wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip && sudo unzip ninja-linux.zip -d /usr/local/bin/ && sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
+    - /usr/bin/ninja --version 
+
+    # Workaround for pip3. Without the Pyenv line, build fails because both versions 3.6 and 3.6.3 are available.
+    - pyenv global system 3.6
+    - pip3 install meson==0.44.0
+
+    # Update the apt-get repos.
+    - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+#    - if [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
+    - if [ "$CXX" == "clang++" ]; then sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main"; fi
+    - sudo apt-get -qq update
+
+    # Install packages for GCC.
+    - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-6; fi
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+
+    # Install packages for Clang.
+    - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-4.0.1 lldb-4.0; fi
+    - if [ "$CXX" == "clang++" ]; then export CXX="clang++-4.0"; fi
+
+install:
+    - make
+
+script:
+    - build/tests_raptor
+    - make cram
+
+notifications:
+    email:
+        on_success: change
+        on_failure: always
