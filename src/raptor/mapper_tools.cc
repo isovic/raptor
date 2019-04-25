@@ -172,5 +172,56 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Gro
     return all_target_hits;
 }
 
+/*
+ * Aligns the anchor using Edlib to obtain match rates needed for the DP chaining.
+ */
+int32_t CalcMatchRate(const mindex::SequencePtr& qseq, mindex::IndexPtr index,
+                                const std::shared_ptr<raptor::RegionMapped>& anchor) {
+    int32_t diffs = 0, matches = 0;
+
+    LOG_ALL("CalcMatchRate is currently deactivated while refactoring MinimizerIndex.\n");
+
+    // int32_t tseq_start =
+    //     anchor->TargetIndexStart() +
+    //     ((!anchor->TargetRev()) ? (anchor->TargetStart()) : (anchor->TargetLen() - anchor->TargetEnd()));
+
+    // size_t tseq_len = anchor->TargetEnd() - anchor->TargetStart();
+
+    // size_t qseq_len = anchor->QueryEnd() - anchor->QueryStart();
+
+    // int32_t result = 0;
+
+    // EdlibAlignTask task = EDLIB_TASK_DISTANCE;
+    // EdlibAlignMode edlib_mode = EDLIB_MODE_NW;
+
+    // // If not reverse complement, we can speed-up the computation by not copying.
+    // if (!anchor->TargetRev()) {
+    //     EdlibAlignResult result = edlibAlign((const char*)&(qseq->data()[anchor->QueryStart()]),
+    //                                          qseq_len, (const char*)&index->data()[tseq_start],
+    //                                          tseq_len, edlibNewAlignConfig(-1, edlib_mode, task));
+    //     diffs = result.editDistance;
+    //     matches = qseq_len - diffs;  // An approximation. Pessimistic.
+    //     edlibFreeAlignResult(result);
+
+    // } else {
+    //     std::string target = raptor::ReverseComplement((const char*)&index->data()[tseq_start], tseq_len);
+
+    //     EdlibAlignResult result =
+    //         edlibAlign((const char*)&(qseq->data()[anchor->QueryStart()]), qseq_len, target.c_str(),
+    //                    target.size(), edlibNewAlignConfig(-1, edlib_mode, task));
+    //     diffs = result.editDistance;
+    //     matches = qseq_len - diffs;  // An approximation. Pessimistic.
+    //     edlibFreeAlignResult(result);
+    // }
+
+    // // In case something went wrong with the alignment, the anchor
+    // // just won't be used.
+    // if (result < 0) {
+    //     matches = 0;
+    // }
+
+    return matches;
+}
+
 }
 }

@@ -40,17 +40,6 @@ class Mapper {
 
     std::shared_ptr<raptor::LinearMappingResult> Map(const mindex::SequencePtr& qseq);
 
-    /*
-     * Uses alignment (Edlib edit distance) to estimate the number of matches in anchors.
-     * This is then used for DP chaining. I used the term "estimate" because Edlib returns
-     * the edit distance instead of the matches we need, so I subtracted the edit distance
-     * from the query length. This produces a pessimistic score because indels should
-     * not be counted. In this way, this actually provides an estimate of accuracy (but not
-     * normalized).
-     */
-    static int32_t CalcMatchRate(const mindex::SequencePtr& qseq, mindex::IndexPtr index,
-                        const std::shared_ptr<raptor::RegionMapped>& anchor);
-
    private:
     Mapper(const mindex::IndexPtr index, const std::shared_ptr<raptor::ParamsMapper> params);
     Mapper(const Mapper&) = delete;

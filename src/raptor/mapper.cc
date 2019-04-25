@@ -64,57 +64,6 @@ std::vector<std::shared_ptr<raptor::TargetHits<T>>> raptor::Mapper::FilterForOve
 }
 
 /*
- * Aligns the anchor using Edlib to obtain match rates needed for the DP chaining.
- */
-int32_t raptor::Mapper::CalcMatchRate(const mindex::SequencePtr& qseq, mindex::IndexPtr index,
-                                const std::shared_ptr<raptor::RegionMapped>& anchor) {
-    int32_t diffs = 0, matches = 0;
-
-    LOG_ALL("CalcMatchRate is currently deactivated while refactoring MinimizerIndex.\n");
-
-    // int32_t tseq_start =
-    //     anchor->TargetIndexStart() +
-    //     ((!anchor->TargetRev()) ? (anchor->TargetStart()) : (anchor->TargetLen() - anchor->TargetEnd()));
-
-    // size_t tseq_len = anchor->TargetEnd() - anchor->TargetStart();
-
-    // size_t qseq_len = anchor->QueryEnd() - anchor->QueryStart();
-
-    // int32_t result = 0;
-
-    // EdlibAlignTask task = EDLIB_TASK_DISTANCE;
-    // EdlibAlignMode edlib_mode = EDLIB_MODE_NW;
-
-    // // If not reverse complement, we can speed-up the computation by not copying.
-    // if (!anchor->TargetRev()) {
-    //     EdlibAlignResult result = edlibAlign((const char*)&(qseq->data()[anchor->QueryStart()]),
-    //                                          qseq_len, (const char*)&index->data()[tseq_start],
-    //                                          tseq_len, edlibNewAlignConfig(-1, edlib_mode, task));
-    //     diffs = result.editDistance;
-    //     matches = qseq_len - diffs;  // An approximation. Pessimistic.
-    //     edlibFreeAlignResult(result);
-
-    // } else {
-    //     std::string target = raptor::ReverseComplement((const char*)&index->data()[tseq_start], tseq_len);
-
-    //     EdlibAlignResult result =
-    //         edlibAlign((const char*)&(qseq->data()[anchor->QueryStart()]), qseq_len, target.c_str(),
-    //                    target.size(), edlibNewAlignConfig(-1, edlib_mode, task));
-    //     diffs = result.editDistance;
-    //     matches = qseq_len - diffs;  // An approximation. Pessimistic.
-    //     edlibFreeAlignResult(result);
-    // }
-
-    // // In case something went wrong with the alignment, the anchor
-    // // just won't be used.
-    // if (result < 0) {
-    //     matches = 0;
-    // }
-
-    return matches;
-}
-
-/*
  * The Mapping workflow. Collects all hits from the index, filters
  * colinear hits in a narrow band of diagonals, forms anchors from the
  * colinear hits (an anchor is a start/end position for each set of colinear
@@ -237,7 +186,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     if (params_->score_anchors == true) {
         for (auto& target_anchors : anchors) {
             for (auto& anchor : target_anchors->hits()) {
-                int32_t matches = CalcMatchRate(qseq, index_, anchor);
+                int32_t matches = raptor::mapper::CalcMatchRate(qseq, index_, anchor);
                 anchor->score(matches);
             }
         }

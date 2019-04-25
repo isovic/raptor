@@ -7,6 +7,7 @@
 
 #include <raptor/graph_mapper.h>
 #include <raptor/graph_mapper_tools.h>
+#include <raptor/mapper_tools.h>
 
 #include <cmath>
 #include <algorithm/graph.hpp>
@@ -913,7 +914,7 @@ void GraphMapper::AlignAnchors_(const mindex::SequencePtr& qseq,
                                 std::vector<raptor::TargetAnchorPtr>& target_anchors) const {
     for (auto& ta : target_anchors) {
         for (auto& anchor : ta->hits()) {
-            int32_t matches = raptor::Mapper::CalcMatchRate(qseq, index_, anchor);
+            int32_t matches = raptor::mapper::CalcMatchRate(qseq, index_, anchor);
             anchor->score(matches);
         }
     }

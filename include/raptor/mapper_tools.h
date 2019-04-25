@@ -31,6 +31,18 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Gro
                     int32_t qid,
                     int32_t qlen);
 
+
+/*
+* Uses alignment (Edlib edit distance) to estimate the number of matches in anchors.
+* This is then used for DP chaining. I used the term "estimate" because Edlib returns
+* the edit distance instead of the matches we need, so I subtracted the edit distance
+* from the query length. This produces a pessimistic score because indels should
+* not be counted. In this way, this actually provides an estimate of accuracy (but not
+* normalized).
+*/
+int32_t CalcMatchRate(const mindex::SequencePtr& qseq, mindex::IndexPtr index,
+                    const std::shared_ptr<raptor::RegionMapped>& anchor);
+
 }
 }
 
