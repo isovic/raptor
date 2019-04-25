@@ -25,7 +25,8 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                 int32_t _qstart, int32_t _qend,
                 int32_t _tstart, int32_t _tend,
                 int32_t _cov_bases_q, int32_t _cov_bases_t,
-                int32_t _num_seeds, int32_t _score,
+                int32_t _num_seeds, int32_t _edit_dist,
+                int32_t _score,
                 int32_t _path_id, int32_t _num_paths,
                 int32_t _segment_id, int32_t _num_segments);
 
@@ -39,7 +40,8 @@ public:
                     int32_t _qstart, int32_t _qend,
                     int32_t _tstart, int32_t _tend,
                     int32_t _cov_bases_q, int32_t _cov_bases_t,
-                    int32_t _num_seeds, int32_t _score,
+                    int32_t _num_seeds, int32_t _edit_dist,
+                    int32_t _score,
                     int32_t _path_id, int32_t _num_paths,
                     int32_t _segment_id, int32_t _num_segments);
 
@@ -110,7 +112,7 @@ public:
         return cov_bases_t_;
     }
     int32_t EditDistance() const {
-        return -1;
+        return edit_dist_;
     }
     std::vector<raptor::CigarOp> Cigar() const {
         return std::vector<raptor::CigarOp>();
@@ -148,6 +150,22 @@ public:
         return (score_ >= 0) ? score_ : QuerySpan();
     }
 
+    ////////////////
+    /// Setters. ///
+    ////////////////
+    void SetCoveredBasesQuery(int32_t val) {
+        cov_bases_q_ = val;
+    }
+    void SetCoveredBasesTarget(int32_t val) {
+        cov_bases_t_ = val;
+    }
+    void SetEditDistance(int32_t val) {
+        edit_dist_ = val;
+    }
+    void SetScore(int32_t val) {
+        score_ = val;
+    }
+
     /*
      * Getters.
     */
@@ -161,6 +179,7 @@ public:
     int32_t cov_bases_q() const { return cov_bases_q_; }
     int32_t cov_bases_t() const { return cov_bases_t_; }
     int32_t num_seeds() const { return num_seeds_; }
+    int32_t edit_dist() const { return edit_dist_; }
     int32_t score() const { return score_; }
     int32_t path_id() const { return path_id_; }
     int32_t num_paths() const { return num_paths_; }
@@ -178,6 +197,7 @@ public:
     void cov_bases_q(int32_t _cov_bases_q) { cov_bases_q_ = _cov_bases_q; }
     void cov_bases_t(int32_t _cov_bases_t) { cov_bases_t_ = _cov_bases_t; }
     void num_seeds(int32_t _num_seeds) { num_seeds_ = _num_seeds; }
+    void edit_dist(int32_t _edit_dist) { edit_dist_ = _edit_dist; }
     void score(int32_t _score) { score_ = _score; }
     void path_id(int32_t _path_id) { path_id_ = _path_id; }
     void num_paths(int32_t _num_paths) { num_paths_ = _num_paths; }
@@ -198,7 +218,8 @@ private:
             int32_t _qstart, int32_t _qend,
             int32_t _tstart, int32_t _tend,
             int32_t _cov_bases_q, int32_t _cov_bases_t,
-            int32_t _num_seeds, int32_t _score,
+            int32_t _num_seeds, int32_t _edit_dist,
+            int32_t _score,
             int32_t _path_id, int32_t _num_paths,
             int32_t _segment_id, int32_t _num_segments);
 
@@ -211,6 +232,7 @@ private:
     int32_t tstart_, tend_;
     int32_t cov_bases_q_, cov_bases_t_;
     int32_t num_seeds_;
+    int32_t edit_dist_;
     int32_t score_;    // Score is < 0 if not initialized. Score can represent an arbitrary value such as the number of matching bases.
     int32_t path_id_;
     int32_t num_paths_;

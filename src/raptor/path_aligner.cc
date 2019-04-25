@@ -436,7 +436,8 @@ std::shared_ptr<raptor::RegionMapped> PathAligner::ExtendAlignmentFront_(
                                 anchor->QueryStart(), anchor->QueryEnd(),
                                 anchor->TargetStart(), anchor->TargetEnd(),
                                 anchor->CoveredBasesQuery(), anchor->CoveredBasesTarget(),
-                                anchor->NumSeeds(), anchor->Score(),
+                                anchor->NumSeeds(), anchor->EditDistance(),
+                                anchor->Score(),
                                 anchor->PathId(), anchor->PathsNum(),
                                 anchor->SegmentId(), anchor->SegmentsNum());
 
@@ -512,7 +513,7 @@ std::shared_ptr<raptor::RegionMapped> PathAligner::ExtendAlignmentBack_(
                                 anchor->QueryStart(), anchor->QueryEnd(),
                                 anchor->TargetStart(), anchor->TargetEnd(),
                                 anchor->CoveredBasesQuery(), anchor->CoveredBasesTarget(),
-                                anchor->NumSeeds(), anchor->Score(),
+                                anchor->NumSeeds(), anchor->EditDistance(), anchor->Score(),
                                 anchor->PathId(), anchor->PathsNum(),
                                 anchor->SegmentId(), anchor->SegmentsNum());
 

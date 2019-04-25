@@ -9,7 +9,8 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                 int32_t _qstart, int32_t _qend,
                 int32_t _tstart, int32_t _tend,
                 int32_t _cov_bases_q, int32_t _cov_bases_t,
-                int32_t _num_seeds, int32_t _score,
+                int32_t _num_seeds, int32_t _edit_dist,
+                int32_t _score,
                 int32_t _path_id, int32_t _num_paths,
                 int32_t _segment_id, int32_t _num_segments) {
 
@@ -20,7 +21,7 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                                             _qstart, _qend,
                                             _tstart, _tend,
                                             _cov_bases_q, _cov_bases_t,
-                                            _num_seeds, _score,
+                                            _num_seeds, _edit_dist, _score,
                                             _path_id, _num_paths,
                                             _segment_id, _num_segments));
 
@@ -38,7 +39,7 @@ RegionMapped::RegionMapped(
             qstart_(_qstart), qend_(_qend),
             tstart_(_tstart), tend_(_tend),
             cov_bases_q_(0), cov_bases_t_(0),
-            num_seeds_(0), score_(-1),
+            num_seeds_(0), edit_dist_(-1), score_(-1),
             path_id_(-1), num_paths_(-1),
             segment_id_(-1), num_segments_(-1) {
 
@@ -51,7 +52,8 @@ RegionMapped::RegionMapped(
         int32_t _qstart, int32_t _qend,
         int32_t _tstart, int32_t _tend,
         int32_t _cov_bases_q, int32_t _cov_bases_t,
-        int32_t _num_seeds, int32_t _score,
+        int32_t _num_seeds, int32_t _edit_dist,
+        int32_t _score,
         int32_t _path_id, int32_t _num_paths,
         int32_t _segment_id, int32_t _num_segments)
         :   id_(_id),
@@ -60,7 +62,8 @@ RegionMapped::RegionMapped(
             qstart_(_qstart), qend_(_qend),
             tstart_(_tstart), tend_(_tend),
             cov_bases_q_(_cov_bases_q), cov_bases_t_(_cov_bases_t),
-            num_seeds_(_num_seeds), score_(_score),
+            num_seeds_(_num_seeds), edit_dist_(_edit_dist),
+            score_(_score),
             path_id_(_path_id), num_paths_(_num_paths),
             segment_id_(_segment_id), num_segments_(_num_segments)  {
 

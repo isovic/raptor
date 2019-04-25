@@ -18,8 +18,6 @@
 
 #include <log/log_tools.h>
 #include <algorithm/lis_is.hpp>
-#include <utility/revcmp.hpp>
-#include <lib/edlib.h>
 #include <writer/output_formatter.h>
 #include <index/kxsort.h>
 #include <raptor/dp_chain.h>

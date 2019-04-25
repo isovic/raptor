@@ -14,6 +14,7 @@
 #include <containers/region/region_base.h>
 #include <containers/mapping_env.h>
 #include <aligner/alignment_result.h>
+#include <log/log_tools.h>
 
 namespace raptor {
 
@@ -138,6 +139,22 @@ class RegionAligned : public raptor::RegionBase {
     }
     const std::vector<raptor::RegionExtraTags>& ExtraTags() const {
         return extra_tags_;
+    }
+
+    ////////////////
+    /// Setters. ///
+    ////////////////
+    void SetCoveredBasesQuery(int32_t val) {
+        LOG_ALL("Warning: Base-level setters not implemented in RegionAligned.\n");
+    }
+    void SetCoveredBasesTarget(int32_t val) {
+        LOG_ALL("Warning: Base-level setters not implemented in RegionAligned.\n");
+    }
+    void SetEditDistance(int32_t val) {
+        LOG_ALL("Warning: Base-level setters not implemented in RegionAligned.\n");
+    }
+    void SetScore(int32_t val) {
+        LOG_ALL("Warning: Base-level setters not implemented in RegionAligned.\n");
     }
 
     /*

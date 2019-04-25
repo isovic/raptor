@@ -43,13 +43,13 @@ public:
     virtual int32_t QuerySpan() const = 0;
     virtual int32_t TargetID() const = 0;
     virtual bool TargetRev() const = 0;
-    virtual int32_t TargetStart() const = 0;
-    virtual int32_t TargetEnd() const = 0;
+    virtual int32_t TargetStart() const = 0;                    // TargetStart() is in the strand of alignment and 0-based.
+    virtual int32_t TargetEnd() const = 0;                      // TargetEnd() is in the strand of alignment, 0-based, and non-inclusive (1 base after the last inclusive position).
     virtual int32_t TargetLen() const = 0;
     virtual int32_t TargetSpan() const = 0;
     virtual int32_t TargetIndexStart() const = 0;
-    virtual int32_t TargetFwdStart() const = 0;
-    virtual int32_t TargetFwdEnd() const = 0;
+    virtual int32_t TargetFwdStart() const = 0;                 // TargetFwdStart() corresponds to the start coordinate in the FWD strand of the sequence.
+    virtual int32_t TargetFwdEnd() const = 0;                   // TargetFwdEnd() corresponds to the end coordinate in the FWD strand of the sequence.
     virtual int32_t Score() const = 0;
     virtual int32_t NumSeeds() const = 0;
     virtual int32_t CoveredBasesQuery() const = 0;
@@ -73,6 +73,15 @@ public:
     virtual const std::vector<raptor::RegionExtraTags>& ExtraTags() const = 0;
 
     virtual std::string WriteAsCSV(const char separator) const = 0;
+
+
+    ////////////////
+    /// Setters. ///
+    ////////////////
+    virtual void SetCoveredBasesQuery(int32_t val) = 0;
+    virtual void SetCoveredBasesTarget(int32_t val) = 0;
+    virtual void SetEditDistance(int32_t val) = 0;
+    virtual void SetScore(int32_t val) = 0;
 };
 
 }
