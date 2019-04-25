@@ -48,7 +48,7 @@ void RaptorResultsWriter::WriteSingleResult(const mindex::SequenceFilePtr seqs, 
     int32_t mapq = 0;
     std::string timings_all;
     bool do_output = false;
-    std::vector<std::shared_ptr<raptor::RegionBase>> regions_to_write;
+    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
 
     // Collect the results to write.
     // Branching is because the output can either be aligned or unaligned.
@@ -59,7 +59,6 @@ void RaptorResultsWriter::WriteSingleResult(const mindex::SequenceFilePtr seqs, 
             std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
             std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
             timings_all = map_timings + "///" + graphmap_timings;
-            regions_to_write = result.aln_result->CollectRegions(one_hit_per_target);
         }
 
     } else {
@@ -69,7 +68,6 @@ void RaptorResultsWriter::WriteSingleResult(const mindex::SequenceFilePtr seqs, 
             std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
             std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
             timings_all = map_timings + "///" + graphmap_timings;
-            regions_to_write = result.graph_mapping_result->CollectRegions(one_hit_per_target);
         }
     }
 

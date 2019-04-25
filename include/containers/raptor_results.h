@@ -26,9 +26,12 @@ class RaptorResults {
   ~RaptorResults() { }
 
   int64_t q_id_in_batch;
+  // Intermediate results.
   std::shared_ptr<raptor::LinearMappingResult> mapping_result;
   std::shared_ptr<raptor::GraphMappingResult> graph_mapping_result;
   std::shared_ptr<raptor::AlignedMappingResult> aln_result;
+  // Final results are extracted as linear regions through the graph.
+  std::vector<std::shared_ptr<raptor::RegionBase>> regions;
 };
 
 } /* namespace raptor */

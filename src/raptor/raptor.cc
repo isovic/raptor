@@ -310,6 +310,10 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
+            results[i].regions = results[i].aln_result->CollectRegions(params->one_hit_per_target);
+
+            DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
+
         } else {
             DEBUG_QSEQ(params, qseq, LOG_ALL("Not aligning the paths because params->do_align == false.\n"));
 
@@ -333,11 +337,16 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                     new_paths.emplace_back(new_path);
                 }
                 results[i].graph_mapping_result->paths(new_paths);
+
             } else {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Not extending the flanks because flank_ext_len == 0."));
             }
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
+
+            results[i].regions = results[i].graph_mapping_result->CollectRegions(params->one_hit_per_target);
+
+            DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
         }
 
     }

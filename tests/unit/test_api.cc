@@ -87,6 +87,8 @@ TEST(APIExamples, APITest1) {
         // The graph can be empty.
         results.graph_mapping_result = graph_mapper->Map(seq, results.mapping_result);
 
+        results.regions = results.graph_mapping_result->CollectRegions(true);
+
         // results.mapping_result->Filter(1, 0.01, -1, false);
         writer->WriteSingleResult(reads, results, false, true, false);
     }
