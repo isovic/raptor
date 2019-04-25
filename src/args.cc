@@ -60,10 +60,10 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
     argparser.AddCompositeArgument("ovl-miniasm", composite_str_ovl_miniasm);
 
-    std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
-                                "--match 1 --mismatch 1 --gap-open 1 --gap-ext 1 "
-                                "--zdrop 400 --end-bonus 500 --no-sezs --flank-ext-len 500"); // --sezs
-    argparser.AddCompositeArgument("ipa", composite_str_ovl_ipa);
+    // std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
+    //                             "--match 1 --mismatch 1 --gap-open 1 --gap-ext 1 "
+    //                             "--zdrop 400 --end-bonus 500 --no-sezs --flank-ext-len 500"); // --sezs
+    // argparser.AddCompositeArgument("ipa", composite_str_ovl_ipa);
 
     argparser.AddArgument(&parameters->ref_paths, VALUE_TYPE_STRING_LIST, "r", "ref", "",
                           "Path to the reference sequence (fastq or fasta). Can be specified multiple times.", 0,
