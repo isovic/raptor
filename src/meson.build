@@ -12,6 +12,7 @@ raptor_cpp_sources = files([
   'aligner/anchor_aligner.cc',
   'aligner/cigar.cc',
   'aligner/sam_parser.cc',
+  'aligner/difflib_edlib.cc',
 
 #  'containers/chain.cc',
 #  'containers/chained_alignment.cc',
