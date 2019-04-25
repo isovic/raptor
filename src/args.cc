@@ -28,7 +28,7 @@ void VerboseShortHelpAndExit(int argc, char **argv) {
     fprintf(stderr, "  ./raptor -r escherichia_coli.fa -d reads.fastq --align -o out.paf # Align.\n");
     fprintf(stderr, "  ./raptor -g graph.gfa2 -r ref.fa -d reads.fasta -o out.paf        # Graph mapping.\n");
     fprintf(stderr, "  ./raptor-reshape -i reads.fasta --block-size 400 -o reads         # Build a RaptorDB.\n");
-    fprintf(stderr, "  ./raptor -x overlap -r reads.rdb -d reads.rdb -o overlaps.paf     # Map/overlap to the RDB.\n");
+    fprintf(stderr, "  ./raptor -x ovl-raw -r reads.rdb -d reads.rdb -o overlaps.paf     # Map/overlap to the RDB.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "%s\n", LICENCE_INFORMATION.c_str());
     fprintf(stderr, "Version: %d.%d.%d-%s\n", RAPTOR_VERSION_MAJOR, RAPTOR_VERSION_MINOR,
