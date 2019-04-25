@@ -315,6 +315,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "    ksw2-single - KSW2 library, single affine gap penalty.\n"
                           "    ksw2-double - KSW2 library, double affine gap penalty.",
                           0, "Alignment options");
+    argparser.AddArgument(&parameters->do_diff, VALUE_TYPE_BOOL, "", "diff", "0",
+                          "Align anchors without traceback. Useful for overlapping. Complementary to '--align'. The '--aligner' option does not affect this one.", 0,
+                          "Alignment options");
     argparser.AddArgument(
                           &match, VALUE_TYPE_INT32, "", "match", "2",
                           "Match score for the DP alignment. Ignored when Edlib is used.",
@@ -671,6 +674,11 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
             parameters->index_params->region_rend =
                 atoi(index_region_string.substr((dash_pos + 1)).c_str());
         }
+    }
+
+    if (parameters->do_align && parameters->do_diff) {
+        fprintf (stderr, "Both '--align' and '--diff' options are specified. These are mutually exclusive.\n");
+        VerboseShortHelpAndExit(argc, argv);
     }
 
     // Parse the alignment parameters.

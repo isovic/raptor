@@ -102,6 +102,7 @@ struct ParamsRaptor {
     int64_t min_map_len = 0;
     bool do_align = false;
     bool strict_format = false;
+    bool do_diff = false;
 
     std::string composite;
 };
