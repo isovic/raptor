@@ -51,11 +51,14 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Define the composite options which can be expanded internally.
     // std::string composite_str_overlap("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0");
-    std::string composite_str_overlap("--overlap-skip-self -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
-    argparser.AddCompositeArgument("overlap", composite_str_overlap);
+    std::string composite_str_ovl_raw("--overlap-skip-self -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10");
+    argparser.AddCompositeArgument("ovl-raw", composite_str_ovl_raw);
 
-    std::string composite_str_ovl_mm2("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
-    argparser.AddCompositeArgument("ovl-mm2", composite_str_overlap);
+    std::string composite_str_ovl_hifi("--overlap-skip-self -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
+    argparser.AddCompositeArgument("ovl-hifi", composite_str_ovl_hifi);
+
+    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
+    argparser.AddCompositeArgument("ovl-miniasm", composite_str_ovl_miniasm);
 
     std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
                                 "--match 1 --mismatch 1 --gap-open 1 --gap-ext 1 "
@@ -433,8 +436,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     argparser.AddArgument(&parameters->composite, VALUE_TYPE_COMPOSITE, "x", "composite", "",
         "Pre-set parameters for different use cases. Valid options are:\n"
-        " \"overlap\"   - Equivalent to: '" + composite_str_overlap + "'\n" +
-        " \"ovl-mm2\"   - Equivalent to: '" + composite_str_ovl_mm2 + "'\n", 0, "Composite options");
+        " \"ovl-raw\"   - Equivalent to: '" + composite_str_ovl_raw + "'\n" +
+        " \"ovl-hifi\"   - Equivalent to: '" + composite_str_ovl_hifi + "'\n" +
+        " \"ovl-miniasm\"   - Equivalent to: '" + composite_str_ovl_miniasm + "'\n", 0, "Composite options");
 
     argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
                           "Other options");
