@@ -1,5 +1,5 @@
 Mappping the same pair of reads where one is query and the other target, and then reversing the pair (i.e. overlapping with symmetric arcs). This should return identical results.
-  $ ${BIN_DIR}/raptor -x overlap --min-map-len 100 --out-fmt m4 -r ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -d ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -v 0
+  $ ${BIN_DIR}/raptor -x ovl-raw -k 15 -w 5 --min-map-len 100 --out-fmt m4 -r ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -d ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -v 0
   14183 16026 -842 100 0 44 884 19004 0 8831 9674 9689
   16026 14183 -842 100 0 8831 9674 9689 0 44 884 19004
 
