@@ -18,6 +18,7 @@
 // #include <containers/single_aln_region.h>
 #include <utility/range_tools.hpp>
 #include <utility/stringutil.h>
+#include <aligner/difflib_edlib.h>
 
 namespace raptor {
 
@@ -345,6 +346,21 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
             results[i].regions = results[i].graph_mapping_result->CollectRegions(params->one_hit_per_target);
+
+            if (params->do_diff) {
+                DEBUG_QSEQ(params, qseq, LOG_ALL("Performing diff alignment without traceback."));
+
+                auto difflib = raptor::createDifflibEdlib();
+                for (size_t region_id = 0; region_id < results[i].regions.size(); ++region_id) {
+                    auto& region = results[i].regions[region_id];
+                    const char* tseq_raw = (const char*) index->FetchRawSeq(region->TargetID());
+
+                    int64_t diffs = difflib->CalcDiffs((const char *) qseq->data().data(), region->QueryStart(), region->QueryEnd(), region->QueryLen(),
+                                                        tseq_raw, region->TargetRev(), region->TargetFwdStart(), region->TargetFwdEnd(), region->TargetLen());
+
+                    region->SetEditDistance(diffs);
+                }
+            }
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
         }
