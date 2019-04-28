@@ -12,8 +12,8 @@
 
 namespace mindex {
 
-mindex::SequenceFileParserFastxPtr createSequenceFileParserFastx(const std::string& in_path) {
-    auto ret = mindex::SequenceFileParserFastxPtr(new mindex::SequenceFileParserFastx());
+mindex::SequenceFileParserBasePtr createSequenceFileParserFastx(const std::string& in_path) {
+    auto ret = mindex::SequenceFileParserBasePtr(new mindex::SequenceFileParserFastx());
     bool rv = ret->Open(in_path);
     if (rv == false) {
         return nullptr;

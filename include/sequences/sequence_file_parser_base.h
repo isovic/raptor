@@ -15,11 +15,16 @@
 
 namespace mindex {
 
+class SequenceFileParserBase;
+
+using SequenceFileParserBasePtr = std::unique_ptr<SequenceFileParserBase>;
+
 class SequenceFileParserBase {
 public:
    // SequenceFileParserBase(const std::string& path);
    virtual ~SequenceFileParserBase() {}
 
+   virtual bool Open(const std::string& in_path) = 0;
    virtual SequencePtr YieldSequence() = 0;
    virtual std::string GetFileHeaderAsString() const = 0;
    virtual int64_t GetFileOffset() const = 0;

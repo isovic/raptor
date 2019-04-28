@@ -20,13 +20,13 @@ namespace mindex {
 
 class SequenceFileParserGfa2;
 
-typedef std::unique_ptr<mindex::SequenceFileParserGfa2> SequenceFileParserGfa2Ptr;
+// typedef std::unique_ptr<mindex::SequenceFileParserGfa2> SequenceFileParserGfa2Ptr;
 
-mindex::SequenceFileParserGfa2Ptr createSequenceFileParserGfa2(const std::string& in_path);
+mindex::SequenceFileParserBasePtr createSequenceFileParserGfa2(const std::string& in_path);
 
 class SequenceFileParserGfa2 : SequenceFileParserBase {
 public:
-   friend mindex::SequenceFileParserGfa2Ptr createSequenceFileParserGfa2(const std::string& in_path);
+   friend mindex::SequenceFileParserBasePtr createSequenceFileParserGfa2(const std::string& in_path);
    ~SequenceFileParserGfa2();
 
    bool Open(const std::string& path);

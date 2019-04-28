@@ -13,10 +13,9 @@
 
 namespace mindex {
 
-mindex::SequenceFileParserSamPtr createSequenceFileParserSam(const std::string& in_path) {
-    auto ret = mindex::SequenceFileParserSamPtr(new mindex::SequenceFileParserSam());
+mindex::SequenceFileParserBasePtr createSequenceFileParserSam(const std::string& in_path) {
+    auto ret = mindex::SequenceFileParserBasePtr(new mindex::SequenceFileParserSam());
     bool rv = ret->Open(in_path);
-    ret->ParseHeader_();
     if (rv == false) {
         return nullptr;
     }
@@ -139,6 +138,8 @@ bool SequenceFileParserSam::Open(const std::string& path) {
         FATAL_REPORT(ERR_OPENING_FILE, "File path: '%s'.", path_.c_str());
         return false;
     }
+
+    ParseHeader_();
 
     return true;
 }

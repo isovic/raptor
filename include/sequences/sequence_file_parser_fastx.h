@@ -23,13 +23,13 @@ namespace mindex {
 
 class SequenceFileParserFastx;
 
-typedef std::unique_ptr<mindex::SequenceFileParserFastx> SequenceFileParserFastxPtr;
+// using SequenceFileParserBasePtr = std::unique_ptr<mindex::SequenceFileParserFastx>;
 
-mindex::SequenceFileParserFastxPtr createSequenceFileParserFastx(const std::string& in_path);
+mindex::SequenceFileParserBasePtr createSequenceFileParserFastx(const std::string& in_path);
 
 class SequenceFileParserFastx : SequenceFileParserBase {
 public:
-   friend mindex::SequenceFileParserFastxPtr createSequenceFileParserFastx(const std::string& in_path);
+   friend mindex::SequenceFileParserBasePtr createSequenceFileParserFastx(const std::string& in_path);
    ~SequenceFileParserFastx();
 
    bool Open(const std::string& path);

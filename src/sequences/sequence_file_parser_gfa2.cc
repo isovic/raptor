@@ -13,8 +13,8 @@
 
 namespace mindex {
 
-mindex::SequenceFileParserGfa2Ptr createSequenceFileParserGfa2(const std::string& in_path) {
-    auto ret = mindex::SequenceFileParserGfa2Ptr(new mindex::SequenceFileParserGfa2());
+mindex::SequenceFileParserBasePtr createSequenceFileParserGfa2(const std::string& in_path) {
+    auto ret = mindex::SequenceFileParserBasePtr(new mindex::SequenceFileParserGfa2());
     bool rv = ret->Open(in_path);
     if (rv == false) {
         return nullptr;
