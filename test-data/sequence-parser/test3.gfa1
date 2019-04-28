@@ -1,0 +1,8 @@
+H	VN:Z:1.0
+S	seq1	AAAC
+S	seq2	GGGC
+S	seq3	TTTTTAAAAATTTT
+S	seq4	AACTGACTGACTGAATGAACGAACT
+L	seq1	+	seq2	+	*
+L	seq2	+	seq3	+	*
+L	seq3	+	seq1	+	*

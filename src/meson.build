@@ -82,6 +82,11 @@ raptor_cpp_sources = files([
 
   'raptor_fetch/params_raptor_fetch.cc',
 
+  'sequences/sequence_file_parser_fastx.cc',
+  'sequences/sequence_file_parser_gfa1.cc',
+  'sequences/sequence_file_parser_gfa2.cc',
+  'sequences/sequence_file_parser_sam.cc',
+
   'utility/memtime.cc',
   'utility/fofn.cc',
   'utility/stringutil.cc',

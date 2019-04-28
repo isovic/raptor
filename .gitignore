@@ -57,6 +57,7 @@ test-data/demos/demo-1-circular-synth/*
 # !test-data/demos/demo-2-transcriptome-synth/*
 !test-data/raptordb-fetch
 !test-data/consistent-query-target-results
+!test-data/sequence-parser
 
 tool*
 callgrind.*
