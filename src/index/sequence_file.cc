@@ -23,37 +23,109 @@ mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& in_pa
     return mindex::SequenceFilePtr(new mindex::SequenceFile(in_paths, in_fmts));
 }
 
-// mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& headers, const std::vector<std::string>& seqs) {
-//     return mindex::SequenceFilePtr(new mindex::SequenceFile(headers, seqs));
-// }
+const mindex::SequencePtr& SequenceFile::GetSeqByID(int64_t id) const {
+    if (id < 0 || id >= seqs_.size()) {
+        std::cerr << "[GetSeqByID] Warnning: Requested id is out of scope of current batch. id = " <<
+                        id << ", batch_start_seq_id_ = " << batch_start_seq_id_ << ", batch_id_ = " << batch_id_ <<
+                        ", seqs_.size() = " << seqs_.size() << " . Returning nullptr." << std::endl;
+        return dummy_nullptr_seq_;
+    }
+    return seqs_[id];
+}
+
+const mindex::SequencePtr& SequenceFile::GetSeqByAbsID(int64_t abs_id) const {
+    int64_t id = abs_id - batch_start_seq_id_;
+    return GetSeqByID(id);
+}
+
+void SequenceFile::Add(std::unique_ptr<mindex::Sequence> seq) {
+    if (seq == nullptr) {
+        return;
+    }
+    int64_t new_id = static_cast<int64_t>(seqs_.size());
+    seq->id(new_id);
+    seq->abs_id(batch_start_seq_id_ + new_id);
+    total_size_ += seq->len();
+    seqs_.emplace_back(std::move(seq));
+}
+
+std::string SequenceFile::GetOpenFilePath() const {
+    if (parser_ == nullptr) {
+        return std::string();
+    }
+    return parser_->GetFilePath();
+}
+
+mindex::SequenceFormat SequenceFile::GetOpenFileFormat() const {
+    if (curr_open_file_ < 0 || curr_open_file_ >= in_files_.size()) {
+        return mindex::SequenceFormat::Unknown;
+    }
+    return curr_input_fmt_;
+}
+
+int64_t SequenceFile::GetOpenFileTell() const {
+    auto curr_fmt = GetOpenFileFormat();
+    if (curr_fmt == mindex::SequenceFormat::Unknown) {
+        return -4;
+    }
+    if (parser_ == nullptr) {
+        return -2;
+    }
+    if (parser_->IsOpen() == false) {
+        return -3;
+    }
+    return parser_->GetFileOffset();
+}
+
+mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
+    if (in_files_.size() == 0) {
+        WARNING_REPORT(ERR_OPENING_FILE, "No input files were specified, but YieldSequence_ was called. Returning nullptr.");
+        return nullptr;
+    }
+
+    if (curr_open_file_ < 0 || parser_ == nullptr) {
+        curr_open_file_ = 0;
+        const std::string& next_in_path = std::get<0>(in_files_[curr_open_file_]);
+        const mindex::SequenceFormat& next_in_fmt = std::get<1>(in_files_[curr_open_file_]);
+
+        Open(next_in_path, next_in_fmt);
+    }
+
+    mindex::SequencePtr seq = nullptr;
+    int64_t num_in_files = in_files_.size();
+
+    while ((curr_open_file_ + 1) <= num_in_files && (seq = parser_->YieldSequence()) == nullptr) {
+        ++curr_open_file_;
+        if (curr_open_file_ >= in_files_.size()) {
+            break;
+        }
+        const std::string& next_in_path = std::get<0>(in_files_[curr_open_file_]);
+        const mindex::SequenceFormat& next_in_fmt = std::get<1>(in_files_[curr_open_file_]);
+        Open(next_in_path, next_in_fmt);
+    }
+
+    if (seq != nullptr && convert_to_uppercase) {
+        seq->ToUppercase();
+    }
+
+    return seq;
+}
 
 bool SequenceFile::Open(const std::string& in_path, mindex::SequenceFormat in_fmt) {
-    // All file handlers and mem allocations should be released automatically upon destruction.
-    fp_handlers_ = mindex::createSequenceFileHandlers(in_path);
-    curr_input_fmt_ = in_fmt;
-
     if (in_fmt == mindex::SequenceFormat::Auto) {
         auto ext = raptor::GetFileExt(in_path);
-
         // If the file is Gzipped, the .gz will be in the ext.
         // E.g. the output from GetFileExt can be "fasta.gz".
         if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
             ext = ext.substr(0, ext.size() - 3);
         }
-
-        curr_input_fmt_ =
-                    (ext == "fasta") ? mindex::SequenceFormat::Fasta :
-                    (ext == "fa") ? mindex::SequenceFormat::Fasta :
-                    (ext == "fastq") ? mindex::SequenceFormat::Fastq :
-                    (ext == "fq") ? mindex::SequenceFormat::Fastq :
-                    (ext == "gfa") ? mindex::SequenceFormat::GFA :
-                    (ext == "gfa1") ? mindex::SequenceFormat::GFA1 :
-                    (ext == "gfa2") ? mindex::SequenceFormat::GFA2 :
-                    (ext == "sam") ? mindex::SequenceFormat::SAM :
-                    mindex::SequenceFormat::Unknown;
+        in_fmt = SequenceFormatFromString(ext);
     }
 
-    return (fp_handlers_ != nullptr);
+    parser_ = mindex::createSequenceFileParser(in_path, in_fmt);
+    curr_input_fmt_ = in_fmt;
+
+    return (parser_ != nullptr);
 }
 
 SequenceFile::SequenceFile()
@@ -61,7 +133,7 @@ SequenceFile::SequenceFile()
                     in_files_(),
                     curr_open_file_(-1),
                     curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    fp_handlers_(nullptr),
+                    parser_(nullptr),
                     seqs_(),
                     batch_id_(-1),
                     batch_start_seq_id_(0),
@@ -75,7 +147,7 @@ SequenceFile::SequenceFile(const std::string& in_path, mindex::SequenceFormat in
                     in_files_{std::make_pair(in_path, in_fmt)},
                     curr_open_file_(-1),
                     curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    fp_handlers_(nullptr),
+                    parser_(nullptr),
                     seqs_(),
                     batch_id_(-1),
                     batch_start_seq_id_(0),
@@ -88,7 +160,7 @@ SequenceFile::SequenceFile(const std::vector<std::string>& in_paths, const std::
                     in_files_{},
                     curr_open_file_(-1),
                     curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    fp_handlers_(nullptr),
+                    parser_(nullptr),
                     seqs_(),
                     batch_id_(-1),
                     batch_start_seq_id_(0),
@@ -140,7 +212,8 @@ bool SequenceFile::LoadBatchMB(int64_t batch_size_mb, bool convert_to_uppercase)
 
     total_size_ = 0;
 
-    while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr || curr_open_file_ < in_files_.size()) {
+    // while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr || curr_open_file_ < in_files_.size()) {
+    while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr) {
         if (seq == nullptr) {
             continue;
         }
@@ -172,7 +245,8 @@ bool SequenceFile::LoadBatchOfOne(bool convert_to_uppercase) {
     mindex::SequencePtr seq(nullptr);
 
     // Find the first non-nullptr sequence.
-    while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr || curr_open_file_ < in_files_.size()) {
+    // while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr || curr_open_file_ < in_files_.size()) {
+    while ((seq = YieldSequence_(convert_to_uppercase)) != nullptr) {
         if (seq != nullptr) {
             break;
         }
