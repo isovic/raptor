@@ -24,6 +24,53 @@ mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& in_pa
     return mindex::SequenceFilePtr(new mindex::SequenceFile(in_paths, in_fmts));
 }
 
+SequenceFile::SequenceFile()
+                :
+                    in_files_(),
+                    curr_open_file_(-1),
+                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
+                    parser_(nullptr),
+                    seqs_(),
+                    batch_id_(-1),
+                    batch_start_seq_id_(0),
+                    total_size_(0),
+                    dummy_nullptr_seq_(nullptr) {
+
+}
+
+SequenceFile::SequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt)
+                :
+                    in_files_{std::make_pair(in_path, in_fmt)},
+                    curr_open_file_(-1),
+                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
+                    parser_(nullptr),
+                    seqs_(),
+                    batch_id_(-1),
+                    batch_start_seq_id_(0),
+                    total_size_(0),
+                    dummy_nullptr_seq_(nullptr) {
+}
+
+SequenceFile::SequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts)
+                :
+                    in_files_{},
+                    curr_open_file_(-1),
+                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
+                    parser_(nullptr),
+                    seqs_(),
+                    batch_id_(-1),
+                    batch_start_seq_id_(0),
+                    total_size_(0),
+                    dummy_nullptr_seq_(nullptr) {
+    if (in_paths.size() != in_fmts.size()) {
+        WARNING_REPORT(ERR_UNEXPECTED_VALUE, "in_paths.size() = %ld and in_fmts.size() = %ld. Not setting the inputs.", in_paths.size(), in_fmts.size());
+        return;
+    }
+    for (size_t i = 0; i < in_paths.size(); ++i) {
+        in_files_.emplace_back(std::make_pair(in_paths[i], in_fmts[i]));
+    }
+}
+
 const mindex::SequencePtr& SequenceFile::GetSeqByID(int64_t id) const {
     if (id < 0 || id >= seqs_.size()) {
         std::cerr << "[GetSeqByID] Warnning: Requested id is out of scope of current batch. id = " <<
@@ -127,53 +174,6 @@ bool SequenceFile::Open(const std::string& in_path, mindex::SequenceFormat in_fm
     curr_input_fmt_ = in_fmt;
 
     return (parser_ != nullptr);
-}
-
-SequenceFile::SequenceFile()
-                :
-                    in_files_(),
-                    curr_open_file_(-1),
-                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    parser_(nullptr),
-                    seqs_(),
-                    batch_id_(-1),
-                    batch_start_seq_id_(0),
-                    total_size_(0),
-                    dummy_nullptr_seq_(nullptr) {
-
-}
-
-SequenceFile::SequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt)
-                :
-                    in_files_{std::make_pair(in_path, in_fmt)},
-                    curr_open_file_(-1),
-                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    parser_(nullptr),
-                    seqs_(),
-                    batch_id_(-1),
-                    batch_start_seq_id_(0),
-                    total_size_(0),
-                    dummy_nullptr_seq_(nullptr) {
-}
-
-SequenceFile::SequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts)
-                :
-                    in_files_{},
-                    curr_open_file_(-1),
-                    curr_input_fmt_(mindex::SequenceFormat::Unknown),
-                    parser_(nullptr),
-                    seqs_(),
-                    batch_id_(-1),
-                    batch_start_seq_id_(0),
-                    total_size_(0),
-                    dummy_nullptr_seq_(nullptr) {
-    if (in_paths.size() != in_fmts.size()) {
-        WARNING_REPORT(ERR_UNEXPECTED_VALUE, "in_paths.size() = %ld and in_fmts.size() = %ld. Not setting the inputs.", in_paths.size(), in_fmts.size());
-        return;
-    }
-    for (size_t i = 0; i < in_paths.size(); ++i) {
-        in_files_.emplace_back(std::make_pair(in_paths[i], in_fmts[i]));
-    }
 }
 
 bool SequenceFile::LoadAll(const std::vector<std::string>& headers, const std::vector<std::string>& seqs, bool convert_to_uppercase) {
