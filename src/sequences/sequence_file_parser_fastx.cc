@@ -80,7 +80,27 @@ int64_t SequenceFileParserFastx::GetFileOffset() const {
     if (IsOpen() == false) {
         return -1;
     }
-    return gztell(fp_gzip_);
+
+    int64_t ret_val = gztell(fp_gzip_);
+
+    if (ret_val < 0) {
+        return ret_val;
+    }
+    if (fp_kseq_ == NULL) {
+        return -5;
+    }
+
+    int64_t offset = static_cast<int64_t>(fp_kseq_->f->end) - static_cast<int64_t>(fp_kseq_->f->begin);
+
+    if (offset < 0) {
+        return -6;
+    }
+
+    // The "-1" because kseq parser loads the next '>' or '@' character too.
+    int64_t offset_separator_char = (fp_kseq_->last_char == '>' || fp_kseq_->last_char == '@') ? (1) : 0;
+    ret_val -= (offset + offset_separator_char);
+
+    return ret_val;
 }
 
 std::string SequenceFileParserFastx::GetFilePath() const {
