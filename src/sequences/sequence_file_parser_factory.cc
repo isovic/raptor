@@ -16,6 +16,11 @@ mindex::SequenceFileParserBasePtr createSequenceFileParser(const std::string& in
 
     if (in_fmt == mindex::SequenceFormat::Auto) {
         auto ext = raptor::GetFileExt(in_path);
+        // If the file is Gzipped, the .gz will be in the ext.
+        // E.g. the output from GetFileExt can be "fasta.gz".
+        if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
+            ext = ext.substr(0, ext.size() - 3);
+        }
         in_fmt = SequenceFormatFromString(ext);
     }
 
