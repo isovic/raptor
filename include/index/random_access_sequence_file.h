@@ -18,10 +18,8 @@
 #include <unordered_map>
 #include <index/sequence.h>
 #include <params/params_raptor.h>
-#include <index/sequence_file_handlers.h>
 #include <index/sequence_file_enums.h>
 #include <index/sequence_file.h>
-#include <index/sequence_deserializer.h>
 
 namespace mindex {
 
@@ -95,7 +93,7 @@ private:
 
     mindex::SequencePtr FetchSequence_(int64_t db_seq_id);
 
-    size_t max_num_streams_;
+    size_t max_num_parsers_;
     float db_version_;
     std::vector<RaptorDBRecordFile> db_files_;
     std::vector<RaptorDBRecordSequence> db_seqs_;
@@ -104,7 +102,7 @@ private:
     std::unordered_map<int64_t, size_t> file_id_to_vec_;        // The first is the file_id from DB, and second is the ordinal number in the vector.
     std::unordered_map<int64_t, size_t> block_id_to_vec_;       // The first is the block_id from DB, and second is the ordinal number in the vector.
     std::unordered_map<std::string, size_t> qname_to_vec_;      // The first is the sequence qname from DB, and second is the ordinal number in the vector.
-    std::vector<std::unique_ptr<mindex::SequenceFileHandlers>> streams_;
+    std::vector<mindex::SequenceFileParserBasePtr> parsers_;
     std::deque<int64_t> fid_stream_priority_;
 };
 

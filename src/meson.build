@@ -57,7 +57,6 @@ raptor_cpp_sources = files([
   'index/random_access_sequence_file.cc',
   'index/sequence_file.cc',
   'index/sequence.cc',
-  'index/sequence_deserializer.cc',
   'index/sequence_serializer.cc',
 
   'params/params_aligner.cc',

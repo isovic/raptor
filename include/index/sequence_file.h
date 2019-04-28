@@ -15,9 +15,7 @@
 #include <memory>
 #include <index/sequence.h>
 #include <params/params_raptor.h>
-#include <index/sequence_file_handlers.h>
 #include <index/sequence_file_enums.h>
-#include <index/sequence_deserializer.h>
 #include <sequences/sequence_file_parser_factory.h>
 
 namespace mindex {

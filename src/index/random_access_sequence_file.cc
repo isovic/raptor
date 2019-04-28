@@ -24,10 +24,10 @@ mindex::RandomAccessSequenceFilePtr createRandomAccessSequenceFile(const std::st
 
 RandomAccessSequenceFile::RandomAccessSequenceFile(size_t max_num_streams)
                 :
-                    max_num_streams_(max_num_streams),
+                    max_num_parsers_(max_num_streams),
                     db_version_(-1.0f), db_files_(), db_seqs_(), db_blocks_(),
                     seq_id_to_vec_(), file_id_to_vec_(), block_id_to_vec_(), qname_to_vec_(),
-                    streams_(), fid_stream_priority_() {
+                    parsers_(), fid_stream_priority_() {
 }
 
 bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
@@ -41,7 +41,7 @@ bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
     db_files_.clear();
     db_seqs_.clear();
     db_blocks_.clear();
-    streams_.clear();
+    parsers_.clear();
     fid_stream_priority_.clear();
 
     std::string line;
@@ -75,7 +75,7 @@ bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
         }
     }
 
-    streams_ = std::vector<std::unique_ptr<mindex::SequenceFileHandlers>>(db_files_.size());
+    parsers_ = std::vector<mindex::SequenceFileParserBasePtr>(db_files_.size());
 
     // std::cerr << "db_version_ = " << db_version_ << "\n";
     // std::cerr << "db_files_.size() = " << db_files_.size() << "\n";
@@ -113,23 +113,27 @@ mindex::SequencePtr RandomAccessSequenceFile::FetchSequence_(int64_t db_seq_id) 
     size_t db_file_id = it_file_id_to_vec->second;
     const auto& db_file = db_files_[db_file_id];
 
-    if (streams_[db_file_id] == nullptr) {
-        streams_[db_file_id] = std::move(mindex::createSequenceFileHandlers(db_file.path));
+    if (parsers_[db_file_id] == nullptr) {
+        parsers_[db_file_id] = std::move(mindex::createSequenceFileParser(db_file.path, db_file.format));
         fid_stream_priority_.push_back(db_file_id);
     }
 
-    while (fid_stream_priority_.size() > max_num_streams_) {
-        streams_[fid_stream_priority_.front()] = nullptr;
+    while (fid_stream_priority_.size() > max_num_parsers_) {
+        parsers_[fid_stream_priority_.front()] = nullptr;
         fid_stream_priority_.pop_front();
     }
 
-    if (streams_[db_file_id] == nullptr) {
+    if (parsers_[db_file_id] == nullptr) {
         return nullptr;
     }
 
-    streams_[db_file_id]->Seek(db_seq.data_start);
+    parsers_[db_file_id]->FileSeek(db_seq.data_start);
 
-    mindex::SequencePtr ret = mindex::SequenceDeserializer::DeserializeSequence(streams_[db_file_id], db_file.format, true);
+    mindex::SequencePtr ret = parsers_[db_file_id]->YieldSequence();
+
+    if (ret != nullptr) {
+        ret->ToUppercase();
+    }
 
     if (ret == nullptr) {
         WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Deserialized sequence is nullptr! db_seq_id = %ld, db_seq.name = %s, db_seq.data_start = %ld, db_seq.seq_len = %ld\n", db_seq_id, db_seq.name.c_str(), db_seq.data_start, db_seq.seq_len);
