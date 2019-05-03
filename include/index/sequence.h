@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <containers/region/region_aligned.h>
 
 namespace mindex {
 
@@ -86,6 +87,9 @@ public:
     std::vector<mindex::seqqual_t>& qual() {
         return qual_;
     }
+    raptor::AlignedRegionPtr apriori_aln() const {
+        return apriori_aln_;
+    }
 
     /*
      * Setters.
@@ -105,6 +109,9 @@ public:
     }
     void abs_id(int64_t _abs_id) {
         abs_id_ = _abs_id;
+    }
+    void apriori_aln(raptor::AlignedRegionPtr val) {
+        apriori_aln_ = val;
     }
 
     std::string GetSequenceAsString() const {
@@ -139,6 +146,7 @@ private:
     int64_t id_;
     int64_t abs_id_;
     size_t header_hash_;
+    raptor::AlignedRegionPtr apriori_aln_;
 };
 
 }
