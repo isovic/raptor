@@ -137,7 +137,7 @@ class RegionAligned : public raptor::RegionBase {
     bool IsSupplementary() const {
         return (segment_id_ > 0);
     }
-    const std::vector<raptor::RegionExtraTags>& ExtraTags() const {
+    const std::unordered_map<std::string, raptor::RegionExtraTags>& ExtraTags() const {
         return extra_tags_;
     }
 
@@ -155,6 +155,9 @@ class RegionAligned : public raptor::RegionBase {
     }
     void SetScore(int32_t val) {
         LOG_ALL("Warning: Base-level setters not implemented in RegionAligned.\n");
+    }
+    void AddTag(const raptor::RegionExtraTags& val) {
+        extra_tags_[val.id] = val;
     }
 
     /*
@@ -204,7 +207,7 @@ class RegionAligned : public raptor::RegionBase {
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
-    std::vector<raptor::RegionExtraTags> extra_tags_;
+    std::unordered_map<std::string, raptor::RegionExtraTags> extra_tags_;
 };
 
 }
