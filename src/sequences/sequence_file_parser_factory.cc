@@ -32,6 +32,8 @@ mindex::SequenceFileParserBasePtr createSequenceFileParser(const std::string& in
         ret = mindex::createSequenceFileParserFastx(in_path);
     } else if (in_fmt == mindex::SequenceFormat::SAM) {
         ret = mindex::createSequenceFileParserSam(in_path);
+    } else if (in_fmt == mindex::SequenceFormat::BAM) {
+        ret = mindex::createSequenceFileParserBam(in_path);
     } else if (in_fmt == mindex::SequenceFormat::GFA1) {
         ret = mindex::createSequenceFileParserGfa1(in_path);
     } else if (in_fmt == mindex::SequenceFormat::GFA2) {

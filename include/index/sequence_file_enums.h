@@ -11,7 +11,7 @@
 namespace mindex {
 
 enum class BatchLoadType { MB, Coverage };
-enum class SequenceFormat { Auto, Fasta, Fastq, SAM, GFA, GFA1, GFA2, RaptorDB, FOFN, Unknown };
+enum class SequenceFormat { Auto, Fasta, Fastq, SAM, BAM, GFA, GFA1, GFA2, RaptorDB, FOFN, Unknown };
 
 inline SequenceFormat SequenceFormatFromString(const std::string& format_str) {
     SequenceFormat ret;
@@ -23,6 +23,8 @@ inline SequenceFormat SequenceFormatFromString(const std::string& format_str) {
         ret = SequenceFormat::Fastq;
     } else if (format_str == "sam") {
         ret = SequenceFormat::SAM;
+    } else if (format_str == "bam") {
+        ret = SequenceFormat::BAM;
     } else if (format_str == "gfa") {
         ret = SequenceFormat::GFA;
     } else if (format_str == "gfa1") {
@@ -54,6 +56,9 @@ inline std::string SequenceFormatToString(const SequenceFormat& fmt) {
             break;
         case SequenceFormat::SAM:
             ret = "sam";
+            break;
+        case SequenceFormat::BAM:
+            ret = "bam";
             break;
         case SequenceFormat::GFA:
             ret = "gfa";

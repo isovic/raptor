@@ -86,6 +86,7 @@ raptor_cpp_sources = files([
   'sequences/sequence_file_parser_gfa1.cc',
   'sequences/sequence_file_parser_gfa2.cc',
   'sequences/sequence_file_parser_sam.cc',
+  'sequences/sequence_file_parser_bam.cc',
 
   'utility/memtime.cc',
   'utility/fofn.cc',
@@ -110,6 +111,6 @@ raptor_lib = library(
   version : meson.project_version(),
   install : raptor_lib_install,
   link_with : codebase_lib,
-  dependencies : [raptor_thread_dep, raptor_zlib_dep],
+  dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
   include_directories : raptor_include_directories + codebase_include_directories,
   cpp_args : [raptor_extra_flags, raptor_warning_flags, raptor_cpp_flags])
