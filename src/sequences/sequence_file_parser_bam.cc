@@ -14,6 +14,8 @@
 #include <pbbam/BamReader.h>
 #include <pbbam/BamWriter.h>
 #include <pbbam/BamRecord.h>
+#include <pbbam/SamTagCodec.h>
+#include <utility/stringutil.h>
 
 namespace mindex {
 
@@ -79,6 +81,15 @@ SequencePtr SequenceFileParserBam::YieldSequence() {
     seq->header(record.FullName());
     seq->id(id);
     seq->abs_id(abs_id);
+
+    std::string joined_tags = PacBio::BAM::SamTagCodec::Encode(record.Impl().Tags());
+    std::istringstream iss(joined_tags);
+    std::string tag_str;
+    while ((iss >> tag_str)) {
+        auto tokens = raptor::Tokenize(tag_str, ':');
+        raptor::SamTag tag(tokens[0], tokens[1], tokens[2]);
+        seq->AddTag(tag);
+    }
 
     return seq;
 }
