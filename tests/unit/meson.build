@@ -14,6 +14,7 @@ tests_cpp_sources = files([
   'test_sequence_file_parser_gfa1.cc',
   'test_sequence_file_parser_gfa2.cc',
   'test_sequence_file_parser_sam.cc',
+  'test_sequence_file_parser_bam.cc',
   'test_split_segment_graph.cc',
   'test_stringutil.cc',
 ])
