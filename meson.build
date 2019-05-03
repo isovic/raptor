@@ -7,7 +7,7 @@ project(
     'warning_level=3',
     'cpp_std=c++14'],
   license : 'unlicensed',
-  meson_version : '>= 0.43')
+  meson_version : '>= 0.49')
 
 ############
 # CXXFLAGS #
