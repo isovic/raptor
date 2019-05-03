@@ -108,7 +108,7 @@ void RaptorResultsWriter::WriteSingleResult(const mindex::SequenceFilePtr seqs, 
             const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
-                oss_ << OutputFormatter::UnmappedSAM(qseq);
+                oss_ << OutputFormatter::UnmappedSAM(qseq, write_custom_tags);
             } else if (outfmt_ == raptor::OutputFormat::PAF) {
                 // PAF simply doesn't report unmapped alignments.
             } else if (outfmt_ == raptor::OutputFormat::GFA2) {

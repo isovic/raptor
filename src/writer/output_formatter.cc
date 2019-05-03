@@ -22,7 +22,7 @@ std::string OutputFormatter::TimingMapToString(const std::unordered_map<std::str
     return oss.str();
 }
 
-std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq) {
+std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq, bool write_custom_tags) {
     std::stringstream ss;
 
     std::string q_name = raptor::TrimToFirstSpace(qseq->header());
@@ -41,6 +41,13 @@ std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq) {
         << "0" << "\t"
         << seq << "\t"
         << qual;
+
+    if (write_custom_tags) {
+        // Extra tags provided in the alignment.
+        for (const auto& vals: qseq->tags()) {
+            ss << "\t" << vals.second.FormatAsSAM();
+        }
+    }
 
     ss << "\n";
 
@@ -112,6 +119,12 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
         << seq << "\t"
         << qual;
     if (write_custom_tags) {
+        // Extra tags provided in the alignment.
+        for (const auto& vals: qseq->tags()) {
+            ss << "\t" << vals.second.FormatAsSAM();
+        }
+
+        // Specific tags to Raptor.
         ss << "\t"
             << "NM:i:" << edit_dist << "\t"
             << "AS:i:" << score << "\t"
@@ -186,6 +199,7 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
             cov_bases_q << "\t" <<
             (t_end - t_start) << "\t" <<
             mapq;
+
     if (write_custom_tags) {
         ss << "\t"
             << "cm:i:" << num_seeds << "\t"
@@ -196,6 +210,11 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
             << "pn:i:" << num_segments_in_path << "\t"
             << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0)
             << "\t" << "cg:Z:" << cigar;
+
+        // Extra tags provided in the alignment.
+        for (const auto& vals: qseq->tags()) {
+            ss << "\t" << vals.second.FormatAsSAM();
+        }
 
         #ifdef RAPTOR_DEBUG_TIMINGS
             ss << "\t" << "tt:Z:" << timings;

@@ -87,8 +87,8 @@ public:
     std::vector<mindex::seqqual_t>& qual() {
         return qual_;
     }
-    raptor::AlignedRegionPtr apriori_aln() const {
-        return apriori_aln_;
+    const std::unordered_map<std::string, raptor::SamTag>& tags() const {
+        return tags_;
     }
 
     /*
@@ -110,8 +110,11 @@ public:
     void abs_id(int64_t _abs_id) {
         abs_id_ = _abs_id;
     }
-    void apriori_aln(raptor::AlignedRegionPtr val) {
-        apriori_aln_ = val;
+    void tags(const std::unordered_map<std::string, raptor::SamTag>& val) {
+        tags_ = val;
+    }
+    void AddTag(const raptor::SamTag& val) {
+        tags_[val.name] = val;
     }
 
     std::string GetSequenceAsString() const {
@@ -146,7 +149,7 @@ private:
     int64_t id_;
     int64_t abs_id_;
     size_t header_hash_;
-    raptor::AlignedRegionPtr apriori_aln_;
+    std::unordered_map<std::string, raptor::SamTag> tags_;
 };
 
 }

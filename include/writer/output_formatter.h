@@ -26,7 +26,7 @@ class OutputFormatter {
 public:
     static std::string TimingMapToString(const std::unordered_map<std::string, double>& timings);
 
-    static std::string UnmappedSAM(const mindex::SequencePtr& qseq);
+    static std::string UnmappedSAM(const mindex::SequencePtr& qseq, bool write_custom_tags);
 
     static std::string ToSAM(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                              const std::shared_ptr<raptor::RegionBase> mapping,

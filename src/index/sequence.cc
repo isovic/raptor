@@ -37,36 +37,36 @@ mindex::SequencePtr createSequence(const std::string& header, const std::vector<
 }
 
 Sequence::Sequence()
-                        : header_(), data_(), qual_(), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(), qual_(), id_(0), abs_id_(0), header_hash_(0), tags_() {
 
 }
 
 Sequence::Sequence(const std::string& _header, const seq_t* seq, size_t seq_len)
-                        : header_(), data_(seq, seq + seq_len), qual_(), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(seq, seq + seq_len), qual_(), id_(0), abs_id_(0), header_hash_(0), tags_() {
     // Call the setter, which calculates the hash.
     header(_header);
 }
 
 Sequence::Sequence(const std::string& _header, const std::string& seq)
-                        : header_(), data_(seq.begin(), seq.end()), qual_(), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(seq.begin(), seq.end()), qual_(), id_(0), abs_id_(0), header_hash_(0), tags_() {
     // Call the setter, which calculates the hash.
     header(_header);
 }
 
 Sequence::Sequence(const std::string& _header, const std::vector<mindex::seq_t>& data)
-                        : header_(), data_(data), qual_(), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(data), qual_(), id_(0), abs_id_(0), header_hash_(0), tags_() {
     // Call the setter, which calculates the hash.
     header(_header);
 }
 
 Sequence::Sequence(const std::string& _header, const std::string& seq, const std::string& qual)
-                        : header_(), data_(seq.begin(), seq.end()), qual_(qual.begin(), qual.end()), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(seq.begin(), seq.end()), qual_(qual.begin(), qual.end()), id_(0), abs_id_(0), header_hash_(0), tags_() {
     // Call the setter, which calculates the hash.
     header(_header);
 }
 
 Sequence::Sequence(const std::string& _header, const std::vector<mindex::seq_t>& data, const std::vector<mindex::seqqual_t>& qual)
-                        : header_(), data_(data), qual_(qual), id_(0), abs_id_(0), header_hash_(0) {
+                        : header_(), data_(data), qual_(qual), id_(0), abs_id_(0), header_hash_(0), tags_() {
     // Call the setter, which calculates the hash.
     header(_header);
 }
