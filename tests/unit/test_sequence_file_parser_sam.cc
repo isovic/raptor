@@ -21,22 +21,19 @@ TEST(SequenceFileParserSam, YieldSequence) {
 
     std::string expected_file_header = {
         "@HD\tVN:1.5\tSO:unknown\n"
-        "@SQ\tSN:seq1\tLN:4\n"
-        "@SQ\tSN:seq2\tLN:4\n"
-        "@SQ\tSN:seq3\tLN:14\n"
-        "@SQ\tSN:seq4\tLN:25\n"
+        "@SQ\tSN:Chr01\tLN:1000\n"
     };
     std::vector<std::string> expected_headers = {
-        "seq1", "seq2", "seq3", "seq4"
+        "seq1", "seq2", "seq3", "seq4", "seq5", "seq6"
     };
     std::vector<std::string> expected_seqs = {
-        "AAAC", "GGGC", "TTTTTAAAAATTTT", "AACTGACTGACTGAATGAACGAACT"
+        "AAAC", "GGGC", "TTTTTAAAAATTTT", "AACTGACTGACTGAATGAACGAACT", "AAAC", "AAAC"
     };
     std::vector<std::string> expected_quals = {
-        "", "", "", "!!!!!11111222223333344444"
+        "", "", "", "!!!!!11111222223333344444", "1234", "1234"
     };
 
-    ASSERT_EQ(result_seqs.size(), 4);
+    ASSERT_EQ(result_seqs.size(), expected_seqs.size());
     ASSERT_EQ(result_headers, expected_headers);
     ASSERT_EQ(result_seqs, expected_seqs);
     ASSERT_EQ(parser->GetFileHeaderAsString(), expected_file_header);
@@ -46,10 +43,7 @@ TEST(SequenceFileParserSam, GetFileHeaderAsString1) {
     std::string in_path = "test-data/sequence-parser/test5.sam";
     std::string expected = {
         "@HD\tVN:1.5\tSO:unknown\n"
-        "@SQ\tSN:seq1\tLN:4\n"
-        "@SQ\tSN:seq2\tLN:4\n"
-        "@SQ\tSN:seq3\tLN:14\n"
-        "@SQ\tSN:seq4\tLN:25\n"
+        "@SQ\tSN:Chr01\tLN:1000\n"
     };
 
     auto parser = mindex::createSequenceFileParserSam(in_path);

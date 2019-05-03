@@ -71,6 +71,11 @@ SequencePtr SequenceFileParserSam::YieldSequence() {
         seq->id(id);
         seq->abs_id(abs_id);
 
+        // Always report the sequence in the FWD strand.
+        if (flag & 0x10) {
+            seq->ReverseComplement();
+        }
+
         // We found a valid sequence. Yield.
         break;
     }
