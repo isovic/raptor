@@ -12,26 +12,9 @@
 #include <vector>
 #include <unordered_map>
 #include <aligner/cigar.h>
+#include <containers/sam_tag.h>
 
 namespace raptor {
-
-class RegionExtraTags {
-    public:
-    // // The "name" can be used to identify this tag more verbosely, or to
-    // // display in more verbose formats.
-    // std::string name;
-
-    // The following three fields should be consistentwith SAM/BAM conventions.
-    // They can simply be joined with a ':', and they would automatically be
-    // compliant with the SAM/BAM formats.
-
-    // The SAM/BAM compliant naming. It should include the data type too. E.g. cg:z
-    std::string id;
-    // The SAM/BAM compliant naming of a tag type. E.g. i for integer.
-    std::string type;
-    // Values packed in a string, regardless of the underlying data type, for simplicity.
-    std::string val;
-};
 
 /*
  * RegionBase provides the base interface for both mapping and alignment results.
@@ -78,7 +61,7 @@ public:
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
-    virtual const std::unordered_map<std::string, raptor::RegionExtraTags>& ExtraTags() const = 0;
+    virtual const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const = 0;
 
     virtual std::string WriteAsCSV(const char separator) const = 0;
 
@@ -89,7 +72,7 @@ public:
     virtual void SetCoveredBasesTarget(int32_t val) = 0;
     virtual void SetEditDistance(int32_t val) = 0;
     virtual void SetScore(int32_t val) = 0;
-    virtual void AddTag(const raptor::RegionExtraTags& val) = 0;
+    virtual void AddTag(const raptor::SamTag& val) = 0;
 };
 
 }

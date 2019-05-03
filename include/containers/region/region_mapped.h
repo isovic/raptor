@@ -138,7 +138,7 @@ public:
     bool IsSupplementary() const {
         return (segment_id_ > 0);
     }
-    const std::unordered_map<std::string, raptor::RegionExtraTags>& ExtraTags() const {
+    const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
     }
 
@@ -165,8 +165,8 @@ public:
     void SetScore(int32_t val) {
         score_ = val;
     }
-    void AddTag(const raptor::RegionExtraTags& val) {
-        extra_tags_[val.id] = val;
+    void AddTag(const raptor::SamTag& val) {
+        extra_tags_[val.name] = val;
     }
 
     /*
@@ -244,7 +244,7 @@ private:
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
-    std::unordered_map<std::string, raptor::RegionExtraTags> extra_tags_;
+    std::unordered_map<std::string, raptor::SamTag> extra_tags_;
 
 };
 
