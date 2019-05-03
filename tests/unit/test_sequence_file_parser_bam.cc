@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <random>
 #include <string>
 #include <vector>
 
@@ -73,12 +72,15 @@ TEST(SequenceFileParserBam, IsOpen1) {
     ASSERT_EQ(result, expected);
 }
 
-TEST(SequenceFileParserBam, GetFileOffset1) {
-
-}
+// TEST(SequenceFileParserBam, GetFileOffset1) {
+//     // This functionality is integratively tested in FileSeek1.
+// }
 
 TEST(SequenceFileParserBam, FileSeek1) {
     auto parser = mindex::createSequenceFileParserBam("test-data/sequence-parser/test6.bam");
+
+    ASSERT_NE(parser, nullptr);
+    ASSERT_EQ(parser->IsOpen(), true);
 
     std::vector<int64_t> offsets;
     std::vector<mindex::SequencePtr> seqs;
@@ -93,15 +95,12 @@ TEST(SequenceFileParserBam, FileSeek1) {
         prev_offset = parser->GetFileOffset();
     }
 
-    // Create a random permutation of sequence IDs.
+    // Create a reversed permutation of sequence IDs for reading.
     std::vector<int64_t> permutation;
     for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
         permutation.emplace_back(i);
     }
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    gen.seed(12345);
-    std::shuffle(permutation.begin(), permutation.end(), gen);
+    std::reverse(permutation.begin(), permutation.end());
 
     // Lookup all the same sequences, in a random order.
     for (const auto& seq_id: permutation) {
@@ -112,7 +111,6 @@ TEST(SequenceFileParserBam, FileSeek1) {
         ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());
         ASSERT_EQ(seq->GetQualityAsString(), seqs[seq_id]->GetQualityAsString());
     }
-
 }
 
 //    int64_t GetFileOffset() const;

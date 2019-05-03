@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <random>
 #include <string>
 #include <vector>
 
@@ -46,7 +47,7 @@ TEST(SequenceFileParserGfa2, GetFileHeaderAsString1) {
 }
 
 TEST(SequenceFileParserGfa2, GetFilePath1) {
-    std::string in_path = "test-data/sequence-parser/test3.gfa1";
+    std::string in_path = "test-data/sequence-parser/test4.gfa2";
     std::string expected = in_path;
 
     auto parser = mindex::createSequenceFileParserGfa2(in_path);
@@ -56,7 +57,7 @@ TEST(SequenceFileParserGfa2, GetFilePath1) {
 }
 
 TEST(SequenceFileParserGfa2, IsOpen1) {
-    std::string in_path = "test-data/sequence-parser/test3.gfa1";
+    std::string in_path = "test-data/sequence-parser/test4.gfa2";
     bool expected = true;
 
     auto parser = mindex::createSequenceFileParserGfa2(in_path);
@@ -65,12 +66,48 @@ TEST(SequenceFileParserGfa2, IsOpen1) {
     ASSERT_EQ(result, expected);
 }
 
-TEST(SequenceFileParserGfa2, GetFileOffset1) {
-
-}
+// TEST(SequenceFileParserGfa2, GetFileOffset1) {
+//     // This functionality is integratively tested in FileSeek1.
+// }
 
 TEST(SequenceFileParserGfa2, FileSeek1) {
+    auto parser = mindex::createSequenceFileParserGfa2("test-data/sequence-parser/test4.gfa2");
 
+    ASSERT_NE(parser, nullptr);
+    ASSERT_EQ(parser->IsOpen(), true);
+
+    std::vector<int64_t> offsets;
+    std::vector<mindex::SequencePtr> seqs;
+
+    mindex::SequencePtr seq;
+    int64_t prev_offset = parser->GetFileOffset();
+
+    // Create a mini index of the sequences.
+    while ((seq = parser->YieldSequence()) != nullptr) {
+        seqs.emplace_back(std::move(seq));
+        offsets.emplace_back(prev_offset);
+        prev_offset = parser->GetFileOffset();
+    }
+
+    // Create a random permutation of sequence IDs.
+    std::vector<int64_t> permutation;
+    for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
+        permutation.emplace_back(i);
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    gen.seed(12345);
+    std::shuffle(permutation.begin(), permutation.end(), gen);
+
+    // Lookup all the same sequences, in a random order.
+    for (const auto& seq_id: permutation) {
+        parser->FileSeek(offsets[seq_id]);
+        seq = parser->YieldSequence();
+        ASSERT_NE(seq, nullptr);
+        ASSERT_EQ(seq->header(), seqs[seq_id]->header());
+        ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());
+        ASSERT_EQ(seq->GetQualityAsString(), seqs[seq_id]->GetQualityAsString());
+    }
 }
 
 //    int64_t GetFileOffset() const;

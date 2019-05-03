@@ -65,12 +65,45 @@ TEST(SequenceFileParserGfa1, IsOpen1) {
     ASSERT_EQ(result, expected);
 }
 
-TEST(SequenceFileParserGfa1, GetFileOffset1) {
-
-}
+// TEST(SequenceFileParserGfa1, GetFileOffset1) {
+//     // This functionality is integratively tested in FileSeek1.
+// }
 
 TEST(SequenceFileParserGfa1, FileSeek1) {
+    auto parser = mindex::createSequenceFileParserGfa1("test-data/sequence-parser/test3.gfa1");
 
+    ASSERT_NE(parser, nullptr);
+    ASSERT_EQ(parser->IsOpen(), true);
+
+    std::vector<int64_t> offsets;
+    std::vector<mindex::SequencePtr> seqs;
+
+    mindex::SequencePtr seq;
+    int64_t prev_offset = parser->GetFileOffset();
+
+    // Create a mini index of the sequences.
+    while ((seq = parser->YieldSequence()) != nullptr) {
+        seqs.emplace_back(std::move(seq));
+        offsets.emplace_back(prev_offset);
+        prev_offset = parser->GetFileOffset();
+    }
+
+    // Create a reversed permutation of sequence IDs for reading.
+    std::vector<int64_t> permutation;
+    for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
+        permutation.emplace_back(i);
+    }
+    std::reverse(permutation.begin(), permutation.end());
+
+    // Lookup all the same sequences, in a random order.
+    for (const auto& seq_id: permutation) {
+        parser->FileSeek(offsets[seq_id]);
+        seq = parser->YieldSequence();
+        ASSERT_NE(seq, nullptr);
+        ASSERT_EQ(seq->header(), seqs[seq_id]->header());
+        ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());
+        ASSERT_EQ(seq->GetQualityAsString(), seqs[seq_id]->GetQualityAsString());
+    }
 }
 
 //    int64_t GetFileOffset() const;
