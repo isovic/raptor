@@ -5,7 +5,7 @@ project(
   default_options : [
     'buildtype=release',
     'warning_level=3',
-    'cpp_std=c++11'],
+    'cpp_std=c++14'],
   license : 'unlicensed',
   meson_version : '>= 0.43')
 
@@ -81,6 +81,12 @@ raptor_thread_dep = dependency('threads', required : true)
 
 # Zlib.
 raptor_zlib_dep = dependency('zlib', required : true)
+
+# Pbbam.
+pbmm2_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
+
+# Pbcopper.
+pbmm2_pbcopper_dep = dependency('pbcopper', fallback : ['pbcopper', 'pbcopper_dep'])
 
 # Google test.
 gtest_dep = dependency('gtest', main : true, required : false)

@@ -1,0 +1,5 @@
+[wrap-git]
+directory=pbbam
+url=https://github.com/PacificBiosciences/pbbam.git
+revision=develop
+
