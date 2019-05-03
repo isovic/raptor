@@ -91,7 +91,7 @@ void SequenceFileParserSam::ParseHeader_() {
         if (line[0] != '@') {
             break;
         }
-        header += line;
+        header += line + "\n";
         prev_pos = GetFileOffset();
     }
     FileSeek(prev_pos);

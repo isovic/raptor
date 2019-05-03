@@ -20,11 +20,11 @@ TEST(SequenceFileParserSam, YieldSequence) {
     }
 
     std::string expected_file_header = {
-        "@HD\tVN:1.5\tSO:unknown"
-        "@SQ\tSN:seq1\tLN:4"
-        "@SQ\tSN:seq2\tLN:4"
-        "@SQ\tSN:seq3\tLN:14"
-        "@SQ\tSN:seq4\tLN:25"
+        "@HD\tVN:1.5\tSO:unknown\n"
+        "@SQ\tSN:seq1\tLN:4\n"
+        "@SQ\tSN:seq2\tLN:4\n"
+        "@SQ\tSN:seq3\tLN:14\n"
+        "@SQ\tSN:seq4\tLN:25\n"
     };
     std::vector<std::string> expected_headers = {
         "seq1", "seq2", "seq3", "seq4"
@@ -43,8 +43,14 @@ TEST(SequenceFileParserSam, YieldSequence) {
 }
 
 TEST(SequenceFileParserSam, GetFileHeaderAsString1) {
-    std::string in_path = "test-data/sequence-parser/test3.gfa1";
-    std::string expected;
+    std::string in_path = "test-data/sequence-parser/test5.sam";
+    std::string expected = {
+        "@HD\tVN:1.5\tSO:unknown\n"
+        "@SQ\tSN:seq1\tLN:4\n"
+        "@SQ\tSN:seq2\tLN:4\n"
+        "@SQ\tSN:seq3\tLN:14\n"
+        "@SQ\tSN:seq4\tLN:25\n"
+    };
 
     auto parser = mindex::createSequenceFileParserSam(in_path);
     std::string result = parser->GetFileHeaderAsString();
@@ -53,7 +59,7 @@ TEST(SequenceFileParserSam, GetFileHeaderAsString1) {
 }
 
 TEST(SequenceFileParserSam, GetFilePath1) {
-    std::string in_path = "test-data/sequence-parser/test3.gfa1";
+    std::string in_path = "test-data/sequence-parser/test5.sam";
     std::string expected = in_path;
 
     auto parser = mindex::createSequenceFileParserSam(in_path);
@@ -63,7 +69,7 @@ TEST(SequenceFileParserSam, GetFilePath1) {
 }
 
 TEST(SequenceFileParserSam, IsOpen1) {
-    std::string in_path = "test-data/sequence-parser/test3.gfa1";
+    std::string in_path = "test-data/sequence-parser/test5.sam";
     bool expected = true;
 
     auto parser = mindex::createSequenceFileParserSam(in_path);
