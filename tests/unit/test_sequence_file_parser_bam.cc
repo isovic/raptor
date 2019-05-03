@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <random>
 #include <string>
 #include <vector>
 
@@ -62,21 +63,55 @@ TEST(SequenceFileParserBam, GetFilePath1) {
     ASSERT_EQ(result, expected);
 }
 
-// TEST(SequenceFileParserBam, IsOpen1) {
-//     std::string in_path = "test-data/sequence-parser/test6.bam";
-//     bool expected = true;
+TEST(SequenceFileParserBam, IsOpen1) {
+    std::string in_path = "test-data/sequence-parser/test6.bam";
+    bool expected = true;
 
-//     auto parser = mindex::createSequenceFileParserBam(in_path);
-//     bool result = parser->IsOpen();
+    auto parser = mindex::createSequenceFileParserBam(in_path);
+    bool result = parser->IsOpen();
 
-//     ASSERT_EQ(result, expected);
-// }
+    ASSERT_EQ(result, expected);
+}
 
 TEST(SequenceFileParserBam, GetFileOffset1) {
 
 }
 
 TEST(SequenceFileParserBam, FileSeek1) {
+    auto parser = mindex::createSequenceFileParserBam("test-data/sequence-parser/test6.bam");
+
+    std::vector<int64_t> offsets;
+    std::vector<mindex::SequencePtr> seqs;
+
+    mindex::SequencePtr seq;
+    int64_t prev_offset = parser->GetFileOffset();
+
+    // Create a mini index of the sequences.
+    while ((seq = parser->YieldSequence()) != nullptr) {
+        seqs.emplace_back(std::move(seq));
+        offsets.emplace_back(prev_offset);
+        prev_offset = parser->GetFileOffset();
+    }
+
+    // Create a random permutation of sequence IDs.
+    std::vector<int64_t> permutation;
+    for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
+        permutation.emplace_back(i);
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    gen.seed(12345);
+    std::shuffle(permutation.begin(), permutation.end(), gen);
+
+    // Lookup all the same sequences, in a random order.
+    for (const auto& seq_id: permutation) {
+        parser->FileSeek(offsets[seq_id]);
+        seq = parser->YieldSequence();
+        ASSERT_NE(seq, nullptr);
+        ASSERT_EQ(seq->header(), seqs[seq_id]->header());
+        ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());
+        ASSERT_EQ(seq->GetQualityAsString(), seqs[seq_id]->GetQualityAsString());
+    }
 
 }
 
