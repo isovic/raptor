@@ -136,7 +136,7 @@ mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
         const std::string& next_in_path = std::get<0>(in_files_[curr_open_file_]);
         const mindex::SequenceFormat& next_in_fmt = std::get<1>(in_files_[curr_open_file_]);
 
-        Open(next_in_path, next_in_fmt);
+        Open_(next_in_path, next_in_fmt);
     }
 
     mindex::SequencePtr seq = nullptr;
@@ -149,7 +149,7 @@ mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
         }
         const std::string& next_in_path = std::get<0>(in_files_[curr_open_file_]);
         const mindex::SequenceFormat& next_in_fmt = std::get<1>(in_files_[curr_open_file_]);
-        Open(next_in_path, next_in_fmt);
+        Open_(next_in_path, next_in_fmt);
     }
 
     if (seq != nullptr && convert_to_uppercase) {
@@ -159,7 +159,7 @@ mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
     return seq;
 }
 
-bool SequenceFile::Open(const std::string& in_path, mindex::SequenceFormat in_fmt) {
+bool SequenceFile::Open_(const std::string& in_path, mindex::SequenceFormat in_fmt) {
     if (in_fmt == mindex::SequenceFormat::Auto) {
         auto ext = raptor::GetFileExt(in_path);
         // If the file is Gzipped, the .gz will be in the ext.

@@ -37,7 +37,6 @@ public:
     friend mindex::SequenceFilePtr createSequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt);
     friend mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts);
 
-    bool Open(const std::string& in_path, mindex::SequenceFormat in_fmt);
     bool LoadAll(const std::vector<std::string>& headers, const std::vector<std::string>& seqs, bool convert_to_uppercase=true);
     bool LoadAll(bool convert_to_uppercase=true);
     bool LoadBatchMB(int64_t batch_size_mb, bool convert_to_uppercase=true);
@@ -104,6 +103,7 @@ private:
     SequenceFile(const SequenceFile&) = delete;
     SequenceFile& operator=(const SequenceFile&) = delete;
 
+    bool Open_(const std::string& in_path, mindex::SequenceFormat in_fmt);
     mindex::SequencePtr YieldSequence_(bool convert_to_uppercase);
 
 
