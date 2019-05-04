@@ -77,35 +77,49 @@ TEST(SequenceFileParserBam, IsOpen1) {
 // }
 
 TEST(SequenceFileParserBam, FileSeek1) {
-    auto parser = mindex::createSequenceFileParserBam("test-data/sequence-parser/test6.bam");
-
-    ASSERT_NE(parser, nullptr);
-    ASSERT_EQ(parser->IsOpen(), true);
 
     std::vector<int64_t> offsets;
     std::vector<mindex::SequencePtr> seqs;
-
-    mindex::SequencePtr seq;
-    int64_t prev_offset = parser->GetFileOffset();
-
-    // Create a mini index of the sequences.
-    while ((seq = parser->YieldSequence()) != nullptr) {
-        seqs.emplace_back(std::move(seq));
-        offsets.emplace_back(prev_offset);
-        prev_offset = parser->GetFileOffset();
-    }
-
-    // Create a reversed permutation of sequence IDs for reading.
     std::vector<int64_t> permutation;
-    for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
-        permutation.emplace_back(i);
+    mindex::SequencePtr seq = nullptr;
+
+    std::string in_path = "test-data/sequence-parser/test6.bam";
+    // std::string in_path = "test-data/sequence-parser/subreads1.bam";
+
+    {
+        auto parser_1 = mindex::createSequenceFileParserBam(in_path);
+
+        ASSERT_NE(parser_1, nullptr);
+        ASSERT_EQ(parser_1->IsOpen(), true);
+
+        int64_t prev_offset = parser_1->GetFileOffset();
+
+        // Create a mini index of the sequences.
+        while ((seq = parser_1->YieldSequence()) != nullptr) {
+            seqs.emplace_back(std::move(seq));
+            offsets.emplace_back(prev_offset);
+            prev_offset = parser_1->GetFileOffset();
+        }
+
+        // Create a reversed permutation of sequence IDs for reading.
+        for (int64_t i = 0; i < static_cast<int64_t>(seqs.size()); ++i) {
+            permutation.emplace_back(i);
+        }
+        std::reverse(permutation.begin(), permutation.end());
+
+        // std::cerr << "Permutation: ";
+        // for (const auto& val: permutation) {
+        //     std::cerr << " " << val;
+        // }
+        // std::cerr << "\n";
     }
-    std::reverse(permutation.begin(), permutation.end());
+
+    auto parser_2 = mindex::createSequenceFileParserBam(in_path);
 
     // Lookup all the same sequences, in a random order.
     for (const auto& seq_id: permutation) {
-        parser->FileSeek(offsets[seq_id]);
-        seq = parser->YieldSequence();
+        parser_2->FileSeek(offsets[seq_id]);
+        seq = parser_2->YieldSequence();
         ASSERT_NE(seq, nullptr);
         ASSERT_EQ(seq->header(), seqs[seq_id]->header());
         ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());
