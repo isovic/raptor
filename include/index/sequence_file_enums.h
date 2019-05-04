@@ -8,6 +8,7 @@
 #ifndef SRC_PARAMS_SEQUENCE_FILE_ENUMS_H_
 #define SRC_PARAMS_SEQUENCE_FILE_ENUMS_H_
 
+#include <algorithm>
 #include <cstdlib>
 
 namespace mindex {
