@@ -80,6 +80,10 @@ int64_t SequenceFileParserGfa1::GetFileOffset() const {
     return gztell(fp_gzip_);
 }
 
+const HeaderGroupType& SequenceFileParserGfa1::GetHeaderGroups() const {
+    return header_groups_;
+}
+
 std::string SequenceFileParserGfa1::GetFilePath() const {
     return path_;
 }

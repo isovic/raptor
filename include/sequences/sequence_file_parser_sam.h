@@ -37,17 +37,24 @@ public:
    std::string GetFilePath() const;
    bool FileSeek(int64_t pos);
    bool IsOpen() const;
+   const HeaderGroupType& GetHeaderGroups() const;
 
 private:
    SequenceFileParserSam();
 
    void ParseHeader_();
+   void ParseReadGroupAndProgramGroupFromHeader_(const std::string& header);
 
    std::string path_;
    std::string header_;
 
    gzFile fp_gzip_;
 
+   // The following is complicated, but it translates to:
+   //   header_group_[group_name][ID] = map_of_tags;
+   // For example:
+   //   header_group_["RG"]["995ef077"] = {"ID": "995ef077", "PL": "PACBIO"};
+   HeaderGroupType header_groups_;
 };
 
 }

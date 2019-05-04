@@ -40,6 +40,7 @@ public:
    std::string GetFilePath() const;
    bool FileSeek(int64_t pos);
    bool IsOpen() const;
+   const HeaderGroupType& GetHeaderGroups() const;
 
 private:
    SequenceFileParserFastx();
@@ -48,6 +49,7 @@ private:
 
    kseq_t *fp_kseq_;
    gzFile fp_gzip_;
+   HeaderGroupType header_groups_;
 
 };
 

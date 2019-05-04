@@ -103,6 +103,10 @@ int64_t SequenceFileParserFastx::GetFileOffset() const {
     return ret_val;
 }
 
+const HeaderGroupType& SequenceFileParserFastx::GetHeaderGroups() const {
+    return header_groups_;
+}
+
 std::string SequenceFileParserFastx::GetFilePath() const {
     return path_;
 }

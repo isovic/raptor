@@ -37,6 +37,7 @@ public:
    std::string GetFilePath() const;
    bool FileSeek(int64_t pos);
    bool IsOpen() const;
+   const HeaderGroupType& GetHeaderGroups() const;
 
 private:
    SequenceFileParserGfa1();
@@ -45,6 +46,7 @@ private:
    std::string header_;
 
    gzFile fp_gzip_;
+   HeaderGroupType header_groups_;
 
 };
 

@@ -44,8 +44,48 @@ bool SequenceFileParserBam::Open(const std::string& path) {
     dataset_ = std::make_unique<PacBio::BAM::DataSet>(*bam_file_);
 
     ParseHeader_();
+    ParseReadGroupAndProgramGroupFromHeader_(sam_header_);
 
     return true;
+}
+
+void SequenceFileParserBam::ParseReadGroupAndProgramGroupFromHeader_(const std::string& header) {
+    std::istringstream iss(header);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (line.size() < 3) {
+            continue;
+        }
+        if (line[0] != '@') {
+            break;
+        }
+
+        std::string field_name = line.substr(1, 2);
+
+        if (field_name == "RG" || field_name == "PG") {
+            std::unordered_map<std::string, std::string> tags;
+
+            // Skip the first token, that's "@RG" or "@PG".
+            auto tokens = raptor::Tokenize(line, '\t');
+            bool is_ok = true;
+            for (size_t tid = 1; tid < tokens.size(); ++tid) {
+                std::string tag_name = tokens[tid].substr(0, 2);
+                std::string tag_val = tokens[tid].substr(3);
+                tags[tag_name] = tag_val;
+            }
+
+            if (tags.find("ID") == tags.end()) {
+                is_ok = false;
+            }
+
+            if (is_ok == false) {
+                WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Skipping faulty header line: '%s'.", line.c_str());
+                continue;
+            }
+
+            header_groups_[field_name][tags["ID"]] = std::move(tags);
+        }
+    }
 }
 
 void SequenceFileParserBam::ParseHeader_() {
@@ -96,6 +136,10 @@ SequencePtr SequenceFileParserBam::YieldSequence() {
     }
 
     return seq;
+}
+
+const HeaderGroupType& SequenceFileParserBam::GetHeaderGroups() const {
+    return header_groups_;
 }
 
 std::string SequenceFileParserBam::GetFileHeaderAsString() const {
