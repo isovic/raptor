@@ -96,13 +96,17 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 			seq->header(ss_buff.str());
 		}
 
-		// Overwrite the pos_before and pos_after, if we're writing the seqs to disk.
-		if (parameters->symlink_files == false) {
+		if (parameters->symlink_files == false) {	// WITH dumping of sequences to disk.
+			// Overwrite the pos_before and pos_after, if we're writing the seqs to disk.
 			pos_before = static_cast<int64_t>(ofs.tellp());
 			mindex::SequenceSerializer::SerializeSequence(ofs, seq, parameters->out_fmt);
 			pos_now = static_cast<int64_t>(ofs.tellp());
-		} else {
+
+		} else {	// WITHOUT writing to disk, just pointing to existing locations.
 			if (file_now != file_before) {
+				// In case of symlinking, the out format has to be the same as input format.
+				auto curr_out_fmt = mindex::GetSequenceFormatFromPath(parameters->in_paths[file_now]);
+				std::string out_format = mindex::SequenceFormatToString(curr_out_fmt);
 				ofs_rdb << "F\t" << file_now << "\t" << parameters->in_paths[file_now] << "\t" << out_format << "\n";
 			}
 		}
