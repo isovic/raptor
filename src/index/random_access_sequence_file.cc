@@ -15,19 +15,20 @@ namespace mindex {
 mindex::RandomAccessSequenceFilePtr createRandomAccessSequenceFile(const std::string& in_path, size_t max_num_streams) {
     auto ret = mindex::RandomAccessSequenceFilePtr(new mindex::RandomAccessSequenceFile(max_num_streams));
     bool rv = ret->LoadDB(in_path);
+    ret->ParseAndMergeHeaderGroups_();
     if (rv == false) {
         return nullptr;
     }
     return std::move(ret);
 }
 
-
 RandomAccessSequenceFile::RandomAccessSequenceFile(size_t max_num_streams)
                 :
                     max_num_parsers_(max_num_streams),
                     db_version_(-1.0f), db_files_(), db_seqs_(), db_blocks_(),
                     seq_id_to_vec_(), file_id_to_vec_(), block_id_to_vec_(), qname_to_vec_(),
-                    parsers_(), fid_stream_priority_() {
+                    parsers_(), fid_stream_priority_(),
+                    header_groups_() {
 }
 
 bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
@@ -212,6 +213,39 @@ mindex::SequenceFilePtr RandomAccessSequenceFile::FetchAll() {
     }
 
     return seq_file;
+}
+
+bool RandomAccessSequenceFile::ParseAndMergeHeaderGroups_() {
+    mindex::HeaderGroupType merged_groups;
+
+    for (size_t fid = 0; fid < db_files_.size(); ++fid) {
+
+        const std::string& in_path = db_files_[fid].path;
+        mindex::SequenceFormat& in_fmt = db_files_[fid].format;
+
+        if (in_fmt == mindex::SequenceFormat::Auto) {
+            auto ext = raptor::GetFileExt(in_path);
+            // If the file is Gzipped, the .gz will be in the ext.
+            // E.g. the output from GetFileExt can be "fasta.gz".
+            if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
+                ext = ext.substr(0, ext.size() - 3);
+            }
+            in_fmt = SequenceFormatFromString(ext);
+        }
+
+        auto parser = mindex::createSequenceFileParser(in_path, in_fmt);
+        const auto& curr_groups = parser->GetHeaderGroups();
+
+        for (const auto& it_field: curr_groups) {
+            for (const auto& it_ids: it_field.second) {
+                merged_groups[it_field.first][it_ids.first] = it_ids.second;
+            }
+        }
+    }
+
+    std::swap(header_groups_, merged_groups);
+
+    return true;
 }
 
 }

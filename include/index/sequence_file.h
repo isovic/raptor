@@ -76,6 +76,12 @@ public:
     int64_t GetOpenFileId() const {
         return curr_open_file_;
     }
+    const HeaderGroupType& header_groups() const {
+        return header_groups_;
+    }
+    const HeaderGroupType& GetHeaderGroups() const {
+        return header_groups_;
+    }
 
     /*
      * Setters.
@@ -104,6 +110,7 @@ private:
     SequenceFile& operator=(const SequenceFile&) = delete;
 
     bool Open_(const std::string& in_path, mindex::SequenceFormat in_fmt);
+    bool ParseAndMergeHeaderGroups_();
     mindex::SequencePtr YieldSequence_(bool convert_to_uppercase);
 
 
@@ -118,6 +125,7 @@ private:
     int64_t batch_start_seq_id_;    // Absolute ID of the first sequence in the loaded batch.
     int64_t total_size_;            // Sum of all sequence lengths.
     mindex::SequencePtr dummy_nullptr_seq_;
+    HeaderGroupType header_groups_;
 };
 
 }

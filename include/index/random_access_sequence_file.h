@@ -85,11 +85,20 @@ public:
         return db_blocks_;
     }
 
+    const HeaderGroupType& header_groups() const {
+        return header_groups_;
+    }
+    const HeaderGroupType& GetHeaderGroups() const {
+        return header_groups_;
+    }
+
 private:
     RandomAccessSequenceFile(size_t max_num_streams);
 
     RandomAccessSequenceFile(const RandomAccessSequenceFile&) = delete;
     RandomAccessSequenceFile& operator=(const RandomAccessSequenceFile&) = delete;
+
+    bool ParseAndMergeHeaderGroups_();
 
     mindex::SequencePtr FetchSequence_(int64_t db_seq_id);
 
@@ -104,6 +113,7 @@ private:
     std::unordered_map<std::string, size_t> qname_to_vec_;      // The first is the sequence qname from DB, and second is the ordinal number in the vector.
     std::vector<mindex::SequenceFileParserBasePtr> parsers_;
     std::deque<int64_t> fid_stream_priority_;
+    HeaderGroupType header_groups_;
 };
 
 }
