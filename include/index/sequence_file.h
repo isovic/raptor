@@ -51,6 +51,7 @@ public:
     std::string GetOpenFilePath() const;
     mindex::SequenceFormat GetOpenFileFormat() const;
     int64_t GetOpenFileTell() const;
+    int64_t GetOpenFilePrevTell() const;
 
     /*
      * Getters.
@@ -126,6 +127,7 @@ private:
     int64_t total_size_;            // Sum of all sequence lengths.
     mindex::SequencePtr dummy_nullptr_seq_;
     HeaderGroupType header_groups_;
+    int64_t open_file_offset_prev_;
 };
 
 }

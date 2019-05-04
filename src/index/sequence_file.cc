@@ -39,7 +39,8 @@ SequenceFile::SequenceFile()
                     batch_start_seq_id_(0),
                     total_size_(0),
                     dummy_nullptr_seq_(nullptr),
-                    header_groups_() {
+                    header_groups_(),
+                    open_file_offset_prev_(0) {
 
 }
 
@@ -54,7 +55,8 @@ SequenceFile::SequenceFile(const std::string& in_path, mindex::SequenceFormat in
                     batch_start_seq_id_(0),
                     total_size_(0),
                     dummy_nullptr_seq_(nullptr),
-                    header_groups_() {
+                    header_groups_(),
+                    open_file_offset_prev_(0) {
 }
 
 SequenceFile::SequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts)
@@ -68,7 +70,8 @@ SequenceFile::SequenceFile(const std::vector<std::string>& in_paths, const std::
                     batch_start_seq_id_(0),
                     total_size_(0),
                     dummy_nullptr_seq_(nullptr),
-                    header_groups_() {
+                    header_groups_(),
+                    open_file_offset_prev_(0) {
     if (in_paths.size() != in_fmts.size()) {
         WARNING_REPORT(ERR_UNEXPECTED_VALUE, "in_paths.size() = %ld and in_fmts.size() = %ld. Not setting the inputs.", in_paths.size(), in_fmts.size());
         return;
@@ -132,6 +135,20 @@ int64_t SequenceFile::GetOpenFileTell() const {
     return parser_->GetFileOffset();
 }
 
+int64_t SequenceFile::GetOpenFilePrevTell() const {
+    auto curr_fmt = GetOpenFileFormat();
+    if (curr_fmt == mindex::SequenceFormat::Unknown) {
+        return -4;
+    }
+    if (parser_ == nullptr) {
+        return -2;
+    }
+    if (parser_->IsOpen() == false) {
+        return -3;
+    }
+    return open_file_offset_prev_;
+}
+
 mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
     if (in_files_.size() == 0) {
         WARNING_REPORT(ERR_OPENING_FILE, "No input files were specified, but YieldSequence_ was called. Returning nullptr.");
@@ -146,6 +163,8 @@ mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
         Open_(next_in_path, next_in_fmt);
     }
 
+    open_file_offset_prev_ = GetOpenFileTell();
+
     mindex::SequencePtr seq = nullptr;
     int64_t num_in_files = in_files_.size();
 
@@ -157,6 +176,7 @@ mindex::SequencePtr SequenceFile::YieldSequence_(bool convert_to_uppercase) {
         const std::string& next_in_path = std::get<0>(in_files_[curr_open_file_]);
         const mindex::SequenceFormat& next_in_fmt = std::get<1>(in_files_[curr_open_file_]);
         Open_(next_in_path, next_in_fmt);
+        open_file_offset_prev_ = GetOpenFileTell();
     }
 
     if (seq != nullptr && convert_to_uppercase) {
