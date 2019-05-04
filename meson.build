@@ -82,6 +82,9 @@ raptor_thread_dep = dependency('threads', required : true)
 # Zlib.
 raptor_zlib_dep = dependency('zlib', required : true)
 
+# Boost. Required for Pbbam.
+pbbam_dep = dependency('boost', required : true)
+
 # Pbbam.
 pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
 
