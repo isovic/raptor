@@ -19,14 +19,25 @@ RaptorResultsWriter::~RaptorResultsWriter() {
 
 }
 
-void RaptorResultsWriter::WriteHeader() {
+void RaptorResultsWriter::WriteHeader(const mindex::HeaderGroupType header_groups) {
     if (outfmt_ == raptor::OutputFormat::SAM) {
         oss_ << "@HD\tVN:1.5" << std::endl;
+
+        for (const auto& it_field: header_groups) {
+            oss_ << "@" << it_field.first;
+            for (const auto& it_ids: it_field.second) {
+                for (const auto& it_tags: it_ids.second) {
+                    oss_ << "\t" << it_tags.first << ":" << it_tags.second;
+                }
+            }
+            oss_ << "\n";
+        }
 
         for (size_t i = 0; i < index_->seqs()->size(); ++i) {
             std::string header = TrimToFirstSpace(index_->header(i));
             oss_ << "@SQ\tSN:" << header << "\tLN:" << index_->len(i) << std::endl;
         }
+
     } else if (outfmt_ == raptor::OutputFormat::GFA2) {
         oss_ << "H\tVN:Z:2.0" << std::endl;
 

@@ -28,7 +28,7 @@ class RaptorResultsWriter {
 
   ~RaptorResultsWriter();
 
-  void WriteHeader();
+  void WriteHeader(const mindex::HeaderGroupType header_groups);
   void Write(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tag, bool one_hit_per_targets);
   void WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target);
 

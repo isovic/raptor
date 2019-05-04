@@ -125,15 +125,13 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	// Create a writer for results.
 	auto writer = raptor::createRaptorResultsWriter(*ofs_ptr, index, parameters->outfmt);
 
-	// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
-	writer->WriteHeader();
-
 	int64_t total_processed = 0;
 
 	LOG_ALL("Creating the Raptor object.\n");
 	auto raptor = raptor::createRaptor(index, graph, ssg, parameters);
 
 	if (parameters->infmt == mindex::SequenceFormat::RaptorDB) {
+
 		if (parameters->query_paths.size() != 1) {
 			FATAL_REPORT(ERR_UNEXPECTED_VALUE,
 				"There has to be exactly 1 query path specified when the input is a RaptorDB. "
@@ -165,6 +163,11 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The end_block_id >= num_blocks. end_block_id = %ld, num_blocks = %ld. Exiting.", end_block_id, num_blocks);
 		}
 
+		const auto& header_groups = random_seqfile->GetHeaderGroups();
+
+		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
+		writer->WriteHeader(header_groups);
+
 		for (int64_t block_id = start_block_id; block_id < end_block_id; ++block_id) {
 			LOG_ALL("Loading block %ld from the RaptorDB.\n", block_id);
 
@@ -189,6 +192,11 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		// Open a sequence file object which will iterate through all inputs.
 		std::vector<mindex::SequenceFormat> query_fmts(parameters->query_paths.size(), parameters->infmt);
 		mindex::SequenceFilePtr reads = mindex::createSequenceFile(parameters->query_paths, query_fmts);
+
+		const auto& header_groups = reads->GetHeaderGroups();
+
+		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
+		writer->WriteHeader(header_groups);
 
 		LOG_ALL("Processing reads.\n");
 		int64_t batch_size_in_mb = static_cast<int64_t>(parameters->batch_size);
