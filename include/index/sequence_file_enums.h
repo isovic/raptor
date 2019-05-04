@@ -8,6 +8,8 @@
 #ifndef SRC_PARAMS_SEQUENCE_FILE_ENUMS_H_
 #define SRC_PARAMS_SEQUENCE_FILE_ENUMS_H_
 
+#include <cstdlib>
+
 namespace mindex {
 
 enum class BatchLoadType { MB, Coverage };
@@ -79,6 +81,22 @@ inline std::string SequenceFormatToString(const SequenceFormat& fmt) {
             ret = "unknown";
     }
     return ret;
+}
+
+inline SequenceFormat GetSequenceFormatFromPath(const std::string& path) {
+    int32_t pos = path.find_last_of(".");
+    std::string ext = path.substr(pos + 1);
+    if (ext == "gz") {
+        ext = path.substr(path.find_last_of(".", (pos - 1)) + 1);
+    }
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+    // If the file is Gzipped, the .gz will be in the ext.
+    // E.g. the output from GetFileExt can be "fasta.gz".
+    if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
+        ext = ext.substr(0, ext.size() - 3);
+    }
+    return SequenceFormatFromString(ext);
 }
 
 }
