@@ -65,11 +65,11 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 		ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << out_format << "\n";
 	}
 
-	int64_t pos_before = 0;
 	int64_t file_before = -1;
 
 	while (seq_file->LoadBatchOfOne()) {
 		int64_t pos_now = seq_file->GetOpenFileTell();
+		int64_t pos_last = seq_file->GetOpenFilePrevTell();
 		int64_t file_now = seq_file->GetOpenFileId();
 		int64_t file_id = (parameters->symlink_files) ? file_now : total_out_files;
 
@@ -79,10 +79,6 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 
 		if (seq_file->seqs().size() == 0) {
 			break;
-		}
-
-		if (file_now != file_before) {
-			pos_before = 0;
 		}
 
 		const auto& seq = seq_file->seqs()[0];
@@ -98,9 +94,12 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 
 		if (parameters->symlink_files == false) {	// WITH dumping of sequences to disk.
 			// Overwrite the pos_before and pos_after, if we're writing the seqs to disk.
-			pos_before = static_cast<int64_t>(ofs.tellp());
+			int64_t num_written_bytes = static_cast<int64_t>(ofs.tellp());
 			mindex::SequenceSerializer::SerializeSequence(ofs, seq, parameters->out_fmt);
-			pos_now = static_cast<int64_t>(ofs.tellp());
+			int64_t num_written_bytes_after = static_cast<int64_t>(ofs.tellp());
+
+			ofs_rdb << "S\t" << total_num_seqs << "\t" << raptor::TrimToFirstWhiteSpace(seq->header()) << "\t" << seq->len()
+					<< "\t" << file_id << "\t" << num_written_bytes << "\t" << (num_written_bytes_after - num_written_bytes) << "\n";
 
 		} else {	// WITHOUT writing to disk, just pointing to existing locations.
 			if (file_now != file_before) {
@@ -109,10 +108,10 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 				std::string out_format = mindex::SequenceFormatToString(curr_out_fmt);
 				ofs_rdb << "F\t" << file_now << "\t" << parameters->in_paths[file_now] << "\t" << out_format << "\n";
 			}
-		}
 
-		ofs_rdb << "S\t" << total_num_seqs << "\t" << raptor::TrimToFirstWhiteSpace(seq->header()) << "\t" << seq->len()
-				<< "\t" << file_id << "\t" << pos_before << "\t" << (pos_now - pos_before) << "\n";
+			ofs_rdb << "S\t" << total_num_seqs << "\t" << raptor::TrimToFirstWhiteSpace(seq->header()) << "\t" << seq->len()
+					<< "\t" << file_id << "\t" << pos_last << "\t" << (pos_now - pos_last) << "\n";
+		}
 
 		if (block_num_bases > write_block_size_int64) {
 			LOG_ALL("Block done! Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
@@ -133,7 +132,6 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 		}
 
 		++total_num_seqs;
-		pos_before = pos_now;
 		file_before = file_now;
 	}
 	if (block_start_seq_id != total_num_seqs) {
