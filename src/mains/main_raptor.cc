@@ -145,8 +145,10 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 
 		// If the input is a RaptorDB, then a batch size is one block of the input.
 		LOG_ALL("Processing reads from: %s\n", query_path.c_str());
-		mindex::RandomAccessSequenceFilePtr rasf = mindex::createRandomAccessSequenceFile(query_path, 50);
-		int64_t num_blocks = static_cast<int64_t>(rasf->db_blocks().size());
+
+		mindex::RandomAccessSequenceFilePtr random_seqfile = mindex::createRandomAccessSequenceFile(query_path, 50);
+
+		int64_t num_blocks = static_cast<int64_t>(random_seqfile->db_blocks().size());
 		int64_t start_block_id = 0;
 		int64_t end_block_id = num_blocks;
 
@@ -166,12 +168,10 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		for (int64_t block_id = start_block_id; block_id < end_block_id; ++block_id) {
 			LOG_ALL("Loading block %ld from the RaptorDB.\n", block_id);
 
-			mindex::SequenceFilePtr reads = rasf->FetchBlock(block_id);
+			mindex::SequenceFilePtr reads = random_seqfile->FetchBlock(block_id);
 
-			LOG_ALL("Batch of %ld reads loaded (%.2lf MB).\n",
-						reads->seqs().size(), reads->total_size() / (1048576.0));
-			LOG_ALL("Mapping batch of %lu reads. Processed %ld reads so far.\n",
-						reads->seqs().size(), total_processed);
+			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
+						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
 
 			raptor->Clear();
 			raptor->Align(reads);
@@ -186,35 +186,37 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		}
 
 	} else {
-		for (const auto& query_path: parameters->query_paths) {
-			auto reads = mindex::createSequenceFile(query_path, parameters->infmt);
-			LOG_ALL("Processing reads from: %s\n", query_path.c_str());
-			int64_t batch_size_in_mb = static_cast<int64_t>(parameters->batch_size);
-			if (parameters->batch_type == mindex::BatchLoadType::Coverage) {
-				batch_size_in_mb = static_cast<int64_t>(std::ceil(index->total_len() * parameters->batch_size / (1024.0 * 1024.0)));
-				LOG_ALL("Batch loading input queries by reference coverage %.4lf.\n", parameters->batch_size);
-				LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
-			} else {
-				LOG_ALL("Batch loading input queries by size specified in MB.\n");
-				LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
-			}
-			while (reads->LoadBatchMB(batch_size_in_mb)) {
-				LOG_ALL("Batch of %ld reads loaded (%.2lf MB).\n",
-							reads->seqs().size(), reads->total_size() / (1048576.0));
-				LOG_ALL("Mapping batch of %lu reads. Processed %ld reads so far.\n",
-							reads->seqs().size(), total_processed);
+		// Open a sequence file object which will iterate through all inputs.
+		std::vector<mindex::SequenceFormat> query_fmts(parameters->query_paths.size(), parameters->infmt);
+		mindex::SequenceFilePtr reads = mindex::createSequenceFile(parameters->query_paths, query_fmts);
 
-				raptor->Clear();
-				raptor->Align(reads);
-				writer->Write(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
-				total_processed += reads->seqs().size();
-				if (parameters->num_reads_to_process > 0 &&
-					total_processed > (parameters->start_read + parameters->num_reads_to_process)) {
-					break;
-				}
-				LOG_ALL("Batch done! Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-				fflush(stdout);
+		LOG_ALL("Processing reads.\n");
+		int64_t batch_size_in_mb = static_cast<int64_t>(parameters->batch_size);
+		if (parameters->batch_type == mindex::BatchLoadType::Coverage) {
+			batch_size_in_mb = static_cast<int64_t>(std::ceil(index->total_len() * parameters->batch_size / (1024.0 * 1024.0)));
+			LOG_ALL("Batch loading input queries by reference coverage %.4lf.\n", parameters->batch_size);
+			LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
+		} else {
+			LOG_ALL("Batch loading input queries by size specified in MB.\n");
+			LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
+		}
+
+		while (reads->LoadBatchMB(batch_size_in_mb)) {
+			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
+						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
+
+			raptor->Clear();
+			raptor->Align(reads);
+			writer->Write(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
+			total_processed += reads->seqs().size();
+
+			if (parameters->num_reads_to_process > 0 &&
+				total_processed > (parameters->start_read + parameters->num_reads_to_process)) {
+				break;
 			}
+
+			LOG_ALL("Batch done! Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+			fflush(stdout);
 		}
 	}
 
