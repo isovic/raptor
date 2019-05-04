@@ -71,6 +71,18 @@ SequencePtr SequenceFileParserSam::YieldSequence() {
         seq->id(id);
         seq->abs_id(abs_id);
 
+        // Parse additional tags of the alignment line.
+        std::string tag_str;
+        while (ss >> tag_str) {
+            auto tokens = raptor::Tokenize(tag_str, ':');
+            if (tokens.size() != 3) {
+                WARNING_REPORT(ERR_UNEXPECTED_VALUE, "SAM tag has unexpected number of tokens. tokens.size() = %ld, expected = 3. Skipping.", static_cast<int32_t>(tokens.size()));
+                continue;
+            }
+            raptor::SamTag tag(tokens[0], tokens[1], tokens[2]);
+            seq->AddTag(tag);
+        }
+
         // Always report the sequence in the FWD strand.
         if (flag & 0x10) {
             seq->ReverseComplement();
