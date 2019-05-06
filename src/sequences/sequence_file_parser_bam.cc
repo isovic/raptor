@@ -63,19 +63,20 @@ void SequenceFileParserBam::ParseReadGroupAndProgramGroupFromHeader_(const std::
         std::string field_name = line.substr(1, 2);
 
         if (field_name == "RG" || field_name == "PG") {
-            std::unordered_map<std::string, std::string> tags;
+            std::vector<HeaderTag> tags;
 
             // Skip the first token, that's "@RG" or "@PG".
             auto tokens = raptor::Tokenize(line, '\t');
-            bool is_ok = true;
+            bool is_ok = false;
+            std::string field_id;
             for (size_t tid = 1; tid < tokens.size(); ++tid) {
                 std::string tag_name = tokens[tid].substr(0, 2);
                 std::string tag_val = tokens[tid].substr(3);
-                tags[tag_name] = tag_val;
-            }
-
-            if (tags.find("ID") == tags.end()) {
-                is_ok = false;
+                tags.emplace_back(HeaderTag{tag_name, tag_val});
+                if (tag_name == "ID") {
+                    field_id = tag_name;
+                    is_ok = true;
+                }
             }
 
             if (is_ok == false) {
@@ -83,7 +84,7 @@ void SequenceFileParserBam::ParseReadGroupAndProgramGroupFromHeader_(const std::
                 continue;
             }
 
-            header_groups_[field_name][tags["ID"]] = std::move(tags);
+            header_groups_[field_name][field_id] = std::move(tags);
         }
     }
 }

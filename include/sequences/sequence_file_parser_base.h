@@ -21,7 +21,13 @@ class SequenceFileParserBase;
 
 using SequenceFileParserBasePtr = std::unique_ptr<SequenceFileParserBase>;
 
-using HeaderGroupType = std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>>;
+class HeaderTag {
+   public:
+   std::string name;
+   std::string val;
+};
+
+using HeaderGroupType = std::unordered_map<std::string, std::unordered_map<std::string, std::vector<HeaderTag>>>;
 
 class SequenceFileParserBase {
 public:

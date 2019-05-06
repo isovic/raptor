@@ -27,7 +27,7 @@ void RaptorResultsWriter::WriteHeader(const mindex::HeaderGroupType header_group
             oss_ << "@" << it_field.first;
             for (const auto& it_ids: it_field.second) {
                 for (const auto& it_tags: it_ids.second) {
-                    oss_ << "\t" << it_tags.first << ":" << it_tags.second;
+                    oss_ << "\t" << it_tags.name << ":" << it_tags.val;
                 }
             }
             oss_ << "\n";
