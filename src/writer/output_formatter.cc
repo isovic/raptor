@@ -42,12 +42,12 @@ std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq, bool w
         << seq << "\t"
         << qual;
 
-    if (write_custom_tags) {
+    // if (write_custom_tags) {
         // Extra tags provided in the alignment.
         for (const auto& vals: qseq->tags()) {
-            ss << "\t" << vals.second.FormatAsSAM();
+            ss << "\t" << vals.FormatAsSAM();
         }
-    }
+    // }
 
     ss << "\n";
 
@@ -118,12 +118,13 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
         << "0" << "\t"
         << seq << "\t"
         << qual;
-    if (write_custom_tags) {
-        // Extra tags provided in the alignment.
-        for (const auto& vals: qseq->tags()) {
-            ss << "\t" << vals.second.FormatAsSAM();
-        }
 
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        ss << "\t" << vals.FormatAsSAM();
+    }
+
+    if (write_custom_tags) {
         // Specific tags to Raptor.
         ss << "\t"
             << "NM:i:" << edit_dist << "\t"
@@ -211,14 +212,14 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
             << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0)
             << "\t" << "cg:Z:" << cigar;
 
-        // Extra tags provided in the alignment.
-        for (const auto& vals: qseq->tags()) {
-            ss << "\t" << vals.second.FormatAsSAM();
-        }
-
         #ifdef RAPTOR_DEBUG_TIMINGS
             ss << "\t" << "tt:Z:" << timings;
         #endif
+    }
+
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        ss << "\t" << vals.FormatAsSAM();
     }
 
     ss << "\n";
