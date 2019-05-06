@@ -87,7 +87,7 @@ public:
     std::vector<mindex::seqqual_t>& qual() {
         return qual_;
     }
-    const std::unordered_map<std::string, raptor::SamTag>& tags() const {
+    const std::vector<raptor::SamTag>& tags() const {
         return tags_;
     }
 
@@ -110,11 +110,11 @@ public:
     void abs_id(int64_t _abs_id) {
         abs_id_ = _abs_id;
     }
-    void tags(const std::unordered_map<std::string, raptor::SamTag>& val) {
+    void tags(const std::vector<raptor::SamTag>& val) {
         tags_ = val;
     }
     void AddTag(const raptor::SamTag& val) {
-        tags_[val.name] = val;
+        tags_.emplace_back(val);
     }
 
     std::string GetSequenceAsString() const {
@@ -149,7 +149,8 @@ private:
     int64_t id_;
     int64_t abs_id_;
     size_t header_hash_;
-    std::unordered_map<std::string, raptor::SamTag> tags_;
+    // std::unordered_map<std::string, int32_t> tag_id_;
+    std::vector<raptor::SamTag> tags_;
 };
 
 }
