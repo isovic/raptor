@@ -1,9 +1,9 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install build
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild
 
 all: release
 
 clean:
-	rm -rf build
+	rm -rf ${BDIR}
 	# git clean -xdf .
 
 # Custom define flags:
@@ -11,11 +11,12 @@ clean:
 #	RAPTOR_TESTING_MODE
 #	RAPTOR_DEBUG_TIMINGS
 
-BDIR?=build-default
+PREFIX?=${CURDIR}/PREFIX
+BDIR?=build
 # Most rules will create BDIR only if it does not already exist.
 # ("|" means  "order-only" rule, useful for directory creation.)
 
-build: | ${BDIR}
+rebuild: | ${BDIR}
 	ninja -C ${BDIR} reconfigure
 	ninja -C ${BDIR}
 install: | ${BDIR}
@@ -25,7 +26,7 @@ install: | ${BDIR}
 # "meson --reconfigure" is not idempotent, but
 # "ninja reconfigure" works even the first time.
 
-MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0
+MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0 --prefix=${PREFIX}
 
 # This is the only rule that uses MESON_FLAGS.
 # If you want to recreate a directory, you can run "make configure", or simply "rm -rf build-dir".
@@ -34,9 +35,8 @@ configure:
 
 # These are rules to build specific directories.
 # For convenience, you can set "BDIR" to one of these in your shell.
-build-default:
-	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+build: # default expected by old ipa/
+	${MAKE} configure BDIR=$@
 build-release:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
@@ -58,7 +58,7 @@ build-debug-gcc6:
 
 # These rules ignore your current BDIR setting.
 release: | build-release
-	${MAKE} build BDIR=build
+	${MAKE} build BDIR=build-release
 testing: | build-testing
 	${MAKE} build BDIR=build-testing
 time: | build-time

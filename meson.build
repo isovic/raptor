@@ -164,6 +164,7 @@ if not meson.is_subproject()
   raptor_bin = executable(
     'raptor',
     ['src/mains/main_raptor.cc'],
+    install : true,
     dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
@@ -186,6 +187,7 @@ if not meson.is_subproject()
   raptor_bin = executable(
     'raptor-reshape',
     ['src/raptor_reshape/main_raptor_reshape.cc'],
+    install : true,
     dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
