@@ -12,27 +12,27 @@ clean:
 
 release:
 	@echo "[Invoking Meson]"
-	@(cd build && meson --reconfigure && ninja) || (mkdir -p build && cd build && meson --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3 && ninja)
+	(cd build && meson --reconfigure && ninja) || (mkdir -p build && cd build && meson --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3 && ninja)
 
 testing:
 	@echo "[Invoking Meson]"
-	@(cd build-testing && meson --reconfigure && ninja) || (mkdir -p build-testing && cd build-testing && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3 && ninja)
+	(cd build-testing && meson --reconfigure && ninja) || (mkdir -p build-testing && cd build-testing && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3 && ninja)
 
 time:
 	@echo "[Invoking Meson]"
-	@(cd build-time && meson --reconfigure && ninja) || (mkdir -p build-time && cd build-time && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+	(cd build-time && meson --reconfigure && ninja) || (mkdir -p build-time && cd build-time && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
 
 time2:
 	@echo "[Invoking Meson]"
-	@(cd build-time2 && meson --reconfigure && ninja) || (mkdir -p build-time2 && cd build-time2 && meson --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+	(cd build-time2 && meson --reconfigure && ninja) || (mkdir -p build-time2 && cd build-time2 && meson --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
 
 debug:
 	@echo "[Invoking Meson]"
-	@(cd build-debug && meson --reconfigure && ninja) || (mkdir -p build-debug && cd build-debug && (meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+	(cd build-debug && meson --reconfigure && ninja) || (mkdir -p build-debug && cd build-debug && (meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
 
 debug-gcc6:
 	@echo "[Invoking Meson]"
-	@(cd build-debug-gcc6 && meson --reconfigure && ninja) || (mkdir -p build-debug-gcc6 && cd build-debug-gcc6 && (env CC=gcc-6 CXX=g++-6 meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+	(cd build-debug-gcc6 && meson --reconfigure && ninja) || (mkdir -p build-debug-gcc6 && cd build-debug-gcc6 && (env CC=gcc-6 CXX=g++-6 meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
 
 build/raptor: release
 
