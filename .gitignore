@@ -1,5 +1,5 @@
 bin/
-build*
+/build-*
 examples/
 temp-src/
 test_data*

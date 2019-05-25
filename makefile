@@ -1,38 +1,74 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install build
 
 all: release
 
 clean:
 	rm -rf build
+	# git clean -xdf .
 
 # Custom define flags:
 #	EXPERIMENTAL_QUERY_MASK
 #	RAPTOR_TESTING_MODE
 #	RAPTOR_DEBUG_TIMINGS
 
-release:
-	@echo "[Invoking Meson]"
-	(cd build && meson --reconfigure && ninja) || (mkdir -p build && cd build && meson --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3 && ninja)
+BDIR?=build-default
+# Most rules will create BDIR only if it does not already exist.
+# ("|" means  "order-only" rule, useful for directory creation.)
 
-testing:
-	@echo "[Invoking Meson]"
-	(cd build-testing && meson --reconfigure && ninja) || (mkdir -p build-testing && cd build-testing && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3 && ninja)
+build: | ${BDIR}
+	ninja -C ${BDIR} reconfigure
+	ninja -C ${BDIR}
+install: | ${BDIR}
+	ninja -C ${BDIR} reconfigure
+	ninja -C ${BDIR} install
 
-time:
-	@echo "[Invoking Meson]"
-	(cd build-time && meson --reconfigure && ninja) || (mkdir -p build-time && cd build-time && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+# "meson --reconfigure" is not idempotent, but
+# "ninja reconfigure" works even the first time.
 
-time2:
-	@echo "[Invoking Meson]"
-	(cd build-time2 && meson --reconfigure && ninja) || (mkdir -p build-time2 && cd build-time2 && meson --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0
 
-debug:
-	@echo "[Invoking Meson]"
-	(cd build-debug && meson --reconfigure && ninja) || (mkdir -p build-debug && cd build-debug && (meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+# This is the only rule that uses MESON_FLAGS.
+# If you want to recreate a directory, you can run "make configure", or simply "rm -rf build-dir".
+configure:
+	rm -rf ${BDIR} && mkdir -p ${BDIR} && meson ${MESON_FLAGS} ${BDIR}
 
-debug-gcc6:
-	@echo "[Invoking Meson]"
-	(cd build-debug-gcc6 && meson --reconfigure && ninja) || (mkdir -p build-debug-gcc6 && cd build-debug-gcc6 && (env CC=gcc-6 CXX=g++-6 meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+# These are rules to build specific directories.
+# For convenience, you can set "BDIR" to one of these in your shell.
+build-default:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+build-release:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+build-testing:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
+build-time:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+build-time2:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+build-debug:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+build-debug-gcc6:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+
+# These rules ignore your current BDIR setting.
+release: | build-release
+	${MAKE} build BDIR=build
+testing: | build-testing
+	${MAKE} build BDIR=build-testing
+time: | build-time
+	${MAKE} build BDIR=build-time
+time2: | build-time2
+	${MAKE} build BDIR=build-time
+debug: | build-debug
+	${MAKE} build BDIR=build-debug
+debug-gcc6: | build-debug-gcc6
+	${MAKE} build BDIR=build-debug-gcc6
 
 build/raptor: release
 
