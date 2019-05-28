@@ -28,7 +28,8 @@ before_install:
 
     # Workaround for pip3. Without the Pyenv line, build fails because both versions 3.6 and 3.6.3 are available.
     - pyenv global system 3.6
-    - pip3 install meson==0.48
+    - pip3 install meson
+    - meson --version
 
     # Update the apt-get repos.
     - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
