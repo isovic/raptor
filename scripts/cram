@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -vx
 ###################################
 ### This script is a workaround
 ### to run Cram tests, without actually
@@ -16,6 +16,12 @@ export PROJECT_DIR
 export CRAM_DIR
 export BIN_DIR
 export LD_LIBRARY_PATH
+
+ls -l ${BIN_DIR}/../lib64
+ls -l ${BIN_DIR}/../lib
+
+ldd ${BIN_DIR}/raptor
+ldd -r ${BIN_DIR}/raptor
 
 # if we have cram already, use that
 if [[ -x "$(which cram)" ]]; then
