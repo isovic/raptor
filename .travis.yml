@@ -54,6 +54,7 @@ before_install:
     # Install packages for Clang.
     - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-4.0.1 lldb-4.0; fi
     - if [ "$CXX" == "clang++" ]; then export CXX="clang++-4.0"; fi
+    - export CXX
 
 install:
     - g++ --version
