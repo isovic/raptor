@@ -31,6 +31,7 @@ build: | ${BDIR}
 install: | ${BDIR}
 	ninja -C ${BDIR} reconfigure
 	ninja -C ${BDIR} install
+	#DESTDIR='' ninja -C ${BDIR} install
 
 # This is the only rule that uses MESON_FLAGS.
 # If you want to recreate a directory, you can run "make configure", or simply "rm -rf meson-dir".
