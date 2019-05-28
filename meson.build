@@ -165,6 +165,7 @@ if not meson.is_subproject()
     'raptor',
     ['src/mains/main_raptor.cc'],
     install : true,
+    build_by_default : true,
     dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
@@ -173,7 +174,7 @@ if not meson.is_subproject()
   #########################
   # The raptor-index exe. #
   #########################
-  # raptor_bin = executable(
+  # raptor_index_bin = executable(
   #   'raptor-index',
   #   ['src/mains/main_raptor_index.cc'],
   #   dependencies : [raptor_thread_dep, raptor_zlib_dep],
@@ -184,10 +185,11 @@ if not meson.is_subproject()
   #########################
   # The raptor-reshape exe. #
   #########################
-  raptor_bin = executable(
+  raptor_reshape_bin = executable(
     'raptor-reshape',
     ['src/raptor_reshape/main_raptor_reshape.cc'],
     install : true,
+    build_by_default : true,
     dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
@@ -196,7 +198,7 @@ if not meson.is_subproject()
   #########################
   # The raptor-fetch exe. #
   #########################
-  # raptor_bin = executable(
+  # raptor_fetch_bin = executable(
   #   'raptor-fetch',
   #   ['src/raptor_fetch/main_raptor_fetch.cc'],
   #   dependencies : [raptor_thread_dep, raptor_zlib_dep],

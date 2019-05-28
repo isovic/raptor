@@ -36,7 +36,7 @@ configure:
 # These are rules to build specific directories.
 # For convenience, you can set "BDIR" to one of these in your shell.
 build: # default expected by old ipa/
-	${MAKE} configure BDIR=build-release
+	${MAKE} configure BDIR=$@
 build-release:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
