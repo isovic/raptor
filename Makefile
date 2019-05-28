@@ -14,6 +14,10 @@ clean:
 # Default install and build directories:
 PREFIX?=${CURDIR}/install
 
+# In case we have a problem with BIN_DIR in cram,
+#PATH:=${PREFIX}/bin:${PATH}
+#export PATH
+
 MESON_FLAGS?="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
 BDIR?=meson-release
 
@@ -68,8 +72,6 @@ debug: | meson-debug
 debug-gcc6: | meson-debug-gcc6
 	${MAKE} install BDIR=meson-debug-gcc6
 
-build-testing/raptor: testing
-
 dist: release
 	cd meson-release && ninja-dist
 
@@ -85,22 +87,24 @@ data: raptor-test-data/README.md
 raptor-test-data/README.md:
 	git clone https://github.com/isovic/raptor-test-data.git
 
-cram: build/raptor third-party/cram/scripts/cram cram-local #cram-external
+cram: installed third-party/cram/scripts/cram cram-local #cram-external
 
-unit: build/raptor
-	build/tests_raptor
+unit: release
+	meson-release/tests_raptor
 
-unit-testing: build-testing/raptor
-	build-testing/tests_raptor
+unit-testing: testing
+	meson-testing/tests_raptor
 
-cram-local: build/raptor
+cram-local: installed
 	scripts/cram tests/cram/local/*.t tests/cram/local-graph/*.t
 
-cram-external: build/raptor raptor-test-data/README.md
+cram-external: installed raptor-test-data/README.md
 	scripts/cram tests/cram/external/*.t
 
-cram-integration: build/raptor tools/miniasm/miniasm raptor-test-data/README.md
+cram-integration: installed tools/miniasm/miniasm raptor-test-data/README.md
 	scripts/cram tests/cram/integration/*.t
+
+installed: install/bin/raptor  # see BIN_DIR in scripts/cram
 
 tests: unit cram
 

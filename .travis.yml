@@ -59,10 +59,10 @@ before_install:
 install:
     - g++ --version
     - $CXX --version
+    - make unit
     - make release
 
 script:
-    - build/tests_raptor
     - make cram
 
 notifications:
