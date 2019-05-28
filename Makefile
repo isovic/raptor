@@ -1,40 +1,80 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild build
 
-all: release
+all: default  # for consumers expecting to see a build/ directory, but should be build-release
 
 clean:
-	rm -rf build
+	rm -rf ${BDIR}
+	# git clean -xdf .
 
 # Custom define flags:
 #	EXPERIMENTAL_QUERY_MASK
 #	RAPTOR_TESTING_MODE
 #	RAPTOR_DEBUG_TIMINGS
 
-release:
-	@echo "[Invoking Meson]"
-	@(cd build && meson --reconfigure && ninja) || (mkdir -p build && cd build && meson --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3 && ninja)
+PREFIX?=${CURDIR}/PREFIX
+BDIR?=build
+# Most rules will create BDIR only if it does not already exist.
+# ("|" means  "order-only" rule, useful for directory creation.)
 
-testing:
-	@echo "[Invoking Meson]"
-	@(cd build-testing && meson --reconfigure && ninja) || (mkdir -p build-testing && cd build-testing && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3 && ninja)
+rebuild: | ${BDIR}
+	ninja -C ${BDIR} reconfigure
+	ninja -C ${BDIR}
+install: | ${BDIR}
+	ninja -C ${BDIR} reconfigure
+	ninja -C ${BDIR} install
 
-time:
-	@echo "[Invoking Meson]"
-	@(cd build-time && meson --reconfigure && ninja) || (mkdir -p build-time && cd build-time && meson --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+# "meson --reconfigure" is not idempotent, but
+# "ninja reconfigure" works even the first time.
 
-time2:
-	@echo "[Invoking Meson]"
-	@(cd build-time2 && meson --reconfigure && ninja) || (mkdir -p build-time2 && cd build-time2 && meson --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3 && ninja)
+MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0 --prefix=${PREFIX}
 
-debug:
-	@echo "[Invoking Meson]"
-	@(cd build-debug && meson --reconfigure && ninja) || (mkdir -p build-debug && cd build-debug && (meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+# This is the only rule that uses MESON_FLAGS.
+# If you want to recreate a directory, you can run "make configure", or simply "rm -rf build-dir".
+configure:
+	rm -rf ${BDIR} && mkdir -p ${BDIR} && meson ${MESON_FLAGS} ${BDIR}
 
-debug-gcc6:
-	@echo "[Invoking Meson]"
-	@(cd build-debug-gcc6 && meson --reconfigure && ninja) || (mkdir -p build-debug-gcc6 && cd build-debug-gcc6 && (env CC=gcc-6 CXX=g++-6 meson --buildtype=debug -Db_sanitize=address -Dc_args=-O3) && ninja)
+# These are rules to build specific directories.
+# For convenience, you can set "BDIR" to one of these in your shell.
+build: # default expected by old ipa/
+	${MAKE} configure BDIR=$@
+	@echo "This rule creates the "build/" directory, for backward-compatibility."
+	@echo "To build actually, run 'make rebuild', which also reconfigures."
+build-release:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+build-testing:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
+build-time:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+build-time2:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+build-debug:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+build-debug-gcc6:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
 
-build/raptor: release
+# These rules ignore your current BDIR setting.
+default: | build
+	${MAKE} install
+release: | build-release
+	${MAKE} install BDIR=build-release
+testing: | build-testing
+	${MAKE} install BDIR=build-testing
+time: | build-time
+	${MAKE} install BDIR=build-time
+time2: | build-time2
+	${MAKE} install BDIR=build-time
+debug: | build-debug
+	${MAKE} install BDIR=build-debug
+debug-gcc6: | build-debug-gcc6
+	${MAKE} install BDIR=build-debug-gcc6
+
+build/raptor: rebuild
 
 build-testing/raptor: testing
 
@@ -44,13 +84,16 @@ dist: release
 ###########################################
 ### Tests.                              ###
 ###########################################
+third-party/cram/scripts/cram:
+	git submodule update --init third-party/cram
+
 data: raptor-test-data/README.md
 	cd raptor-test-data && git pull
 
 raptor-test-data/README.md:
 	git clone https://github.com/isovic/raptor-test-data.git
 
-cram: build/raptor third-party/cram/scripts/cram cram-local cram-external
+cram: build/raptor third-party/cram/scripts/cram cram-local #cram-external
 
 unit: build/raptor
 	build/tests_raptor

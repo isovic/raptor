@@ -28,7 +28,8 @@ before_install:
 
     # Workaround for pip3. Without the Pyenv line, build fails because both versions 3.6 and 3.6.3 are available.
     - pyenv global system 3.6
-    - pip3 install meson==0.48
+    - pip3 install meson
+    - meson --version
 
     # Update the apt-get repos.
     - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
@@ -41,20 +42,28 @@ before_install:
 # libboost1.68
 # libboost1.67 libboost-all-dev
     - wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
-    - tar -xvf boost_1_67_0.tar.gz
+    - tar -xf boost_1_67_0.tar.gz
     - mkdir -p boost_1_67_0/include && mv boost_1_67_0/boost boost_1_67_0/include/
     - export BOOST_ROOT=$(pwd)/boost_1_67_0/
 
     # Install packages for GCC.
-    - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-7; fi
-    - if [ "$CXX" == "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
+    - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-8; fi
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+    # That line does not happen. I guess apt-get updated $CXX.
 
     # Install packages for Clang.
     - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-4.0.1 lldb-4.0; fi
     - if [ "$CXX" == "clang++" ]; then export CXX="clang++-4.0"; fi
+    - export CXX
 
 install:
-    - make
+    - g++ --version
+    - $CXX --version
+    - make build
+    - git -C subprojects/pbcopper rev-parse HEAD
+    - meson subprojects update
+    - git -C subprojects/pbcopper rev-parse HEAD
+    - make rebuild
 
 script:
     - build/tests_raptor

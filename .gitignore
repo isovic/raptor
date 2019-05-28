@@ -1,5 +1,5 @@
 bin/
-build*
+/build*/
 examples/
 temp-src/
 test_data*
@@ -71,3 +71,4 @@ out/
 subprojects/
 !subprojects/*.wrap
 
+/PREFIX/
