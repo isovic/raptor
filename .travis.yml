@@ -49,12 +49,15 @@ before_install:
     # Install packages for GCC.
     - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-8; fi
     - if [ "$CXX" == "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+    # That line does not happen. I guess apt-get updated $CXX.
 
     # Install packages for Clang.
     - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-4.0.1 lldb-4.0; fi
     - if [ "$CXX" == "clang++" ]; then export CXX="clang++-4.0"; fi
 
 install:
+    - g++ --version
+    - $CXX --version
     - make build
     - git -C subprojects/pbcopper rev-parse HEAD
     - meson subprojects update
