@@ -41,7 +41,7 @@ before_install:
 # libboost1.68
 # libboost1.67 libboost-all-dev
     - wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
-    - tar -xvf boost_1_67_0.tar.gz
+    - tar -xf boost_1_67_0.tar.gz
     - mkdir -p boost_1_67_0/include && mv boost_1_67_0/boost boost_1_67_0/include/
     - export BOOST_ROOT=$(pwd)/boost_1_67_0/
 
