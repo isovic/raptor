@@ -15,8 +15,9 @@ clean:
 PREFIX?=${CURDIR}/install
 
 # In case we have a problem with BIN_DIR in cram,
-#PATH:=${PREFIX}/bin:${PATH}
-#export PATH
+PATH:=${PREFIX}/bin:${PATH}
+LD_LIBRARY_PATH:=${PREFIX}/lib64:${PREFIX}/lib:${LD_LIBRARY_PATH}
+export PATH LD_LIBRARY_PATH
 
 MESON_FLAGS?="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
 BDIR?=meson-release
@@ -96,13 +97,13 @@ unit-testing: testing
 	meson-testing/tests_raptor
 
 cram-local: installed
-	scripts/cram tests/cram/local/*.t tests/cram/local-graph/*.t
+	scripts/cram -E tests/cram/local/*.t tests/cram/local-graph/*.t
 
 cram-external: installed raptor-test-data/README.md
-	scripts/cram tests/cram/external/*.t
+	scripts/cram -E tests/cram/external/*.t
 
 cram-integration: installed tools/miniasm/miniasm raptor-test-data/README.md
-	scripts/cram tests/cram/integration/*.t
+	scripts/cram -E tests/cram/integration/*.t
 
 installed: install/bin/raptor  # see BIN_DIR in scripts/cram
 
