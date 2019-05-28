@@ -74,7 +74,7 @@ debug: | build-debug
 debug-gcc6: | build-debug-gcc6
 	${MAKE} install BDIR=build-debug-gcc6
 
-build/raptor: release
+build/raptor: rebuild
 
 build-testing/raptor: testing
 
@@ -84,6 +84,9 @@ dist: release
 ###########################################
 ### Tests.                              ###
 ###########################################
+third-party/cram/scripts/cram:
+	git submodule update --init third-party/cram
+
 data: raptor-test-data/README.md
 	cd raptor-test-data && git pull
 
