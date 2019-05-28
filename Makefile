@@ -1,7 +1,6 @@
 .PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild
 
-default: | build-release
-	${MAKE} rebuild
+default: release
 
 clean:
 	rm -rf ${BDIR}
@@ -62,17 +61,17 @@ build-debug-gcc6:
 # These rules ignore your current BDIR setting, but they rely on $PREFIX via $MESON_FLAGS.
 # They all reconfigure, rebuild, and install.
 release: | build-release
-	${MAKE} rebuild BDIR=build-release
+	${MAKE} install BDIR=build-release
 testing: | build-testing
-	${MAKE} rebuild BDIR=build-testing
+	${MAKE} install BDIR=build-testing
 time: | build-time
-	${MAKE} rebuild BDIR=build-time
+	${MAKE} install BDIR=build-time
 time2: | build-time2
-	${MAKE} rebuild BDIR=build-time
+	${MAKE} install BDIR=build-time
 debug: | build-debug
-	${MAKE} rebuild BDIR=build-debug
+	${MAKE} install BDIR=build-debug
 debug-gcc6: | build-debug-gcc6
-	${MAKE} rebuild BDIR=build-debug-gcc6
+	${MAKE} install BDIR=build-debug-gcc6
 
 build-testing/raptor: testing
 
