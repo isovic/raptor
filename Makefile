@@ -90,7 +90,7 @@ data: raptor-test-data/README.md
 raptor-test-data/README.md:
 	git clone https://github.com/isovic/raptor-test-data.git
 
-cram: build/raptor third-party/cram/scripts/cram cram-local cram-external
+cram: build/raptor third-party/cram/scripts/cram cram-local #cram-external
 
 unit: build/raptor
 	build/tests_raptor
