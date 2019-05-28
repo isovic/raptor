@@ -1,6 +1,6 @@
 .PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild build
 
-all: build  # for consumers expecting to see a build/ directory, but should be build-release
+all: default  # for consumers expecting to see a build/ directory, but should be build-release
 
 clean:
 	rm -rf ${BDIR}
@@ -37,6 +37,8 @@ configure:
 # For convenience, you can set "BDIR" to one of these in your shell.
 build: # default expected by old ipa/
 	${MAKE} configure BDIR=$@
+	@echo "This rule creates the "build/" directory, for backward-compatibility."
+	@echo "To build actually, run 'make rebuild', which also reconfigures."
 build-release:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
@@ -57,18 +59,20 @@ build-debug-gcc6:
 		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
 
 # These rules ignore your current BDIR setting.
+default: | build
+	${MAKE} rebuild
 release: | build-release
-	${MAKE} build BDIR=build-release
+	${MAKE} rebuild BDIR=build-release
 testing: | build-testing
-	${MAKE} build BDIR=build-testing
+	${MAKE} rebuild BDIR=build-testing
 time: | build-time
-	${MAKE} build BDIR=build-time
+	${MAKE} rebuild BDIR=build-time
 time2: | build-time2
-	${MAKE} build BDIR=build-time
+	${MAKE} rebuild BDIR=build-time
 debug: | build-debug
-	${MAKE} build BDIR=build-debug
+	${MAKE} rebuild BDIR=build-debug
 debug-gcc6: | build-debug-gcc6
-	${MAKE} build BDIR=build-debug-gcc6
+	${MAKE} rebuild BDIR=build-debug-gcc6
 
 build/raptor: release
 
