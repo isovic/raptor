@@ -1,5 +1,4 @@
 [wrap-git]
 directory=pbcopper
 url=https://github.com/PacificBiosciences/pbcopper.git
-revision=develop
-
+revision=791f01a98b438daef69e29c84bbf7476faca94cd
