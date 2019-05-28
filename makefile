@@ -1,6 +1,6 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild build
 
-all: release
+all: build  # for consumers expecting to see a build/ directory, but should be build-release
 
 clean:
 	rm -rf ${BDIR}
@@ -36,7 +36,7 @@ configure:
 # These are rules to build specific directories.
 # For convenience, you can set "BDIR" to one of these in your shell.
 build: # default expected by old ipa/
-	${MAKE} configure BDIR=$@
+	${MAKE} configure BDIR=build-release
 build-release:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
