@@ -1,6 +1,7 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild build
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild
 
-all: default  # for consumers expecting to see a build/ directory, but should be build-release
+default: | build-release
+	${MAKE} rebuild
 
 clean:
 	rm -rf ${BDIR}
@@ -26,7 +27,7 @@ install: | ${BDIR}
 # "meson --reconfigure" is not idempotent, but
 # "ninja reconfigure" works even the first time.
 
-MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0 --prefix=${PREFIX}
+MESON_FLAGS?= --prefix=${PREFIX} --buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0
 
 # This is the only rule that uses MESON_FLAGS.
 # If you want to recreate a directory, you can run "make configure", or simply "rm -rf build-dir".
@@ -35,51 +36,46 @@ configure:
 
 # These are rules to build specific directories.
 # For convenience, you can set "BDIR" to one of these in your shell.
-build: # default expected by old ipa/
+build:
 	${MAKE} configure BDIR=$@
-	@echo "This rule creates the "build/" directory, for backward-compatibility."
-	@echo "To build actually, run 'make rebuild', which also reconfigures."
 build-release:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
 build-testing:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
 build-time:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
 build-time2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
 build-debug:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
 build-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
 
-# These rules ignore your current BDIR setting.
-default: | build
-	${MAKE} install
+# These rules ignore your current BDIR setting, but they rely on $PREFIX via $MESON_FLAGS.
+# They all reconfigure, rebuild, and install.
 release: | build-release
-	${MAKE} install BDIR=build-release
+	${MAKE} rebuild BDIR=build-release
 testing: | build-testing
-	${MAKE} install BDIR=build-testing
+	${MAKE} rebuild BDIR=build-testing
 time: | build-time
-	${MAKE} install BDIR=build-time
+	${MAKE} rebuild BDIR=build-time
 time2: | build-time2
-	${MAKE} install BDIR=build-time
+	${MAKE} rebuild BDIR=build-time
 debug: | build-debug
-	${MAKE} install BDIR=build-debug
+	${MAKE} rebuild BDIR=build-debug
 debug-gcc6: | build-debug-gcc6
-	${MAKE} install BDIR=build-debug-gcc6
-
-build/raptor: rebuild
+	${MAKE} rebuild BDIR=build-debug-gcc6
 
 build-testing/raptor: testing
 
 dist: release
-	cd build && ninja-dist
+	cd build-release && ninja-dist
 
 ###########################################
 ### Tests.                              ###
