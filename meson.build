@@ -167,7 +167,7 @@ if not meson.is_subproject()
     ['src/mains/main_raptor.cc'],
     install : true,
     build_by_default : true,
-    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -178,7 +178,7 @@ if not meson.is_subproject()
   # raptor_index_bin = executable(
   #   'raptor-index',
   #   ['src/mains/main_raptor_index.cc'],
-  #   dependencies : [raptor_thread_dep, raptor_zlib_dep],
+  #   dependencies : [raptor_thread_dep, raptor_zlib_dep, boost_dep],
   #   include_directories : codebase_include_directories + raptor_include_directories,
   #   link_with : [raptor_lib],
   #   cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -191,7 +191,7 @@ if not meson.is_subproject()
     ['src/raptor_reshape/main_raptor_reshape.cc'],
     install : true,
     build_by_default : true,
-    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -202,7 +202,7 @@ if not meson.is_subproject()
   # raptor_fetch_bin = executable(
   #   'raptor-fetch',
   #   ['src/raptor_fetch/main_raptor_fetch.cc'],
-  #   dependencies : [raptor_thread_dep, raptor_zlib_dep],
+  #   dependencies : [raptor_thread_dep, raptor_zlib_dep, boost_dep],
   #   include_directories : codebase_include_directories + raptor_include_directories,
   #   link_with : [raptor_lib],
   #   cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -215,7 +215,7 @@ if not meson.is_subproject()
       tests_bin = executable(
           'tests_raptor',
           tests_cpp_sources,
-          dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, pbbam_dep],
+          dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, pbbam_dep, boost_dep],
           include_directories : codebase_include_directories + raptor_include_directories + tests_include_directories,
           link_with : [raptor_lib, codebase_lib],
           cpp_args : [raptor_warning_flags, raptor_cpp_flags])
