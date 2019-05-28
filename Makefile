@@ -12,8 +12,10 @@ clean:
 #	RAPTOR_TESTING_MODE
 #	RAPTOR_DEBUG_TIMINGS
 
-PREFIX?=${CURDIR}/PREFIX
+# Default install and build directories:
+PREFIX?=${CURDIR}/install
 BDIR?=build
+
 # Most rules will create BDIR only if it does not already exist.
 # ("|" means  "order-only" rule, useful for directory creation.)
 
