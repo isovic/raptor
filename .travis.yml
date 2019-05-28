@@ -46,8 +46,8 @@ before_install:
     - export BOOST_ROOT=$(pwd)/boost_1_67_0/
 
     # Install packages for GCC.
-    - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-7; fi
-    - if [ "$CXX" == "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
+    - if [ "$CXX" == "g++" ]; then sudo apt-get install g++-8; fi
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
 
     # Install packages for Clang.
     - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-4.0.1 lldb-4.0; fi
