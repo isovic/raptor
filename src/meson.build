@@ -111,6 +111,6 @@ raptor_lib = library(
   version : meson.project_version(),
   install : raptor_lib_install,
   link_with : codebase_lib,
-  dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
+  dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
   include_directories : raptor_include_directories + codebase_include_directories,
   cpp_args : [raptor_extra_flags, raptor_warning_flags, raptor_cpp_flags])

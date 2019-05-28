@@ -153,10 +153,11 @@ all_sources = raptor_cpp_sources + codebase_cpp_sources
 # The raptor exe.    #
 ######################
 
+# raptor_dep is not used anywhere?
 raptor_dep = declare_dependency(
     include_directories: codebase_include_directories + raptor_include_directories,
     link_with: [raptor_lib, codebase_lib],
-    dependencies: [raptor_thread_dep, raptor_zlib_dep, pbbam_dep],
+    dependencies: [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
     version: meson.project_version(),
     compile_args: raptor_warning_flags + raptor_cpp_flags)
 
