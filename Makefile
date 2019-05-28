@@ -60,19 +60,19 @@ build-debug-gcc6:
 
 # These rules ignore your current BDIR setting.
 default: | build
-	${MAKE} rebuild
+	${MAKE} install
 release: | build-release
-	${MAKE} rebuild BDIR=build-release
+	${MAKE} install BDIR=build-release
 testing: | build-testing
-	${MAKE} rebuild BDIR=build-testing
+	${MAKE} install BDIR=build-testing
 time: | build-time
-	${MAKE} rebuild BDIR=build-time
+	${MAKE} install BDIR=build-time
 time2: | build-time2
-	${MAKE} rebuild BDIR=build-time
+	${MAKE} install BDIR=build-time
 debug: | build-debug
-	${MAKE} rebuild BDIR=build-debug
+	${MAKE} install BDIR=build-debug
 debug-gcc6: | build-debug-gcc6
-	${MAKE} rebuild BDIR=build-debug-gcc6
+	${MAKE} install BDIR=build-debug-gcc6
 
 build/raptor: release
 
