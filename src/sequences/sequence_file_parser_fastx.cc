@@ -22,7 +22,7 @@ mindex::SequenceFileParserBasePtr createSequenceFileParserFastx(const std::strin
 }
 
 SequenceFileParserFastx::SequenceFileParserFastx()
-    : path_(), fp_kseq_(NULL), fp_gzip_(NULL) {
+    : path_(), fp_kseq_(NULL), fp_gzip_(NULL), header_groups_() {
 }
 
 SequenceFileParserFastx::~SequenceFileParserFastx() {

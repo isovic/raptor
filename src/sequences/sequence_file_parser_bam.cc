@@ -33,7 +33,7 @@ mindex::SequenceFileParserBasePtr createSequenceFileParserBam(const std::string&
 }
 
 SequenceFileParserBam::SequenceFileParserBam()
-    : path_(), bam_reader_(nullptr), bam_file_(nullptr), dataset_(nullptr), sam_header_() {
+    : path_(), bam_reader_(nullptr), bam_file_(nullptr), dataset_(nullptr), sam_header_(), header_groups_() {
 }
 
 SequenceFileParserBam::~SequenceFileParserBam() {

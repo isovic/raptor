@@ -23,7 +23,7 @@ mindex::SequenceFileParserBasePtr createSequenceFileParserGfa1(const std::string
 }
 
 SequenceFileParserGfa1::SequenceFileParserGfa1()
-    : path_(), fp_gzip_(NULL) {
+    : path_(), header_(), fp_gzip_(NULL), header_groups_() {
 }
 
 SequenceFileParserGfa1::~SequenceFileParserGfa1() {

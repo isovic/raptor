@@ -23,7 +23,7 @@ mindex::SequenceFileParserBasePtr createSequenceFileParserSam(const std::string&
 }
 
 SequenceFileParserSam::SequenceFileParserSam()
-    : path_(), fp_gzip_(NULL) {
+    : path_(), header_(), fp_gzip_(NULL), header_groups_() {
 }
 
 SequenceFileParserSam::~SequenceFileParserSam() {
