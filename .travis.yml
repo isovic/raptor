@@ -33,14 +33,10 @@ before_install:
 
     # Update the apt-get repos.
     - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-#    - if [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
     - if [ "$CXX" == "clang++" ]; then sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main"; fi
-#    - sudo add-apt-repository -y ppa:mhier/libboost-latest
     - sudo apt-get -qq update
-#    - sudo apt-get install ninja-build libboost-all-dev
     - sudo apt-get install ninja-build
-# libboost1.68
-# libboost1.67 libboost-all-dev
+
     - wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
     - tar -xf boost_1_67_0.tar.gz
     - mkdir -p boost_1_67_0/include && mv boost_1_67_0/boost boost_1_67_0/include/
@@ -60,7 +56,7 @@ install:
     - g++ --version
     - $CXX --version
     - make unit
-    - make release
+    - make release-pb
 
 script:
     - make cram
