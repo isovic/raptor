@@ -67,9 +67,14 @@ if opt_testing_mode
   raptor_cpp_flags += ['-DRAPTOR_TESTING_MODE']
 endif
 
-opt_testing_mode = get_option('RAPTOR_DEBUG_TIMINGS')
-if opt_testing_mode
+opt_timing_mode = get_option('RAPTOR_DEBUG_TIMINGS')
+if opt_timing_mode
   raptor_cpp_flags += ['-DRAPTOR_DEBUG_TIMINGS']
+endif
+
+opt_compile_with_pbbam = get_option('WITH_PBBAM')
+if opt_compile_with_pbbam
+  raptor_cpp_flags += ['-DRAPTOR_COMPILED_WITH_PBBAM']
 endif
 
 ################
@@ -82,14 +87,16 @@ raptor_thread_dep = dependency('threads', required : true)
 # Zlib.
 raptor_zlib_dep = dependency('zlib', required : true)
 
-# Boost. Required for Pbbam.
-boost_dep = dependency('boost', required : true)
+if opt_compile_with_pbbam
+    # Boost. Required for Pbbam.
+    boost_dep = dependency('boost', required : true)
 
-# Pbbam.
-pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
-
-# Pbcopper.
-pbcopper_dep = dependency('pbcopper', fallback : ['pbcopper', 'pbcopper_dep'])
+    # Pbbam.
+    pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
+else
+    boost_dep = []
+    pbbam_dep = []
+endif
 
 # Google test.
 gtest_dep = dependency('gtest', main : true, required : false)
