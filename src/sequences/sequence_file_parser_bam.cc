@@ -5,6 +5,8 @@
  *      Author: Ivan Sovic
  */
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <sequences/sequence_file_parser_bam.h>
 #include <utility/stringutil.h>
 #include <utility/files.hpp>
@@ -154,3 +156,5 @@ bool SequenceFileParserBam::FileSeek(int64_t abs_pos) {
 }
 
 }
+
+#endif

@@ -32,12 +32,15 @@ mindex::SequenceFileParserBasePtr createSequenceFileParser(const std::string& in
         ret = mindex::createSequenceFileParserFastx(in_path);
     } else if (in_fmt == mindex::SequenceFormat::SAM) {
         ret = mindex::createSequenceFileParserSam(in_path);
-    } else if (in_fmt == mindex::SequenceFormat::BAM) {
-        ret = mindex::createSequenceFileParserBam(in_path);
     } else if (in_fmt == mindex::SequenceFormat::GFA1) {
         ret = mindex::createSequenceFileParserGfa1(in_path);
     } else if (in_fmt == mindex::SequenceFormat::GFA2) {
         ret = mindex::createSequenceFileParserGfa2(in_path);
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+        // If PBBAM wasn't used, then this will fall through to the else.
+    } else if (in_fmt == mindex::SequenceFormat::BAM) {
+        ret = mindex::createSequenceFileParserBam(in_path);
+#endif
     } else {
         ret = nullptr;
     }

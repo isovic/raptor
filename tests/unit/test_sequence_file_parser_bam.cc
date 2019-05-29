@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <string>
 #include <vector>
 
@@ -126,6 +128,8 @@ TEST(SequenceFileParserBam, FileSeek1) {
         ASSERT_EQ(seq->GetQualityAsString(), seqs[seq_id]->GetQualityAsString());
     }
 }
+
+#endif
 
 //    int64_t GetFileOffset() const;
 //    bool FileSeek(int64_t pos);

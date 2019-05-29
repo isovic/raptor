@@ -8,6 +8,8 @@
 #ifndef SRC_INDEX_SEQUENCE_FILE_PARSER_BAM_H_
 #define SRC_INDEX_SEQUENCE_FILE_PARSER_BAM_H_
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,5 +65,7 @@ private:
 };
 
 }
+
+#endif
 
 #endif
