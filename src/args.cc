@@ -28,7 +28,7 @@ void VerboseShortHelpAndExit(int argc, char **argv) {
     fprintf(stderr, "  ./raptor -r escherichia_coli.fa -d reads.fastq --align -o out.paf # Align.\n");
     fprintf(stderr, "  ./raptor -g graph.gfa2 -r ref.fa -d reads.fasta -o out.paf        # Graph mapping.\n");
     fprintf(stderr, "  ./raptor-reshape -i reads.fasta --block-size 400 -o reads         # Build a RaptorDB.\n");
-    fprintf(stderr, "  ./raptor -x ovl-raw -r reads.rdb -d reads.rdb -o overlaps.paf     # Map/overlap to the RDB.\n");
+    fprintf(stderr, "  ./raptor -x overlap -r reads.rdb -d reads.rdb -o overlaps.paf     # Map/overlap to the RDB.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "%s\n", LICENCE_INFORMATION.c_str());
     fprintf(stderr, "Version: %d.%d.%d-%s\n", RAPTOR_VERSION_MAJOR, RAPTOR_VERSION_MINOR,
@@ -87,6 +87,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n gfa   - Graphical Fragment Assembly format (any)."
                           "\n gfa1  - GFA-1 format.\n gfa2  - GFA-2 format."
                           "\n sam   - Sequence Alignment/Mapping format."
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+                          "\n bam   - Binary Sequence Alignment/Mapping format."
+#endif
                           "\n rdb   - RaptorDB format."
                           "\n ",
                           0, "Input/Output options");
@@ -99,6 +102,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n gfa1  - GFA-1 format."
                           "\n gfa2  - GFA-2 format"
                           "\n sam   - Sequence Alignment/Mapping format."
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+                          "\n bam   - Binary Sequence Alignment/Mapping format."
+#endif
                           "\n rdb   - RaptorDB format."
                           "\n ",
                           0, "Input/Output options");
@@ -113,7 +119,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n gfa2 - GFA2 format."
                           "\n mhap - MHAP format useful for overlaps."
                           "\n m4   - BLASR M4 format."
-                          "\n cage-ovl - Cage overlap format."
                           "\n ",
                           0, "Input/Output options");
     argparser.AddArgument(&parameters->strict_format, VALUE_TYPE_BOOL, "", "strict-fmt", "0",
@@ -975,6 +980,9 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
                           "\n gfa   - Graphical Fragment Assembly format.\n gfa1  - GFA-1 format."
                           "\n gfa2  - GFA-2 format"
                           "\n sam   - Sequence Alignment/Mapping format."
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+                          "\n bam   - Binary Sequence Alignment/Mapping format."
+#endif
                           "\n fofn  - File Of File Names. Format is determined automatically.",
                           0, "Input/Output options");
     argparser.AddArgument(&out_fmt, VALUE_TYPE_STRING, "", "out-fmt", "fasta",
