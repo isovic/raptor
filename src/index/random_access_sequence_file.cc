@@ -78,6 +78,14 @@ bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
 
     parsers_ = std::vector<mindex::SequenceFileParserBasePtr>(db_files_.size());
 
+    // Sanity check that all formats are known.
+    for (const auto& db_file: db_files_) {
+        if (db_file.format == mindex::SequenceFormat::Unknown) {
+            ERROR_REPORT(ERR_WRONG_FILE_TYPE, "Unknown format '%s' for file '%s' in RaptorDB: '%s'.",
+                                db_file.format_str.c_str(), db_file.path.c_str(), in_path.c_str());
+        }
+    }
+
     // std::cerr << "db_version_ = " << db_version_ << "\n";
     // std::cerr << "db_files_.size() = " << db_files_.size() << "\n";
     // std::cerr << "db_seqs_.size() = " << db_seqs_.size() << "\n";
@@ -116,6 +124,10 @@ mindex::SequencePtr RandomAccessSequenceFile::FetchSequence_(int64_t db_seq_id) 
 
     if (parsers_[db_file_id] == nullptr) {
         parsers_[db_file_id] = std::move(mindex::createSequenceFileParser(db_file.path, db_file.format));
+        if (parsers_[db_file_id] == nullptr) {
+            // If this is still null, then something is wrong.
+            ERROR_REPORT(ERR_FILE_NOT_FOUND, "Problem opening file '%s' from RaptorDB.", db_file.path.c_str());
+        }
         fid_stream_priority_.push_back(db_file_id);
     }
 
