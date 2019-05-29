@@ -49,7 +49,6 @@ private:
 
    void ParseHeader_();
    void ParseReadGroupAndProgramGroupFromHeader_(const std::string& header);
-   std::string EncodeSamTags_(const PacBio::BAM::TagCollection& tags) const;
 
    std::string path_;
    std::unique_ptr<PacBio::BAM::BamReader> bam_reader_;
