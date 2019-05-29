@@ -104,16 +104,16 @@ SequencePtr SequenceFileParserBam::YieldSequence() {
     int64_t id = -1;
     int64_t abs_id = -1;
 
-    PacBio::BAM::BamRecord record;
-    bool rv_get = bam_reader_->GetNext(record);
+    std::unique_ptr<PacBio::BAM::BamRecord> record = std::make_unique<PacBio::BAM::BamRecord>();
+    bool rv_get = bam_reader_->GetNext(*record);
 
     if (rv_get == false) {
         return nullptr;
     }
 
     // The "PacBio::BAM::Orientation::NATIVE" will always return the FWD strand of the sequence.
-    std::string seq_str = record.Sequence(PacBio::BAM::Orientation::NATIVE);
-    PacBio::BAM::QualityValues qual_data = record.Qualities(PacBio::BAM::Orientation::NATIVE);
+    std::string seq_str = record->Sequence(PacBio::BAM::Orientation::NATIVE);
+    PacBio::BAM::QualityValues qual_data = record->Qualities(PacBio::BAM::Orientation::NATIVE);
     std::string qual_str = qual_data.Fastq();
 
     seq = mindex::createSequence();
@@ -123,9 +123,10 @@ SequencePtr SequenceFileParserBam::YieldSequence() {
         seq->qual().insert(seq->qual().end(), (int8_t *) &qual_str[0], (int8_t *) (&qual_str[0] + qual_str.size()));
     }
 
-    seq->header(record.FullName());
+    seq->header(record->FullName());
     seq->id(id);
     seq->abs_id(abs_id);
+    seq->apriori_bam(std::move(record));
 
     return seq;
 }
