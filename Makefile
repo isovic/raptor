@@ -1,6 +1,6 @@
-.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install rebuild build
+.PHONY: all clean testing time time2 debug debug-gcc6 data cram unit cram-local cram-external cram-integration tests tools dist configure install build
 
-all: default  # for consumers expecting to see a build/ directory, but should be build-release
+default: release
 
 clean:
 	rm -rf ${BDIR}
@@ -11,75 +11,71 @@ clean:
 #	RAPTOR_TESTING_MODE
 #	RAPTOR_DEBUG_TIMINGS
 
-PREFIX?=${CURDIR}/PREFIX
-BDIR?=build
+# Default install and build directories:
+PREFIX?=${CURDIR}/install
+
+# In case we have a problem with BIN_DIR in cram,
+PATH:=${PREFIX}/bin:${PATH}
+LD_LIBRARY_PATH:=${PREFIX}/lib64:${PREFIX}/lib:${LD_LIBRARY_PATH}
+export PATH LD_LIBRARY_PATH
+
+MESON_FLAGS?="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+BDIR?=meson-release
+
 # Most rules will create BDIR only if it does not already exist.
 # ("|" means  "order-only" rule, useful for directory creation.)
 
-rebuild: | ${BDIR}
+build: | ${BDIR}
 	ninja -C ${BDIR} reconfigure
 	ninja -C ${BDIR}
 install: | ${BDIR}
 	ninja -C ${BDIR} reconfigure
 	ninja -C ${BDIR} install
-
-# "meson --reconfigure" is not idempotent, but
-# "ninja reconfigure" works even the first time.
-
-MESON_FLAGS?=--buildtype=debug -DRAPTOR_TESTING_MODE=false -Dc_args=-O0 --prefix=${PREFIX}
+	#DESTDIR='' ninja -C ${BDIR} install
 
 # This is the only rule that uses MESON_FLAGS.
-# If you want to recreate a directory, you can run "make configure", or simply "rm -rf build-dir".
+# If you want to recreate a directory, you can run "make configure", or simply "rm -rf meson-dir".
 configure:
 	rm -rf ${BDIR} && mkdir -p ${BDIR} && meson ${MESON_FLAGS} ${BDIR}
 
 # These are rules to build specific directories.
 # For convenience, you can set "BDIR" to one of these in your shell.
-build: # default expected by old ipa/
-	${MAKE} configure BDIR=$@
-	@echo "This rule creates the "build/" directory, for backward-compatibility."
-	@echo "To build actually, run 'make rebuild', which also reconfigures."
-build-release:
+meson-release:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
-build-testing:
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+meson-testing:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
-build-time:
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
+meson-time:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
-build-time2:
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+meson-time2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
-build-debug:
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+meson-debug:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
-build-debug-gcc6:
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+meson-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
 
-# These rules ignore your current BDIR setting.
-default: | build
-	${MAKE} install
-release: | build-release
-	${MAKE} install BDIR=build-release
-testing: | build-testing
-	${MAKE} install BDIR=build-testing
-time: | build-time
-	${MAKE} install BDIR=build-time
-time2: | build-time2
-	${MAKE} install BDIR=build-time
-debug: | build-debug
-	${MAKE} install BDIR=build-debug
-debug-gcc6: | build-debug-gcc6
-	${MAKE} install BDIR=build-debug-gcc6
-
-build/raptor: rebuild
-
-build-testing/raptor: testing
+# These rules ignore your current BDIR setting, but they rely on $PREFIX via $MESON_FLAGS.
+# They all reconfigure, rebuild, and install.
+release: | meson-release
+	${MAKE} install BDIR=meson-release
+testing: | meson-testing
+	${MAKE} install BDIR=meson-testing
+time: | meson-time
+	${MAKE} install BDIR=meson-time
+time2: | meson-time2
+	${MAKE} install BDIR=meson-time
+debug: | meson-debug
+	${MAKE} install BDIR=meson-debug
+debug-gcc6: | meson-debug-gcc6
+	${MAKE} install BDIR=meson-debug-gcc6
 
 dist: release
-	cd build && ninja-dist
+	cd meson-release && ninja-dist
 
 ###########################################
 ### Tests.                              ###
@@ -93,22 +89,24 @@ data: raptor-test-data/README.md
 raptor-test-data/README.md:
 	git clone https://github.com/isovic/raptor-test-data.git
 
-cram: build/raptor third-party/cram/scripts/cram cram-local #cram-external
+cram: installed third-party/cram/scripts/cram cram-local #cram-external
 
-unit: build/raptor
-	build/tests_raptor
+unit: release
+	meson-release/tests_raptor
 
-unit-testing: build-testing/raptor
-	build-testing/tests_raptor
+unit-testing: testing
+	meson-testing/tests_raptor
 
-cram-local: build/raptor
-	scripts/cram tests/cram/local/*.t tests/cram/local-graph/*.t
+cram-local: installed
+	scripts/cram -E tests/cram/local/*.t tests/cram/local-graph/*.t
 
-cram-external: build/raptor raptor-test-data/README.md
-	scripts/cram tests/cram/external/*.t
+cram-external: installed raptor-test-data/README.md
+	scripts/cram -E tests/cram/external/*.t
 
-cram-integration: build/raptor tools/miniasm/miniasm raptor-test-data/README.md
-	scripts/cram tests/cram/integration/*.t
+cram-integration: installed tools/miniasm/miniasm raptor-test-data/README.md
+	scripts/cram -E tests/cram/integration/*.t
+
+installed: install/bin/raptor  # see BIN_DIR in scripts/cram
 
 tests: unit cram
 

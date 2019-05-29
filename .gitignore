@@ -1,5 +1,6 @@
 bin/
-/build*/
+/install/
+/meson-*/
 examples/
 temp-src/
 test_data*

@@ -59,14 +59,10 @@ before_install:
 install:
     - g++ --version
     - $CXX --version
-    - make build
-    - git -C subprojects/pbcopper rev-parse HEAD
-    - meson subprojects update
-    - git -C subprojects/pbcopper rev-parse HEAD
-    - make rebuild
+    - make unit
+    - make release
 
 script:
-    - build/tests_raptor
     - make cram
 
 notifications:
