@@ -42,27 +42,32 @@ configure:
 # For convenience, you can set "BDIR" to one of these in your shell.
 meson-release:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=false -Dc_args=-O3"
+meson-release-pb:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dc_args=-O3"
 meson-testing:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-time:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-time2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-debug:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
 meson-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
 
 # These rules ignore your current BDIR setting, but they rely on $PREFIX via $MESON_FLAGS.
 # They all reconfigure, rebuild, and install.
 release: | meson-release
 	${MAKE} install BDIR=meson-release
+release-pb: | meson-release-pb
+	${MAKE} install BDIR=meson-release-pb
 testing: | meson-testing
 	${MAKE} install BDIR=meson-testing
 time: | meson-time
@@ -91,8 +96,8 @@ raptor-test-data/README.md:
 
 cram: installed third-party/cram/scripts/cram cram-local #cram-external
 
-unit: release
-	meson-release/tests_raptor
+unit: release-pb
+	meson-release-pb/tests_raptor
 
 unit-testing: testing
 	meson-testing/tests_raptor
