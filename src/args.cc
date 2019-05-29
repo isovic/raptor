@@ -39,6 +39,90 @@ void VerboseShortHelpAndExit(int argc, char **argv) {
     exit(0);
 }
 
+mindex::SequenceFormat WrapGetSequenceFormatFromPath(const mindex::SequenceFormat& apriori_in_fmt, const std::string& path) {
+    mindex::SequenceFormat fmt = mindex::GetSequenceFormatFromPath(path);
+    fmt = (apriori_in_fmt == mindex::SequenceFormat::Auto) ? fmt : apriori_in_fmt;
+    return fmt;
+}
+
+std::vector<std::string> ExpandPathList(
+                const mindex::SequenceFormat& apriori_in_fmt,
+                const std::string& apriori_in_fmt_str,
+                const std::vector<std::string>& in_paths) {
+
+    // In case the input contained FOFNs, collect all paths.
+    std::vector<std::string> expanded_in_paths;
+
+    for (size_t in_id = 0; in_id < in_paths.size(); ++in_id) {
+        const auto& in_path = in_paths[in_id];
+        mindex::SequenceFormat fmt = WrapGetSequenceFormatFromPath(apriori_in_fmt, in_path);
+
+        if (fmt == mindex::SequenceFormat::FOFN) {
+            // This section parses the FOFN, and appends files to the list.
+            std::vector<std::string> fofn_list = raptor::ParseFOFN(in_path);
+            expanded_in_paths.insert(expanded_in_paths.end(), fofn_list.begin(), fofn_list.end());
+
+        } else {
+            // If the file wasn't a FOFN, just add it to the list.
+            expanded_in_paths.emplace_back(in_path);
+        }
+    }
+
+    return expanded_in_paths;
+}
+
+void ValidateInputFiles(
+                    int argc, char **argv,
+                    const mindex::SequenceFormat& apriori_in_fmt,
+                    const std::vector<std::string>& paths) {
+
+    if (apriori_in_fmt == mindex::SequenceFormat::Unknown) {
+    }
+
+    int32_t num_rdb_paths = 0;
+
+    for (size_t in_id = 0; in_id < paths.size(); ++in_id) {
+        const auto& in_path = paths[in_id];
+        std::string in_path_ext = raptor::GetFileExtWithoutGZ(in_path);
+        mindex::SequenceFormat curr_path_fmt = mindex::SequenceFormatFromString(in_path_ext);
+        mindex::SequenceFormat fmt = (apriori_in_fmt == mindex::SequenceFormat::Auto) ? curr_path_fmt : apriori_in_fmt;
+
+        if (fmt == mindex::SequenceFormat::Unknown) {
+            // Exit if an unknown format is found.
+            fprintf(stderr, "Unsupported input format '%s' for file '%s'!\n\n", in_path_ext.c_str(), in_path.c_str());
+            VerboseShortHelpAndExit(argc, argv);
+
+        } else if (fmt == mindex::SequenceFormat::RaptorDB) {
+            ++num_rdb_paths;
+        }
+
+        if (!raptor::FileExists(in_path.c_str())) {
+            fprintf(stderr, "File does not exist: '%s'\n\n", in_path.c_str());
+            VerboseShortHelpAndExit(argc, argv);
+        }
+    }
+
+    // Allow only one RaptorDB file to be loaded.
+    if (num_rdb_paths > 1) {
+        fprintf(stderr, "Only one RaptorDB sequence file can be loaded.\n\n");
+        VerboseShortHelpAndExit(argc, argv);
+    } else if (num_rdb_paths == 1 && paths.size() > 1) {
+        fprintf(stderr, "A RaptorDB input cannot be specified along side to another input file.\n\n");
+        VerboseShortHelpAndExit(argc, argv);
+    }
+}
+
+bool IsInputFormatRaptorDB(const mindex::SequenceFormat& apriori_in_fmt,
+                            const std::vector<std::string>& paths) {
+    if (paths.size() != 1) {
+        return false;
+    }
+    mindex::SequenceFormat fmt = WrapGetSequenceFormatFromPath(apriori_in_fmt, paths[0]);
+    return fmt == mindex::SequenceFormat::RaptorDB;
+}
+
+
+
 int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptor> parameters) {
     bool help = false;
     bool version = false;
@@ -90,6 +174,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
 #endif
+                          "\n fofn  - File Of File Names."
                           "\n rdb   - RaptorDB format."
                           "\n ",
                           0, "Input/Output options");
@@ -105,6 +190,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
 #endif
+                          "\n fofn  - File Of File Names."
                           "\n rdb   - RaptorDB format."
                           "\n ",
                           0, "Input/Output options");
@@ -513,12 +599,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
         fprintf(stderr, "\n");
         VerboseShortHelpAndExit(argc, argv);
     }
-    for (auto& ref_path: parameters->ref_paths) {
-        if (!raptor::FileExists(ref_path.c_str())) {
-            fprintf(stderr, "Reference does not exist: '%s'\n\n", ref_path.c_str());
-            VerboseShortHelpAndExit(argc, argv);
-        }
-    }
 
     // Sanity check for the reads path.
     if (parameters->query_paths.size() == 0 && parameters->calc_only_index == false) {
@@ -526,72 +606,44 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
         fprintf(stderr, "\n");
         VerboseShortHelpAndExit(argc, argv);
     }
-    for (auto& query_path: parameters->query_paths) {
-        if (parameters->calc_only_index == false && !raptor::FileExists(query_path.c_str())) {
-            fprintf(stderr, "Reads file does not exist: '%s'\n\n", query_path.c_str());
-            VerboseShortHelpAndExit(argc, argv);
-        }
-    }
 
+    /////////////////////////////////////////////////
+    /// Parsing and validating the input formats. ///
+    /////////////////////////////////////////////////
     // Parse the input format.
     parameters->infmt = mindex::SequenceFormatFromString(infmt);
     if (parameters->infmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unknown input format '%s'!\n\n", infmt.c_str());
         VerboseShortHelpAndExit(argc, argv);
     }
-    // We only want to allow 1 RaptorDB sequence file to be specified. Perform a check
-    // and report a problem if more than 1 RaptorDB file is specified.
-    if (parameters->infmt == mindex::SequenceFormat::RaptorDB && parameters->query_paths.size() > 1) {
-        fprintf(stderr, "Only one RaptorDB sequence file can be loaded.\n\n");
-        VerboseShortHelpAndExit(argc, argv);
-    } else if (parameters->infmt == mindex::SequenceFormat::Auto) {
-        bool fmt_is_raptor_db = false;
-        for (const auto& query_path: parameters->query_paths) {
-            std::string ext = raptor::GetFileExt(query_path);
-            mindex::SequenceFormat ext_fmt = mindex::SequenceFormatFromString(ext);
-            if (ext_fmt != mindex::SequenceFormat::RaptorDB) {
-                continue;
-            }
-            if (parameters->query_paths.size() > 1) {
-                fprintf(stderr, "Only one RaptorDB sequence file can be loaded.\n\n");
-                VerboseShortHelpAndExit(argc, argv);
-            }
-            fmt_is_raptor_db = true;
-        }
-        if (fmt_is_raptor_db) {
-            parameters->infmt = mindex::SequenceFormat::RaptorDB;
-        }
+    // Collect all FOFN files.
+    parameters->query_paths = ExpandPathList(parameters->infmt, infmt, parameters->query_paths);
+    // Validate the input files and formats.
+    ValidateInputFiles(argc, argv, parameters->infmt, parameters->query_paths);
+    // In case the input was RaptorDB, modify the infmt for future use in the index factory.
+    if (IsInputFormatRaptorDB(parameters->infmt, parameters->query_paths)) {
+        parameters->infmt = mindex::SequenceFormat::RaptorDB;
     }
+    /////////////////////////////////////////////////
 
+    /////////////////////////////////////////////////////
+    /// Parsing and validating the reference formats. ///
+    /////////////////////////////////////////////////////
     // Parse the reference format.
     parameters->ref_fmt = mindex::SequenceFormatFromString(ref_fmt);
     if (parameters->ref_fmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unknown reference format '%s'!\n\n", ref_fmt.c_str());
         VerboseShortHelpAndExit(argc, argv);
     }
-    // We only want to allow 1 RaptorDB reference file to be specified. Perform a check
-    // and report a problem if more than 1 RaptorDB file is specified.
-    if (parameters->ref_fmt == mindex::SequenceFormat::RaptorDB && parameters->ref_paths.size() > 1) {
-        fprintf(stderr, "Only one RaptorDB reference file can be loaded.\n\n");
-        VerboseShortHelpAndExit(argc, argv);
-    } else if (parameters->ref_fmt == mindex::SequenceFormat::Auto) {
-        bool fmt_is_raptor_db = false;
-        for (const auto& ref_path: parameters->ref_paths) {
-            std::string ext = raptor::GetFileExt(ref_path);
-            mindex::SequenceFormat ext_fmt = mindex::SequenceFormatFromString(ext);
-            if (ext_fmt != mindex::SequenceFormat::RaptorDB) {
-                continue;
-            }
-            if (parameters->ref_paths.size() > 1) {
-                fprintf(stderr, "Only one RaptorDB reference file can be loaded.\n\n");
-                VerboseShortHelpAndExit(argc, argv);
-            }
-            fmt_is_raptor_db = true;
-        }
-        if (fmt_is_raptor_db) {
-            parameters->ref_fmt = mindex::SequenceFormat::RaptorDB;
-        }
+    // Collect all FOFN files.
+    parameters->ref_paths = ExpandPathList(parameters->ref_fmt, infmt, parameters->ref_paths);
+    // Validate the input files and formats.
+    ValidateInputFiles(argc, argv, parameters->ref_fmt, parameters->ref_paths);
+    // In case the input was RaptorDB, modify the infmt for future use in the index factory.
+    if (IsInputFormatRaptorDB(parameters->ref_fmt, parameters->ref_paths)) {
+        parameters->ref_fmt = mindex::SequenceFormat::RaptorDB;
     }
+    /////////////////////////////////////////////////////
 
     // Parse the input graph format.
     parameters->graph_fmt = raptor::GraphFormatFromString(graph_fmt);
@@ -1070,42 +1122,32 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
         fprintf(stderr, "\n");
         VerboseShortHelpAndExit(argc, argv);
     }
-    for (auto& in_path: parameters->in_paths) {
-        if (!raptor::FileExists(in_path.c_str())) {
-            fprintf(stderr, "Reference does not exist: '%s'\n\n", in_path.c_str());
-            VerboseShortHelpAndExit(argc, argv);
-        }
-    }
 
-    // Parse the input format.
+    /////////////////////////////////////////////////
+    /// Parsing and validating the input formats. ///
+    /////////////////////////////////////////////////
+    // First check that the specified format is valid.
     parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
     if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unsupported input format '%s'!\n\n", in_fmt.c_str());
         VerboseShortHelpAndExit(argc, argv);
     }
-    std::vector<std::string> expanded_in_paths;
-    for (size_t in_id = 0; in_id < parameters->in_paths.size(); ++in_id) {
-        const auto& in_path = parameters->in_paths[in_id];
-        std::string in_path_ext = raptor::GetFileExt(in_path);
-        mindex::SequenceFormat curr_path_fmt = mindex::SequenceFormatFromString(in_path_ext);
-        mindex::SequenceFormat fmt = (parameters->in_fmt == mindex::SequenceFormat::Auto) ? curr_path_fmt : parameters->in_fmt;
-        if (fmt == mindex::SequenceFormat::FOFN) {
-            // This section parses the FOFN, and appends files to the list.
-            std::vector<std::string> fofn_list = raptor::ParseFOFN(in_path);
-            if (fofn_list.size() == 0) {
-                fprintf(stderr, "The provided FOFN list is empty! Input FOFN file: '%s'!\n\n", in_path.c_str());
-                VerboseShortHelpAndExit(argc, argv);
-            }
-            expanded_in_paths.insert(expanded_in_paths.end(), fofn_list.begin(), fofn_list.end());
-
-        } else {
-            // If the file wasn't a FOFN, just add it to the list.
-            expanded_in_paths.emplace_back(in_path);
-        }
+    // Parse the input format.
+    parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
+    if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
+        fprintf(stderr, "Unknown input format '%s'!\n\n", in_fmt.c_str());
+        VerboseShortHelpAndExit(argc, argv);
     }
-    // Update the paths after FOFN extension.
-    parameters->in_paths = expanded_in_paths;
+    // Collect all FOFN files.
+    parameters->in_paths = ExpandPathList(parameters->in_fmt, in_fmt, parameters->in_paths);
+    // Validate the input files and formats.
+    ValidateInputFiles(argc, argv, parameters->in_fmt, parameters->in_paths);
+    // In case the input was RaptorDB, modify the infmt for future use in the index factory.
+    if (IsInputFormatRaptorDB(parameters->in_fmt, parameters->in_paths)) {
+        parameters->in_fmt = mindex::SequenceFormat::RaptorDB;
+    }
     parameters->in_fmt = (parameters->in_fmt == mindex::SequenceFormat::FOFN) ? mindex::SequenceFormat::Auto : parameters->in_fmt;
+    /////////////////////////////////////////////////
 
     // Parse the output format.
     parameters->out_fmt = mindex::SequenceFormatFromString(out_fmt);
