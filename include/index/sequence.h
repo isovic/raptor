@@ -15,6 +15,10 @@
 #include <functional>
 #include <containers/region/region_aligned.h>
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+#include <pbbam/BamRecord.h>
+#endif
+
 namespace mindex {
 
 // Abstract the underlying data type for possible future updates.
@@ -90,6 +94,11 @@ public:
     const std::vector<raptor::SamTag>& tags() const {
         return tags_;
     }
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+    const std::unique_ptr<PacBio::BAM::BamRecord>& apriori_bam() const {
+        return apriori_bam_;
+    }
+#endif
 
     /*
      * Setters.
@@ -116,6 +125,11 @@ public:
     void AddTag(const raptor::SamTag& val) {
         tags_.emplace_back(val);
     }
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+    void apriori_bam(std::unique_ptr<PacBio::BAM::BamRecord> val) {
+        apriori_bam_ = std::move(val);
+    }
+#endif
 
     std::string GetSequenceAsString() const {
         return std::string((const char *) data_.data(), data_.size());
@@ -151,6 +165,10 @@ private:
     size_t header_hash_;
     // std::unordered_map<std::string, int32_t> tag_id_;
     std::vector<raptor::SamTag> tags_;
+
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+    std::unique_ptr<PacBio::BAM::BamRecord> apriori_bam_;
+#endif
 };
 
 }
