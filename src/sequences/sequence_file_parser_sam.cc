@@ -116,43 +116,7 @@ void SequenceFileParserSam::ParseHeader_() {
 }
 
 void SequenceFileParserSam::ParseReadGroupAndProgramGroupFromHeader_(const std::string& header) {
-    std::istringstream iss(header);
-    std::string line;
-    while (std::getline(iss, line)) {
-        if (line.size() < 3) {
-            continue;
-        }
-        if (line[0] != '@') {
-            break;
-        }
-
-        std::string field_name = line.substr(1, 2);
-
-        if (field_name == "RG" || field_name == "PG") {
-            std::vector<HeaderTag> tags;
-
-            // Skip the first token, that's "@RG" or "@PG".
-            auto tokens = raptor::Tokenize(line, '\t');
-            bool is_ok = false;
-            std::string field_id;
-            for (size_t tid = 1; tid < tokens.size(); ++tid) {
-                std::string tag_name = tokens[tid].substr(0, 2);
-                std::string tag_val = tokens[tid].substr(3);
-                tags.emplace_back(HeaderTag{tag_name, tag_val});
-                if (tag_name == "ID") {
-                    field_id = tag_name;
-                    is_ok = true;
-                }
-            }
-
-            if (is_ok == false) {
-                WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Skipping faulty header line: '%s'.", line.c_str());
-                continue;
-            }
-
-            header_groups_[field_name][field_id] = std::move(tags);
-        }
-    }
+    header_groups_ = mindex::ParseReadGroupAndProgramGroupFromSAMHeader(header);
 }
 
 std::string SequenceFileParserSam::GetFileHeaderAsString() const {
