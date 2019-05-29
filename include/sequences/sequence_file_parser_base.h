@@ -14,20 +14,13 @@
 #include <unordered_map>
 
 #include <index/sequence.h>
+#include <sequences/sequence_file_parser_utils.h>
 
 namespace mindex {
 
 class SequenceFileParserBase;
 
 using SequenceFileParserBasePtr = std::unique_ptr<SequenceFileParserBase>;
-
-class HeaderTag {
-   public:
-   std::string name;
-   std::string val;
-};
-
-using HeaderGroupType = std::unordered_map<std::string, std::unordered_map<std::string, std::vector<HeaderTag>>>;
 
 class SequenceFileParserBase {
 public:
