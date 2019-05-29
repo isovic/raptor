@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <utility/files.hpp>
 
 namespace mindex {
 
@@ -94,18 +95,7 @@ inline std::string SequenceFormatToString(const SequenceFormat& fmt) {
 }
 
 inline SequenceFormat GetSequenceFormatFromPath(const std::string& path) {
-    int32_t pos = path.find_last_of(".");
-    std::string ext = path.substr(pos + 1);
-    if (ext == "gz") {
-        ext = path.substr(path.find_last_of(".", (pos - 1)) + 1);
-    }
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-    // If the file is Gzipped, the .gz will be in the ext.
-    // E.g. the output from GetFileExt can be "fasta.gz".
-    if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
-        ext = ext.substr(0, ext.size() - 3);
-    }
+    std::string ext = raptor::GetFileExtWithoutGZ(path);
     return SequenceFormatFromString(ext);
 }
 

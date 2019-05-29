@@ -64,6 +64,14 @@ inline std::string GetFileExt(const std::string& path) {
     return ext;
 }
 
+inline std::string GetFileExtWithoutGZ(const std::string& path) {
+    auto ext = GetFileExt(path);
+    if (ext.size() >= 3 && ext.substr(ext.size() - 3) == ".gz") {
+        ext = ext.substr(0, ext.size() - 3);
+    }
+    return ext;
+}
+
 }
 
 #endif
