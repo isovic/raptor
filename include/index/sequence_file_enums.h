@@ -18,7 +18,7 @@ enum class BatchLoadType { MB, Coverage };
 enum class SequenceFormat {
             Auto, Fasta, Fastq, SAM,
             #ifdef RAPTOR_COMPILED_WITH_PBBAM
-                        BAM,
+                        BAM, XML,
             #endif
             GFA, GFA1, GFA2, RaptorDB, FOFN, Unknown };
 
@@ -35,6 +35,8 @@ inline SequenceFormat SequenceFormatFromString(const std::string& format_str) {
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
     } else if (format_str == "bam") {
         ret = SequenceFormat::BAM;
+    } else if (format_str == "xml") {
+        ret = SequenceFormat::XML;
 #endif
     } else if (format_str == "gfa") {
         ret = SequenceFormat::GFA;
@@ -71,6 +73,9 @@ inline std::string SequenceFormatToString(const SequenceFormat& fmt) {
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
         case SequenceFormat::BAM:
             ret = "bam";
+            break;
+        case SequenceFormat::XML:
+            ret = "xml";
             break;
 #endif
         case SequenceFormat::GFA:
