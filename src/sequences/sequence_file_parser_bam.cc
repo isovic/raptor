@@ -16,10 +16,7 @@
 #include <pbbam/BamReader.h>
 #include <pbbam/BamWriter.h>
 #include <pbbam/BamRecord.h>
-#include <pbbam/SamTagCodec.h>
 #include <utility/stringutil.h>
-
-#include <boost/lexical_cast.hpp>
 
 namespace mindex {
 
