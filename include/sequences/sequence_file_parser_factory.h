@@ -17,6 +17,7 @@
 #include <sequences/sequence_file_parser_gfa2.h>
 #include <sequences/sequence_file_parser_sam.h>
 #include <sequences/sequence_file_parser_bam.h>
+#include <sequences/sequence_file_parser_pbxml.h>
 #include <index/sequence_file_enums.h>
 
 namespace mindex {

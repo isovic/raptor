@@ -40,6 +40,8 @@ mindex::SequenceFileParserBasePtr createSequenceFileParser(const std::string& in
         // If PBBAM wasn't used, then this will fall through to the else.
     } else if (in_fmt == mindex::SequenceFormat::BAM) {
         ret = mindex::createSequenceFileParserBam(in_path);
+    } else if (in_fmt == mindex::SequenceFormat::XML) {
+        ret = mindex::createSequenceFileParserPbXml(in_path);
 #endif
     } else {
         ret = nullptr;
