@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <index/sequence_file_enums.h>
+#include <sequences/sequence_file_enums.h>
 
 namespace raptor {
 

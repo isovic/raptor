@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <lib/argparser.h>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 // #include <utility/utility_general.h>
 #include <writer/raptor_results_writer.h>
 #include <graph/segment_graph_parser.h>

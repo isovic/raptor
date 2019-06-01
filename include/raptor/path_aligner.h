@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 #include <types/typedefs.h>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <raptor/graph_mapper.h>
 #include <containers/region/region_aligned.h>
 #include <containers/path_alignment.h>

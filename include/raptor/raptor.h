@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <memory>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <containers/range.h>
 #include <params/params_raptor.h>
 #include <containers/raptor_results.h>

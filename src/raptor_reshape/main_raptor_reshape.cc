@@ -11,8 +11,8 @@
 #include <iomanip>
 #include <args.h>
 #include <limits>
-#include <index/sequence_file.h>
-#include <index/sequence_serializer.h>
+#include <sequences/sequence_file.h>
+#include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
 #include <utility/stringutil.h>
 #include <raptor_reshape/params_raptor_reshape.h>

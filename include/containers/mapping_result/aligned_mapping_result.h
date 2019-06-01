@@ -17,7 +17,7 @@
 #include <types/typedefs.h>
 #include <containers/path_alignment.h>
 #include <utility/mapq.hpp>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <containers/mapping_result/mapping_result_base.h>
 
 namespace raptor {

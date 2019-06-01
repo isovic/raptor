@@ -17,7 +17,7 @@
 #include <types/typedefs.h>
 #include <utility/revcmp.hpp>
 #include <aligner/aligner_util.hpp>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <utility/stringutil.h>
 
 namespace raptor {

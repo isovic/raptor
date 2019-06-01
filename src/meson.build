@@ -54,10 +54,6 @@ raptor_cpp_sources = files([
   'index/minimizer_generator.cc',
   'index/minimizer_index_util.cc',
   'index/minimizer_index.cc',
-  'index/random_access_sequence_file.cc',
-  'index/sequence_file.cc',
-  'index/sequence.cc',
-  'index/sequence_serializer.cc',
 
   'params/params_aligner.cc',
   'params/params_mapper.cc',
@@ -89,6 +85,10 @@ raptor_cpp_sources = files([
   'sequences/sequence_file_parser_bam.cc',
   'sequences/sequence_file_parser_pbxml.cc',
   'sequences/sequence_file_parser_utils.cc',
+  'sequences/random_access_sequence_file.cc',
+  'sequences/sequence_file.cc',
+  'sequences/sequence.cc',
+  'sequences/sequence_serializer.cc',
 
   'utility/memtime.cc',
   'utility/fofn.cc',

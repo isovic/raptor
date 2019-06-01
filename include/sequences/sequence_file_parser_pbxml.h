@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <sequences/sequence_file_parser_base.h>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 
 #include <pbbam/DataSet.h>
 #include <pbbam/BamFile.h>

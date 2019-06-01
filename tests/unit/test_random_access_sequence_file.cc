@@ -9,9 +9,9 @@
 #include <log/log_tools.h>
 #include <lib/argparser.h>
 #include <version.h>
-#include <index/sequence_file.h>
-#include <index/random_access_sequence_file.h>
-#include <index/sequence_serializer.h>
+#include <sequences/sequence_file.h>
+#include <sequences/random_access_sequence_file.h>
+#include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
 #include <raptor_fetch/params_raptor_fetch.h>
 

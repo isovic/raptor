@@ -12,8 +12,8 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
-#include <index/sequence_file.h>
-#include <index/sequence.h>
+#include <sequences/sequence_file.h>
+#include <sequences/sequence.h>
 #include <containers/target_hits.hpp>
 #include <containers/region/region_mapped.h>
 #include <containers/mapping_result/linear_mapping_result.h>

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <args.h>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <utility/memtime.h>
 
 void RunRaptorIndex(std::shared_ptr<raptor::ParamsRaptorIndex> parameters) {

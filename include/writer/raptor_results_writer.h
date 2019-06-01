@@ -14,7 +14,7 @@
 #include <raptor/index_factory.h>
 #include <params/params_raptor.h>
 #include <ostream>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 
 namespace raptor {
 

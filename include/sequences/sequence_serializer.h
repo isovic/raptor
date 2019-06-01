@@ -13,8 +13,8 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <index/sequence.h>
-#include <index/sequence_file.h>
+#include <sequences/sequence.h>
+#include <sequences/sequence_file.h>
 
 namespace mindex {
 

@@ -5,7 +5,7 @@
  *      Author: Ivan Sovic
  */
 
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <index/lookups.h>
 #include <sstream>
 #include <string>

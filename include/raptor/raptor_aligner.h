@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <memory>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <aligner/aligner_base.h>
 #include <containers/mapping_result/aligned_mapping_result.h>
 #include <raptor/index_factory.h>

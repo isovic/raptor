@@ -13,9 +13,9 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <params/params_raptor.h>
-#include <index/sequence_file_enums.h>
+#include <sequences/sequence_file_enums.h>
 #include <sequences/sequence_file_parser_factory.h>
 
 namespace mindex {

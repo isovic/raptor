@@ -7,11 +7,11 @@
 
 #include <raptor/index_factory.h>
 // #include <utility/utility_general.h>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <log/log_tools.h>
 #include <params/params_raptor.h>
 #include <utility/files.hpp>
-#include <index/random_access_sequence_file.h>
+#include <sequences/random_access_sequence_file.h>
 
 namespace raptor {
 

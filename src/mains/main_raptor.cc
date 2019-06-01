@@ -7,8 +7,8 @@
 #include <params/params_raptor.h>
 #include <raptor/index_factory.h>
 #include <log/log_tools.h>
-#include <index/sequence_file.h>
-#include <index/random_access_sequence_file.h>
+#include <sequences/sequence_file.h>
+#include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
 #include <writer/raptor_results_writer.h>

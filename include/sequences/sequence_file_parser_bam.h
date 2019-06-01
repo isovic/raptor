@@ -16,7 +16,7 @@
 #include <unordered_map>
 
 #include <sequences/sequence_file_parser_base.h>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 
 #include <pbbam/BamFile.h>
 #include <pbbam/BamReader.h>

@@ -1,6 +1,6 @@
 #include <raptor/raptor_aligner.h>
 #include <raptor/path_aligner.h>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 
 namespace raptor {
 

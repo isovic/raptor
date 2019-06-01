@@ -16,10 +16,10 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <params/params_raptor.h>
-#include <index/sequence_file_enums.h>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file_enums.h>
+#include <sequences/sequence_file.h>
 
 namespace mindex {
 

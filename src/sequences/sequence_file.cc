@@ -5,7 +5,7 @@
  *      Author: Ivan Sovic
  */
 
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <utility/stringutil.h>
 #include <utility/files.hpp>
 #include <log/log_tools.h>

@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <index/sequence_file.h>
+#include <sequences/sequence_file.h>
 #include <containers/range.h>
 #include <containers/target_hits.hpp>
 #include <containers/region/region_mapped.h>

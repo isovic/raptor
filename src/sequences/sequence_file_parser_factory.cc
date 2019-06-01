@@ -6,7 +6,7 @@
  */
 
 #include <sequences/sequence_file_parser_factory.h>
-#include <index/sequence_file_enums.h>
+#include <sequences/sequence_file_enums.h>
 #include <utility/stringutil.h>
 #include <utility/files.hpp>
 

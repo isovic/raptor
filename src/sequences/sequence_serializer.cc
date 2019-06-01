@@ -5,7 +5,7 @@
  *      Author: Ivan Sovic
  */
 
-#include <index/sequence_serializer.h>
+#include <sequences/sequence_serializer.h>
 #include <log/log_tools.h>
 
 namespace mindex {

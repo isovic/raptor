@@ -13,7 +13,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 #include <sequences/sequence_file_parser_utils.h>
 
 namespace mindex {

@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <index/sequence_file_enums.h>
+#include <sequences/sequence_file_enums.h>
 #include <graph/segment_graph_parser_enums.h>
 #include <writer/output_formatter_enums.h>
 #include <index/index_params.h>

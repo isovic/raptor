@@ -15,7 +15,7 @@
 #include <aligner/aligner_util.hpp>
 #include <graph/split_segment_graph.h>
 #include <graph/anchor_graph.h>
-#include <index/sequence.h>
+#include <sequences/sequence.h>
 
 namespace raptor {
 
