@@ -93,6 +93,9 @@ public:
     void batch_start_seq_id(int64_t val) {
         batch_start_seq_id_ = val;
     }
+    void batch_id(int64_t val) {
+        batch_id_ = val;
+    }
 
     /*
      * Modifiers.
