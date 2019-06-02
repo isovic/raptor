@@ -25,8 +25,6 @@ class SequenceFile;
 typedef std::shared_ptr<mindex::SequenceFile> SequenceFilePtr;
 
 mindex::SequenceFilePtr createSequenceFile();
-mindex::SequenceFilePtr createSequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt);
-mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts);
 
 class SequenceFile {
 public:
@@ -34,24 +32,14 @@ public:
      * Creation.
     */
     friend mindex::SequenceFilePtr createSequenceFile();
-    friend mindex::SequenceFilePtr createSequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt);
-    friend mindex::SequenceFilePtr createSequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts);
 
     bool LoadAll(const std::vector<std::string>& headers, const std::vector<std::string>& seqs, bool convert_to_uppercase=true);
-    bool LoadAll(bool convert_to_uppercase=true);
-    bool LoadBatchMB(int64_t batch_size_mb, bool convert_to_uppercase=true);
-    bool LoadBatchOfOne(bool convert_to_uppercase=true);
 
     const mindex::SequencePtr& GetSeqByID(int64_t id) const;
     const mindex::SequencePtr& GetSeqByAbsID(int64_t abs_id) const;
     void Add(std::unique_ptr<mindex::Sequence> seq);
 
     bool Serialize(std::ostream& ofs, mindex::SequenceFormat to_fmt);
-
-    std::string GetOpenFilePath() const;
-    mindex::SequenceFormat GetOpenFileFormat() const;
-    int64_t GetOpenFileTell() const;
-    int64_t GetOpenFilePrevTell() const;
 
     /*
      * Getters.
@@ -73,9 +61,6 @@ public:
     }
     const mindex::SequencePtr& operator[](int64_t id) const {
         return GetSeqByID(id);
-    }
-    int64_t GetOpenFileId() const {
-        return curr_open_file_;
     }
     const HeaderGroupType& header_groups() const {
         return header_groups_;
@@ -106,23 +91,8 @@ public:
 
 private:
     SequenceFile();
-    SequenceFile(const std::vector<std::string>& headers, const std::vector<std::string>& seqs);
-    SequenceFile(const std::string& in_path, mindex::SequenceFormat in_fmt);
-    SequenceFile(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts);
-
     SequenceFile(const SequenceFile&) = delete;
     SequenceFile& operator=(const SequenceFile&) = delete;
-
-    bool Open_(const std::string& in_path, mindex::SequenceFormat in_fmt);
-    bool ParseAndMergeHeaderGroups_();
-    mindex::SequencePtr YieldSequence_(bool convert_to_uppercase);
-
-
-
-    std::vector<std::pair<std::string, mindex::SequenceFormat>> in_files_;
-    int64_t curr_open_file_;
-    mindex::SequenceFormat curr_input_fmt_;
-    mindex::SequenceFileParserBasePtr parser_;
 
     std::vector<mindex::SequencePtr> seqs_;     // All sequences.
     int64_t batch_id_;              // The ID of the currently loaded batch.
@@ -130,7 +100,6 @@ private:
     int64_t total_size_;            // Sum of all sequence lengths.
     mindex::SequencePtr dummy_nullptr_seq_;
     HeaderGroupType header_groups_;
-    int64_t open_file_offset_prev_;
 };
 
 }
