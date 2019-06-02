@@ -10,6 +10,7 @@
 #include <lib/argparser.h>
 #include <version.h>
 #include <sequences/sequence_file.h>
+#include <sequences/sequence_file_composite_fofn.h>
 #include <sequences/random_access_sequence_file.h>
 #include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
@@ -23,8 +24,8 @@ TEST(RandomAccessSequenceFile, FetchSequenceUsingId) {
     int64_t max_open_files = 50;
 	auto random_seq_file = mindex::createRandomAccessSequenceFile(in_path, max_open_files);
 
-    auto seq_file = mindex::createSequenceFile({in_exp_path}, mindex::SequenceFormat::Auto);
-    seq_file->LoadAll(true);
+	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({in_exp_path}, mindex::SequenceFormat::Auto);
+	auto seq_file = seq_file_parser->YieldAll();
 
     for (const auto& seq: seq_file->seqs()) {
         auto result_seq = random_seq_file->FetchSequence(seq->abs_id());
@@ -45,8 +46,8 @@ TEST(RandomAccessSequenceFile, FetchSequenceUsingQname) {
     int64_t max_open_files = 50;
 	auto random_seq_file = mindex::createRandomAccessSequenceFile(in_path, max_open_files);
 
-    auto seq_file = mindex::createSequenceFile({in_exp_path}, mindex::SequenceFormat::Auto);
-    seq_file->LoadAll(true);
+	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({in_exp_path}, mindex::SequenceFormat::Auto);
+	auto seq_file = seq_file_parser->YieldAll();
 
     for (const auto& seq: seq_file->seqs()) {
         auto result_seq = random_seq_file->FetchSequence(seq->header());
@@ -65,8 +66,8 @@ TEST(RandomAccessSequenceFile, FetchSequenceUsingQnameSingleFile) {
     int64_t max_open_files = 50;
 	auto random_seq_file = mindex::createRandomAccessSequenceFile(in_path, max_open_files);
 
-    auto seq_file = mindex::createSequenceFile({in_exp_path}, mindex::SequenceFormat::Auto);
-    seq_file->LoadAll(true);
+	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({in_exp_path}, mindex::SequenceFormat::Auto);
+	auto seq_file = seq_file_parser->YieldAll();
 
     for (const auto& seq: seq_file->seqs()) {
         auto result_seq = random_seq_file->FetchSequence(seq->header());

@@ -8,6 +8,7 @@
 #include <raptor/index_factory.h>
 #include <log/log_tools.h>
 #include <sequences/sequence_file.h>
+#include <sequences/sequence_file_composite_fofn.h>
 #include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
@@ -49,8 +50,8 @@ void APIExample() {
     auto writer = raptor::createRaptorResultsWriter(std::cout, index, raptor::OutputFormat::PAF);
 
     // Process reads one by one in a single thread.
-    auto reads = mindex::createSequenceFile(reads_path, mindex::SequenceFormat::Fastq);
-    reads->LoadAll();
+	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({reads_path}, mindex::SequenceFormat::Fastq);
+	auto reads = seq_file_parser->YieldAll();
 
     for (auto& seq: reads->seqs()) {
         raptor::RaptorResults results;
@@ -191,9 +192,10 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	} else {
 		// Open a sequence file object which will iterate through all inputs.
 		std::vector<mindex::SequenceFormat> query_fmts(parameters->query_paths.size(), parameters->infmt);
-		mindex::SequenceFilePtr reads = mindex::createSequenceFile(parameters->query_paths, query_fmts);
+		mindex::SequenceFileCompositeBasePtr reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, query_fmts);
+		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
 
-		const auto& header_groups = reads->GetHeaderGroups();
+		const auto& header_groups = reads_parser->GetHeaderGroups();
 
 		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
 		writer->WriteHeader(header_groups);
@@ -209,7 +211,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 			LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
 		}
 
-		while (reads->LoadBatchMB(batch_size_in_mb)) {
+		while ((reads = reads_parser->YieldBatchMB(batch_size_in_mb))) {
 			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
 						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
 

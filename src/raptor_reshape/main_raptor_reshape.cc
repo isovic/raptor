@@ -12,6 +12,7 @@
 #include <args.h>
 #include <limits>
 #include <sequences/sequence_file.h>
+#include <sequences/sequence_file_composite_fofn.h>
 #include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
 #include <utility/stringutil.h>
@@ -37,8 +38,8 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 	int64_t load_batch_size_int64 = static_cast<int64_t>(parameters->in_batch_size);
 	int64_t write_block_size_int64 = (parameters->block_size > 0) ? (static_cast<int64_t>(parameters->block_size * 1024 * 1024)) : std::numeric_limits<int64_t>::max();
 
-	auto seq_file = mindex::createSequenceFile(parameters->in_paths,
-										std::vector<mindex::SequenceFormat>(parameters->in_paths.size(), parameters->in_fmt));
+	auto seq_file_parser = mindex::createSequenceFileCompositeFofn(parameters->in_paths, parameters->in_fmt);
+	auto seq_file = mindex::createSequenceFile();
 
 	int64_t total_num_blocks = 0;
 	int64_t total_out_files = 0;
@@ -67,10 +68,10 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 
 	int64_t file_before = -1;
 
-	while (seq_file->LoadBatchOfOne()) {
-		int64_t pos_now = seq_file->GetOpenFileTell();
-		int64_t pos_last = seq_file->GetOpenFilePrevTell();
-		int64_t file_now = seq_file->GetOpenFileId();
+	while ((seq_file = seq_file_parser->YieldBatchOfOne())) {
+		int64_t pos_now = seq_file_parser->GetCurrentFileOffset();
+		int64_t pos_last = seq_file_parser->GetCurrentFilePreviousOffset();
+		int64_t file_now = seq_file_parser->GetCurrentFileId();
 		int64_t file_id = (parameters->symlink_files) ? file_now : total_out_files;
 
 		if (pos_now < 0) {
