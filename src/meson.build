@@ -83,7 +83,6 @@ raptor_cpp_sources = files([
   'sequences/sequence_file_parser_gfa2.cc',
   'sequences/sequence_file_parser_sam.cc',
   'sequences/sequence_file_parser_bam.cc',
-  'sequences/sequence_file_parser_pbxml.cc',
   'sequences/sequence_file_parser_utils.cc',
   'sequences/random_access_sequence_file.cc',
   'sequences/sequence_file.cc',
