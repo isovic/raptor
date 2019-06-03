@@ -59,6 +59,7 @@ test-data/demos/demo-1-circular-synth/*
 !test-data/raptordb-fetch
 !test-data/consistent-query-target-results
 !test-data/sequence-parser
+!test-data/small-xml
 
 tool*
 callgrind.*
