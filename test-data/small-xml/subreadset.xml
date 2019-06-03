@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:SubreadSet CreatedAt="2019-06-03T11:31:43" MetaType="PacBio.DataSet.SubreadSet" Name="pacbio_dataset_subreadset-190603_093143887" Tags="" TimeStampedName="pacbio_dataset_subreadset-190603_093143887" UniqueId="6c6bea46-18d7-c9f5-32fb-ab72f82e1c70" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="subreads1.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190603_093143886" UniqueId="5e85e50a-3534-42d7-8fb0-491bedec8b1f">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="subreads1.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190603_093143886" UniqueId="6fe3f3b1-3044-44cf-b94b-07e5462869db"/>
+			</pbbase:FileIndices>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="subreads2.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190603_093143885" UniqueId="2aea283c-3c40-4436-8401-ca70a2042519">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="subreads2.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190603_093143886" UniqueId="bd417464-5b6c-4bab-b550-ac9599a4f6d9"/>
+			</pbbase:FileIndices>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="subreads3.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190603_093143885" UniqueId="dc519b91-587d-44c9-980a-f671ca18c6d4">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="subreads3.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190603_093143885" UniqueId="dcfe5ec5-694f-4b04-bb54-268cd1c3c3a0"/>
+			</pbbase:FileIndices>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>610647</pbds:TotalLength>
+		<pbds:NumRecords>15</pbds:NumRecords>
+	</pbds:DataSetMetadata>
+</pbds:SubreadSet>
