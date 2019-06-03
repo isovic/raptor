@@ -90,6 +90,7 @@ raptor_cpp_sources = files([
   'sequences/sequence.cc',
   'sequences/sequence_serializer.cc',
   'sequences/sequence_file_composite_fofn.cc',
+  'sequences/sequence_file_composite_pbxml.cc',
 
   'utility/memtime.cc',
   'utility/fofn.cc',
