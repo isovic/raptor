@@ -20,6 +20,8 @@ namespace mindex {
 
 class SequenceFileCompositeFofn;
 
+using SequenceFileCompositeFofnPtr = std::unique_ptr<SequenceFileCompositeFofn>;
+
 mindex::SequenceFileCompositeBasePtr createSequenceFileCompositeFofn(const std::string& fofn_path);
 mindex::SequenceFileCompositeBasePtr createSequenceFileCompositeFofn(const std::vector<std::string>& in_paths, mindex::SequenceFormat in_fmt);
 mindex::SequenceFileCompositeBasePtr createSequenceFileCompositeFofn(const std::vector<std::string>& in_paths, const std::vector<mindex::SequenceFormat>& in_fmts);
@@ -82,12 +84,6 @@ public:
    mindex::SequenceFormat GetOpenFileFormat_() const;
    int64_t GetOpenFileTell_() const;
    bool ParseHeaders_();
-
-   // // Open a FOFN file from disk to specifiy where to load from.
-   // bool Open_(const std::string& fofn_path);
-
-   // // Allow opening one or more files, with auto format detection.
-   // bool Open_(const std::vector<std::string>& in_paths);
 
    std::vector<std::string> files_;
    std::vector<mindex::SequenceFormat> formats_;
