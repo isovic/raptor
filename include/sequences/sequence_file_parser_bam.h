@@ -27,7 +27,7 @@ namespace mindex {
 
 class SequenceFileParserBam;
 
-// typedef std::unique_ptr<mindex::SequenceFileParserBam> SequenceFileParserBamPtr;
+using SequenceFileParserBamPtr = std::unique_ptr<mindex::SequenceFileParserBam>;
 
 mindex::SequenceFileParserBasePtr createSequenceFileParserBam(const std::string& in_path);
 
