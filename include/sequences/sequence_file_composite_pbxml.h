@@ -5,6 +5,8 @@
  *      Author: isovic
  */
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #ifndef SRC_INDEX_SEQUENCE_FILE_COMPOSITE_PBXML_H_
 #define SRC_INDEX_SEQUENCE_FILE_COMPOSITE_PBXML_H_
 
@@ -99,5 +101,7 @@ public:
 };
 
 }
+
+#endif
 
 #endif

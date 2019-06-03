@@ -5,6 +5,8 @@
  *      Author: Ivan Sovic
  */
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <sequences/sequence_file_composite_pbxml.h>
 #include <utility/stringutil.h>
 #include <utility/files.hpp>
@@ -12,11 +14,8 @@
 #include <iostream>
 #include <fstream>
 
-// #include <pbbam/BamReader.h>
-// #include <pbbam/BamWriter.h>
 #include <pbbam/PbiRawData.h>
 #include <pbbam/PbiIndexedBamReader.h>
-// #include <pbbam/PbiBasicTypes.h>
 
 namespace mindex {
 
@@ -333,3 +332,5 @@ bool SequenceFileCompositePbXml::ParseHeaders_() {
 }
 
 }
+
+#endif
