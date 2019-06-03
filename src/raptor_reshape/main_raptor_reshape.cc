@@ -12,7 +12,9 @@
 #include <args.h>
 #include <limits>
 #include <sequences/sequence_file.h>
+#include <sequences/sequence_file_composite_base.h>
 #include <sequences/sequence_file_composite_fofn.h>
+#include <sequences/sequence_file_composite_pbxml.h>
 #include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
 #include <utility/stringutil.h>
@@ -38,7 +40,27 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 	int64_t load_batch_size_int64 = static_cast<int64_t>(parameters->in_batch_size);
 	int64_t write_block_size_int64 = (parameters->block_size > 0) ? (static_cast<int64_t>(parameters->block_size * 1024 * 1024)) : std::numeric_limits<int64_t>::max();
 
-	auto seq_file_parser = mindex::createSequenceFileCompositeFofn(parameters->in_paths, parameters->in_fmt);
+	mindex::SequenceFileCompositeBasePtr seq_file_parser = nullptr;
+
+	// Sanity check for the input files. Allow only one XML file to be specified,
+	// as by design of the SequenceFileCompositePbXml.
+	bool is_xml_used = false;
+	for (const auto& in_path: parameters->in_paths) {
+		if (mindex::GetSequenceFormatFromPath(in_path) == mindex::SequenceFormat::XML) {
+			is_xml_used = true;
+			break;
+		}
+	}
+
+	// Set-up the parser for the correct sequence format.
+	if (is_xml_used && parameters->in_paths.size() != 1) {
+		FATAL_REPORT(ERR_UNEXPECTED_VALUE, "When using XML as input, only a single input can be specified.");
+	} else if (is_xml_used && parameters->in_paths.size() == 1) {
+		seq_file_parser = mindex::createSequenceFileCompositePbXml(parameters->in_paths[0]);
+	} else {
+		seq_file_parser = mindex::createSequenceFileCompositeFofn(parameters->in_paths, parameters->in_fmt);
+	}
+
 	auto seq_file = mindex::createSequenceFile();
 
 	int64_t total_num_blocks = 0;
@@ -48,22 +70,19 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 	int64_t block_num_bases = 0;
 	int64_t block_start_seq_id = 0;
 
-	std::string out_path = parameters->out_prefix + ".block." + std::to_string(total_out_files);
 	std::ofstream ofs;
-
-	if (parameters->symlink_files == false) {
-		ofs.open(out_path);
-	}
 
 	std::string out_rdb_path = parameters->out_prefix + ".rdb";
 	std::ofstream ofs_rdb(out_rdb_path);
 
-	std::string out_format = mindex::SequenceFormatToString(parameters->out_fmt);
+	std::string uber_out_format = mindex::SequenceFormatToString(parameters->out_fmt);
 
 	ofs_rdb << "V\t0.2\n";
 
 	if (parameters->symlink_files == false) {
-		ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << out_format << "\n";
+		std::string out_path = parameters->out_prefix + ".block." + std::to_string(total_out_files);
+		ofs.open(out_path);
+		ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << uber_out_format << "\n";
 	}
 
 	int64_t file_before = -1;
@@ -105,9 +124,10 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 		} else {	// WITHOUT writing to disk, just pointing to existing locations.
 			if (file_now != file_before) {
 				// In case of symlinking, the out format has to be the same as input format.
-				auto curr_out_fmt = mindex::GetSequenceFormatFromPath(parameters->in_paths[file_now]);
-				std::string out_format = mindex::SequenceFormatToString(curr_out_fmt);
-				ofs_rdb << "F\t" << file_now << "\t" << parameters->in_paths[file_now] << "\t" << out_format << "\n";
+				auto curr_file = seq_file_parser->GetCurrentFilePath();
+				auto curr_out_fmt_str = mindex::GetSequenceFormatFromPath(curr_file);
+				std::string out_format = mindex::SequenceFormatToString(curr_out_fmt_str);
+				ofs_rdb << "F\t" << file_now << "\t" << curr_file << "\t" << out_format << "\n";
 			}
 
 			ofs_rdb << "S\t" << total_num_seqs << "\t" << raptor::TrimToFirstWhiteSpace(seq->header()) << "\t" << seq->len()
@@ -126,9 +146,9 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 
 			if (parameters->split_blocks && parameters->symlink_files == false) {
 				++total_out_files;
-				out_path = parameters->out_prefix + ".block." + std::to_string(total_out_files);
+				std::string out_path = parameters->out_prefix + ".block." + std::to_string(total_out_files);
 				ofs = std::ofstream(out_path);
-				ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << out_format << "\n";
+				ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << uber_out_format << "\n";
 			}
 		}
 
