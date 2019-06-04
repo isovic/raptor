@@ -157,13 +157,11 @@ int LogSystem::Error(int severity, std::string function, std::string message) {
   ss << message;
   ss << " In function: '" << function << "'.";
   ss << "\n";
-  // << message;
 
   WriteLog(ss.str(), is_critical);
 
   if (is_critical) {
-//    WriteLog(ss.str() + std::string("Exiting."), is_critical);
-    exit(0);
+    exit(1);
   }
 
   return 0;
