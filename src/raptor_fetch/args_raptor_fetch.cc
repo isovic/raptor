@@ -5,8 +5,8 @@
  *      Author: isovic
  */
 
-#include <args_raptor_fetch.h>
-#include <args_raptor.h>
+#include <raptor_fetch/args_raptor_fetch.h>
+#include <raptor/args_raptor.h>
 #include <lib/argparser.h>
 #include <utility/stringutil.h>
 #include <version.h>

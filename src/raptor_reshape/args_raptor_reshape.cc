@@ -5,8 +5,8 @@
  *      Author: isovic
  */
 
-#include <args_raptor_reshape.h>
-#include <args_raptor.h>
+#include <raptor_reshape/args_raptor_reshape.h>
+#include <raptor/args_raptor.h>
 #include <params/params_raptor.h>
 #include <lib/argparser.h>
 #include <utility/stringutil.h>
