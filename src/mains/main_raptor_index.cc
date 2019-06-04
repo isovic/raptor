@@ -10,7 +10,7 @@
 #include <version.h>
 #include <iostream>
 #include <fstream>
-#include <args.h>
+#include <args_raptor.h>
 #include <sequences/sequence_file.h>
 #include <utility/memtime.h>
 

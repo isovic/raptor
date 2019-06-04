@@ -8,7 +8,7 @@
 #include <version.h>
 #include <iostream>
 #include <fstream>
-#include <args.h>
+#include <args_raptor.h>
 #include <limits>
 #include <sequences/sequence_file.h>
 #include <index/random_access_sequence_file.h>

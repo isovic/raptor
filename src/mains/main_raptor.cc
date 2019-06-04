@@ -17,7 +17,7 @@
 #include <graph/split_segment_graph.h>
 #include <iostream>
 #include <fstream>
-#include <args.h>
+#include <args_raptor.h>
 
 #include <raptor/mapper.h>
 #include <raptor/graph_mapper.h>

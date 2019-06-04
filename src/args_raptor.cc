@@ -1,11 +1,11 @@
 /*
- * args.cc
+ * args_raptor.cc
  *
  *  Created on: Mar 07, 2018
  *      Author: isovic
  */
 
-#include <args.h>
+#include <args_raptor.h>
 #include <params/params_raptor.h>
 #include <lib/argparser.h>
 #include <utility/stringutil.h>
@@ -804,431 +804,195 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     return 0;
 }
 
-int ProcessArgsRaptorIndex(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorIndex> parameters) {
-    bool help = false;
-    bool version = false;
+// int ProcessArgsRaptorIndex(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorIndex> parameters) {
+//     bool help = false;
+//     bool version = false;
 
-    ArgumentParser argparser;
+//     ArgumentParser argparser;
 
-    std::string infmt, ref_fmt, graph_fmt, outfmt;
-    std::string index_region_string;
+//     std::string infmt, ref_fmt, graph_fmt, outfmt;
+//     std::string index_region_string;
 
-    argparser.AddArgument(&parameters->ref_paths, VALUE_TYPE_STRING_LIST, "r", "ref", "",
-                          "Path to the sequences (fastq or fasta). Can be specified multiple times.", 0,
-                          "Input/Output options");
-    argparser.AddArgument(&parameters->out_path, VALUE_TYPE_STRING, "o", "out", "",
-                          "Path to the output file that will be generated.", 0,
-                          "Input/Output options");
-    // argparser.AddArgument(&ref_fmt, VALUE_TYPE_STRING, "", "ref-fmt", "auto",
-    //                       "Format of the reference sequence file. Options are:\n auto  - Determines the "
-    //                       "format automatically from file extension.\n fastq - Loads FASTQ or "
-    //                       "FASTA files.\n fasta - Loads FASTQ or FASTA files.\n gfa   - Graphical "
-    //                       "Fragment Assembly format.\n gfa1  - GFA-1 format.\n gfa2  - GFA-2 format\n sam   - Sequence Alignment/Mapping format.",
-    //                       0, "Input/Output options");
-    argparser.AddArgument(&parameters->batch_size, VALUE_TYPE_DOUBLE, "B", "batch", "200",
-                          "Queries will be loaded in batches of the size specified in megabytes. If there is a "
-                          "trailing 'x', then the batch size is in terms of coverage of reference genome. "
-                          "Value <= 0 loads the entire file.",
-                          0, "Input/Output options");
-    argparser.AddArgument(&(index_region_string), VALUE_TYPE_STRING, "", "region", "",
-                          "Indexes only the specified region. Region format: chr:start-end. Start "
-                          "is 0-based, and end is not inclusive. If end is <= 0, the entire suffix "
-                          "of the reference will be indexed.",
-                          0, "Index options");
-    argparser.AddArgument(
-        &(parameters->index_params->index_only_fwd_strand), VALUE_TYPE_BOOL, "", "fwd", "0",
-        "If specified, only the fwd strand of the reference will be indexed.", 0, "Index options");
-    argparser.AddArgument(&(parameters->index_params->k), VALUE_TYPE_INT32, "k", "seed-len", "15",
-                          "Length of the seeds used for hashing and lookup.", 0, "Index options");
-    argparser.AddArgument(&(parameters->index_params->w), VALUE_TYPE_INT32, "w", "minimizer-window",
-                          "5",
-                          "Length of the window to select a minimizer from. If equal to 1, "
-                          "minimizers will be turned off.",
-                          0, "Index options");
-    argparser.AddArgument(&(parameters->index_params->freq_percentil), VALUE_TYPE_DOUBLE, "",
-                          "freq-percentile", "0.0002",
-                          "Filer this fraction of most frequent seeds in the lookup process.", 0,
-                          "Index options");
-    argparser.AddArgument(&(parameters->index_params->min_occ_cutoff), VALUE_TYPE_INT32, "",
-                          "min-occ-cutoff", "0",
-                          "If the freq-percentil value is less than this count, this will be used "
-                          "instead for seed count filtering.",
-                          0, "Index options");
-    argparser.AddArgument(
-        &(parameters->index_params->homopolymer_suppression), VALUE_TYPE_BOOL, "", "hp-suppress",
-        "0", "If specified, homopolymer runs will be suppressed into a single seed point.", 0,
-        "Index options");
-    argparser.AddArgument(&(parameters->index_params->max_homopolymer_len), VALUE_TYPE_INT32, "",
-                          "max-hp-len", "5", "Compress only homopolymer runs below this length.", 0,
-                          "Index options");
-    argparser.AddArgument(
-        &parameters->keep_lowercase, VALUE_TYPE_BOOL, "", "keep-lowercase", "0",
-        "If this parameter is not specified, lowercase bases will be converted to uppercase.", 0,
-        "Index options");
-    argparser.AddArgument(&parameters->num_threads, VALUE_TYPE_INT64, "t", "threads", "-1",
-                          "Number of threads to use. If '-1', number of threads will be equal to "
-                          "min(24, num_cores/2).",
-                          0, "Other options");
-    argparser.AddArgument(
-        &parameters->verbose_level, VALUE_TYPE_INT64, "v", "verbose", "5",
-        "Verbose level. If equal to 0 nothing except strict output will be placed on stdout.", 0,
-        "Other options");
+//     argparser.AddArgument(&parameters->ref_paths, VALUE_TYPE_STRING_LIST, "r", "ref", "",
+//                           "Path to the sequences (fastq or fasta). Can be specified multiple times.", 0,
+//                           "Input/Output options");
+//     argparser.AddArgument(&parameters->out_path, VALUE_TYPE_STRING, "o", "out", "",
+//                           "Path to the output file that will be generated.", 0,
+//                           "Input/Output options");
+//     // argparser.AddArgument(&ref_fmt, VALUE_TYPE_STRING, "", "ref-fmt", "auto",
+//     //                       "Format of the reference sequence file. Options are:\n auto  - Determines the "
+//     //                       "format automatically from file extension.\n fastq - Loads FASTQ or "
+//     //                       "FASTA files.\n fasta - Loads FASTQ or FASTA files.\n gfa   - Graphical "
+//     //                       "Fragment Assembly format.\n gfa1  - GFA-1 format.\n gfa2  - GFA-2 format\n sam   - Sequence Alignment/Mapping format.",
+//     //                       0, "Input/Output options");
+//     argparser.AddArgument(&parameters->batch_size, VALUE_TYPE_DOUBLE, "B", "batch", "200",
+//                           "Queries will be loaded in batches of the size specified in megabytes. If there is a "
+//                           "trailing 'x', then the batch size is in terms of coverage of reference genome. "
+//                           "Value <= 0 loads the entire file.",
+//                           0, "Input/Output options");
+//     argparser.AddArgument(&(index_region_string), VALUE_TYPE_STRING, "", "region", "",
+//                           "Indexes only the specified region. Region format: chr:start-end. Start "
+//                           "is 0-based, and end is not inclusive. If end is <= 0, the entire suffix "
+//                           "of the reference will be indexed.",
+//                           0, "Index options");
+//     argparser.AddArgument(
+//         &(parameters->index_params->index_only_fwd_strand), VALUE_TYPE_BOOL, "", "fwd", "0",
+//         "If specified, only the fwd strand of the reference will be indexed.", 0, "Index options");
+//     argparser.AddArgument(&(parameters->index_params->k), VALUE_TYPE_INT32, "k", "seed-len", "15",
+//                           "Length of the seeds used for hashing and lookup.", 0, "Index options");
+//     argparser.AddArgument(&(parameters->index_params->w), VALUE_TYPE_INT32, "w", "minimizer-window",
+//                           "5",
+//                           "Length of the window to select a minimizer from. If equal to 1, "
+//                           "minimizers will be turned off.",
+//                           0, "Index options");
+//     argparser.AddArgument(&(parameters->index_params->freq_percentil), VALUE_TYPE_DOUBLE, "",
+//                           "freq-percentile", "0.0002",
+//                           "Filer this fraction of most frequent seeds in the lookup process.", 0,
+//                           "Index options");
+//     argparser.AddArgument(&(parameters->index_params->min_occ_cutoff), VALUE_TYPE_INT32, "",
+//                           "min-occ-cutoff", "0",
+//                           "If the freq-percentil value is less than this count, this will be used "
+//                           "instead for seed count filtering.",
+//                           0, "Index options");
+//     argparser.AddArgument(
+//         &(parameters->index_params->homopolymer_suppression), VALUE_TYPE_BOOL, "", "hp-suppress",
+//         "0", "If specified, homopolymer runs will be suppressed into a single seed point.", 0,
+//         "Index options");
+//     argparser.AddArgument(&(parameters->index_params->max_homopolymer_len), VALUE_TYPE_INT32, "",
+//                           "max-hp-len", "5", "Compress only homopolymer runs below this length.", 0,
+//                           "Index options");
+//     argparser.AddArgument(
+//         &parameters->keep_lowercase, VALUE_TYPE_BOOL, "", "keep-lowercase", "0",
+//         "If this parameter is not specified, lowercase bases will be converted to uppercase.", 0,
+//         "Index options");
+//     argparser.AddArgument(&parameters->num_threads, VALUE_TYPE_INT64, "t", "threads", "-1",
+//                           "Number of threads to use. If '-1', number of threads will be equal to "
+//                           "min(24, num_cores/2).",
+//                           0, "Other options");
+//     argparser.AddArgument(
+//         &parameters->verbose_level, VALUE_TYPE_INT64, "v", "verbose", "5",
+//         "Verbose level. If equal to 0 nothing except strict output will be placed on stdout.", 0,
+//         "Other options");
 
-    argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
-                          "Other options");
+//     argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
+//                           "Other options");
 
-    argparser.AddArgument(&help, VALUE_TYPE_BOOL, "h", "help", "0", "View this help.", 0,
-                          "Other options");
+//     argparser.AddArgument(&help, VALUE_TYPE_BOOL, "h", "help", "0", "View this help.", 0,
+//                           "Other options");
 
-    argparser.ProcessArguments(argc, argv);
+//     argparser.ProcessArguments(argc, argv);
 
-    // Store the command line in parameters.
-    std::stringstream ss_command_line;
-    for (int i = 0; i < argc; i++) {
-        if (i > 0) ss_command_line << " ";
-        ss_command_line << argv[i];
-    }
-    parameters->command_line = ss_command_line.str();
+//     // Store the command line in parameters.
+//     std::stringstream ss_command_line;
+//     for (int i = 0; i < argc; i++) {
+//         if (i > 0) ss_command_line << " ";
+//         ss_command_line << argv[i];
+//     }
+//     parameters->command_line = ss_command_line.str();
 
-    // Check if help was triggered.
-    if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        std::stringstream ss;
-        ss << SOFTWARE_NAME
-           << " - Indexing tool for Raptor - A very accurate and sensitive long-read, high error-rate sequence mapper\n"
-           << SOFTWARE_NAME << " ";
-        ss << "Version: " << RAPTOR_VERSION_STRING << "\n";
-        ss << "Build date: " << std::string(RELEASE_DATE).c_str() << "\n";
-        ss << "\n";
-        ss << LICENCE_INFORMATION << "\n";
-        ss << "\n";
-        ss << "Usage:\n";
-        ss << "\traptor [options] -r <reference_file> -d <reads_file> -o <output_sam_path>\n";
-        ss << "\n";
+//     // Check if help was triggered.
+//     if (argparser.GetArgumentByLongName("help")->is_set == true) {
+//         std::stringstream ss;
+//         ss << SOFTWARE_NAME
+//            << " - Indexing tool for Raptor - A very accurate and sensitive long-read, high error-rate sequence mapper\n"
+//            << SOFTWARE_NAME << " ";
+//         ss << "Version: " << RAPTOR_VERSION_STRING << "\n";
+//         ss << "Build date: " << std::string(RELEASE_DATE).c_str() << "\n";
+//         ss << "\n";
+//         ss << LICENCE_INFORMATION << "\n";
+//         ss << "\n";
+//         ss << "Usage:\n";
+//         ss << "\traptor [options] -r <reference_file> -d <reads_file> -o <output_sam_path>\n";
+//         ss << "\n";
 
-        fprintf(stderr, "%s\n", ss.str().c_str());
-        fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
-        exit(0);
-    }
+//         fprintf(stderr, "%s\n", ss.str().c_str());
+//         fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
+//         exit(0);
+//     }
 
-    if (version) {
-        std::stringstream ss;
-        ss << RAPTOR_VERSION_STRING << "\n";
-        fprintf(stdout, "%s", ss.str().c_str());
-        exit(0);
-    }
+//     if (version) {
+//         std::stringstream ss;
+//         ss << RAPTOR_VERSION_STRING << "\n";
+//         fprintf(stdout, "%s", ss.str().c_str());
+//         exit(0);
+//     }
 
-    // Sanity check for the reference path.
-    if (parameters->ref_paths.size() == 0) {
-        fprintf(stderr, "Please specify the path to the reference file.\n");
-        fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
-    }
-    for (auto& ref_path: parameters->ref_paths) {
-        if (!raptor::FileExists(ref_path.c_str())) {
-            fprintf(stderr, "Reference does not exist: '%s'\n\n", ref_path.c_str());
-            VerboseShortHelpAndExit(argc, argv);
-        }
-    }
+//     // Sanity check for the reference path.
+//     if (parameters->ref_paths.size() == 0) {
+//         fprintf(stderr, "Please specify the path to the reference file.\n");
+//         fprintf(stderr, "\n");
+//         VerboseShortHelpAndExit(argc, argv);
+//     }
+//     for (auto& ref_path: parameters->ref_paths) {
+//         if (!raptor::FileExists(ref_path.c_str())) {
+//             fprintf(stderr, "Reference does not exist: '%s'\n\n", ref_path.c_str());
+//             VerboseShortHelpAndExit(argc, argv);
+//         }
+//     }
 
-    // // Parse the reference format.
-    // parameters->ref_fmt =
-    //     (ref_fmt == "auto")
-    //         ? mindex::SequenceFormat::Auto
-    //         : (ref_fmt == "fasta")
-    //             ? mindex::SequenceFormat::Fasta
-    //             : (ref_fmt == "fastq") ? mindex::SequenceFormat::Fastq
-    //             : (ref_fmt == "gfa") ? mindex::SequenceFormat::GFA
-    //             : (ref_fmt == "gfa1") ? mindex::SequenceFormat::GFA1
-    //             : (ref_fmt == "gfa2") ? mindex::SequenceFormat::GFA2
-    //             : (ref_fmt == "sam") ? mindex::SequenceFormat::SAM
-    //             : mindex::SequenceFormat::Unknown;
-    // if (parameters->ref_fmt == mindex::SequenceFormat::Unknown) {
-    //     fprintf(stderr, "Unknown reference format '%s'!\n\n", ref_fmt.c_str());
-    //     VerboseShortHelpAndExit(argc, argv);
-    // }
+//     // // Parse the reference format.
+//     // parameters->ref_fmt =
+//     //     (ref_fmt == "auto")
+//     //         ? mindex::SequenceFormat::Auto
+//     //         : (ref_fmt == "fasta")
+//     //             ? mindex::SequenceFormat::Fasta
+//     //             : (ref_fmt == "fastq") ? mindex::SequenceFormat::Fastq
+//     //             : (ref_fmt == "gfa") ? mindex::SequenceFormat::GFA
+//     //             : (ref_fmt == "gfa1") ? mindex::SequenceFormat::GFA1
+//     //             : (ref_fmt == "gfa2") ? mindex::SequenceFormat::GFA2
+//     //             : (ref_fmt == "sam") ? mindex::SequenceFormat::SAM
+//     //             : mindex::SequenceFormat::Unknown;
+//     // if (parameters->ref_fmt == mindex::SequenceFormat::Unknown) {
+//     //     fprintf(stderr, "Unknown reference format '%s'!\n\n", ref_fmt.c_str());
+//     //     VerboseShortHelpAndExit(argc, argv);
+//     // }
 
-    if (parameters->num_threads < 0) {
-        parameters->num_threads = std::min(24, ((int)std::thread::hardware_concurrency()) / 2);
-    }
+//     if (parameters->num_threads < 0) {
+//         parameters->num_threads = std::min(24, ((int)std::thread::hardware_concurrency()) / 2);
+//     }
 
-    if (parameters->index_params->w <= 0) {
-        fprintf(stderr, "Minimizer window length cannot be <= 0!\n");
-        VerboseShortHelpAndExit(argc, argv);
-    }
+//     if (parameters->index_params->w <= 0) {
+//         fprintf(stderr, "Minimizer window length cannot be <= 0!\n");
+//         VerboseShortHelpAndExit(argc, argv);
+//     }
 
-    if (parameters->index_params->freq_percentil < 0.0 ||
-        parameters->index_params->freq_percentil > 1.0) {
-        fprintf(stderr, "Frequency percentil should be in range [0.0, 1.0].\n");
-        VerboseShortHelpAndExit(argc, argv);
-    }
+//     if (parameters->index_params->freq_percentil < 0.0 ||
+//         parameters->index_params->freq_percentil > 1.0) {
+//         fprintf(stderr, "Frequency percentil should be in range [0.0, 1.0].\n");
+//         VerboseShortHelpAndExit(argc, argv);
+//     }
 
-    // Write this out for every debug verbose level.
-    if (parameters->verbose_level > 5) {
-        fprintf(stderr, "%s\n", argparser.VerboseArguments().c_str());
-    }
+//     // Write this out for every debug verbose level.
+//     if (parameters->verbose_level > 5) {
+//         fprintf(stderr, "%s\n", argparser.VerboseArguments().c_str());
+//     }
 
-    parameters->index_params->is_region_specified = false;
-    if (index_region_string.size() > 0) {
-        parameters->index_params->is_region_specified = true;
+//     parameters->index_params->is_region_specified = false;
+//     if (index_region_string.size() > 0) {
+//         parameters->index_params->is_region_specified = true;
 
-        size_t rname_end = index_region_string.find_last_of(":");
-        if (rname_end == std::string::npos) {
-            parameters->index_params->region_rname = index_region_string;
-            parameters->index_params->region_rstart = 0;
-            parameters->index_params->region_rend = -1;
-        } else {
-            parameters->index_params->region_rname = index_region_string.substr(0, rname_end);
-            size_t dash_pos = index_region_string.find_first_of("-", (rname_end + 1));
-            if (dash_pos == std::string::npos) {
-                fprintf(stderr,
-                        "Region format is incorrect. Two coordinates need to be provided, "
-                        "separated by '-', in the format: chr:start-end.\n");
-                VerboseShortHelpAndExit(argc, argv);
-            }
-            parameters->index_params->region_rstart =
-                atoi(index_region_string.substr((rname_end + 1), dash_pos).c_str());
-            parameters->index_params->region_rend =
-                atoi(index_region_string.substr((dash_pos + 1)).c_str());
-        }
-    }
+//         size_t rname_end = index_region_string.find_last_of(":");
+//         if (rname_end == std::string::npos) {
+//             parameters->index_params->region_rname = index_region_string;
+//             parameters->index_params->region_rstart = 0;
+//             parameters->index_params->region_rend = -1;
+//         } else {
+//             parameters->index_params->region_rname = index_region_string.substr(0, rname_end);
+//             size_t dash_pos = index_region_string.find_first_of("-", (rname_end + 1));
+//             if (dash_pos == std::string::npos) {
+//                 fprintf(stderr,
+//                         "Region format is incorrect. Two coordinates need to be provided, "
+//                         "separated by '-', in the format: chr:start-end.\n");
+//                 VerboseShortHelpAndExit(argc, argv);
+//             }
+//             parameters->index_params->region_rstart =
+//                 atoi(index_region_string.substr((rname_end + 1), dash_pos).c_str());
+//             parameters->index_params->region_rend =
+//                 atoi(index_region_string.substr((dash_pos + 1)).c_str());
+//         }
+//     }
 
-    return 0;
-}
-
-int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
-    bool help = false;
-    bool version = false;
-
-    ArgumentParser argparser;
-    std::string in_fmt, out_fmt;
-
-    // std::string infmt, ref_fmt, graph_fmt, outfmt;
-
-    argparser.AddArgument(&parameters->in_paths, VALUE_TYPE_STRING_LIST, "i", "in", "",
-                          "Path to the sequences (fastq or fasta). Can be specified multiple times.", 0,
-                          "Input/Output options");
-    argparser.AddArgument(&parameters->out_prefix, VALUE_TYPE_STRING, "o", "out-prefix", "",
-                          "Prefix of the output files that will be generated.", 0,
-                          "Input/Output options");
-    argparser.AddArgument(&in_fmt, VALUE_TYPE_STRING, "", "in-fmt", "auto",
-                          "Format of the input sequence file. Options are:"
-                          "\n auto  - Determines the format automatically from file extension."
-                          "\n fastq - Loads FASTQ or FASTA files.\n fasta - Loads FASTQ or FASTA files."
-                          "\n gfa   - Graphical Fragment Assembly format.\n gfa1  - GFA-1 format."
-                          "\n gfa2  - GFA-2 format"
-                          "\n sam   - Sequence Alignment/Mapping format."
-#ifdef RAPTOR_COMPILED_WITH_PBBAM
-                          "\n bam   - Binary Sequence Alignment/Mapping format."
-#endif
-                          "\n fofn  - File Of File Names. Format is determined automatically.",
-                          0, "Input/Output options");
-    argparser.AddArgument(&out_fmt, VALUE_TYPE_STRING, "", "out-fmt", "fasta",
-                          "Format of the output file(s). Options are:\n fastq, fasta, gfa1, gfa2, sam.",
-                          0, "Input/Output options");
-    argparser.AddArgument(&parameters->in_batch_size, VALUE_TYPE_DOUBLE, "", "in-batch", "400",
-                          "Queries will be loaded in batches of the size specified in megabytes. "
-                          "Value <= 0 loads the entire file.",
-                          0, "Input/Output options");
-    argparser.AddArgument(&parameters->block_size, VALUE_TYPE_DOUBLE, "", "block-size", "400",
-                          "Partition sequences into blocks. "
-                          "Value <= 0 loads the entire file.",
-                          0, "Input/Output options");
-    argparser.AddArgument(
-        &parameters->split_blocks, VALUE_TYPE_BOOL, "", "split-blocks", "0",
-        "If true, each block into a separate file.", 0,
-        "Input/Output options");
-    argparser.AddArgument(
-        &parameters->rename_seqs, VALUE_TYPE_BOOL, "", "rename", "0",
-        "Sequences will be renamed in order of appearance.", 0,
-        "Input/Output options");
-    argparser.AddArgument(
-        &parameters->keep_lowercase, VALUE_TYPE_BOOL, "", "keep-lowercase", "0",
-        "If this parameter is not specified, lowercase bases will be converted to uppercase.", 0,
-        "Other options");
-    argparser.AddArgument(
-        &parameters->symlink_files, VALUE_TYPE_BOOL, "", "symlink", "0",
-        "Sequences will not be written to block files, but only indexed, while still pointing to their original files.", 0,
-        "Other options");
-    argparser.AddArgument(
-        &parameters->verbose_level, VALUE_TYPE_INT64, "v", "verbose", "5",
-        "Verbose level. If equal to 0 nothing except strict output will be placed on stdout.", 0,
-        "Other options");
-    // argparser.AddArgument(
-    //     &parameters->filter_pb_max, VALUE_TYPE_BOOL, "", "filt-pb-max", "0",
-    //     "Keep only maximum length subread per ZMW.", 0,
-    //     "Other options");
-
-    argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
-                          "Other options");
-
-    argparser.AddArgument(&help, VALUE_TYPE_BOOL, "h", "help", "0", "View this help.", 0,
-                          "Other options");
-
-    argparser.ProcessArguments(argc, argv);
-
-    // Store the command line in parameters.
-    std::stringstream ss_command_line;
-    for (int i = 0; i < argc; i++) {
-        if (i > 0) ss_command_line << " ";
-        ss_command_line << argv[i];
-    }
-    parameters->command_line = ss_command_line.str();
-
-    // Check if help was triggered.
-    if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        std::stringstream ss;
-        ss << SOFTWARE_NAME
-           << " - Data reshaping tool for Raptor - A very accurate and sensitive long-read, high error-rate sequence mapper\n"
-           << SOFTWARE_NAME << " ";
-        ss << "Version: " << RAPTOR_VERSION_STRING << "\n";
-        ss << "Build date: " << std::string(RELEASE_DATE).c_str() << "\n";
-        ss << "\n";
-        ss << LICENCE_INFORMATION << "\n";
-        ss << "\n";
-        ss << "Usage:\n";
-        ss << "\traptor-reshape [options] -r <reference_file>";
-        ss << "\n";
-
-        fprintf(stderr, "%s\n", ss.str().c_str());
-        fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
-        exit(0);
-    }
-
-    if (version) {
-        std::stringstream ss;
-        ss << RAPTOR_VERSION_STRING << "\n";
-        fprintf(stdout, "%s", ss.str().c_str());
-        exit(0);
-    }
-
-    // Sanity check for the reference path.
-    if (parameters->in_paths.size() == 0) {
-        fprintf(stderr, "Please specify the path to the reference file.\n");
-        fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
-    }
-
-    /////////////////////////////////////////////////
-    /// Parsing and validating the input formats. ///
-    /////////////////////////////////////////////////
-    // First check that the specified format is valid.
-    parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
-    if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
-        fprintf(stderr, "Unsupported input format '%s'!\n\n", in_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
-    }
-    // Parse the input format.
-    parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
-    if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
-        fprintf(stderr, "Unknown input format '%s'!\n\n", in_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
-    }
-    // Collect all FOFN files.
-    parameters->in_paths = ExpandPathList(parameters->in_fmt, in_fmt, parameters->in_paths);
-    // Validate the input files and formats.
-    ValidateInputFiles(argc, argv, parameters->in_fmt, parameters->in_paths);
-    // In case the input was RaptorDB, modify the infmt for future use in the index factory.
-    if (IsInputFormatRaptorDB(parameters->in_fmt, parameters->in_paths)) {
-        parameters->in_fmt = mindex::SequenceFormat::RaptorDB;
-    }
-    parameters->in_fmt = (parameters->in_fmt == mindex::SequenceFormat::FOFN) ? mindex::SequenceFormat::Auto : parameters->in_fmt;
-    /////////////////////////////////////////////////
-
-    // Parse the output format.
-    parameters->out_fmt = mindex::SequenceFormatFromString(out_fmt);
-    if (parameters->out_fmt == mindex::SequenceFormat::Unknown || parameters->out_fmt == mindex::SequenceFormat::Auto || parameters->out_fmt == mindex::SequenceFormat::GFA) {
-        fprintf(stderr, "Unsupported output format '%s'!\n\n", out_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
-    }
-
-    if (parameters->symlink_files) {
-        if (parameters->rename_seqs) {
-            fprintf(stderr, "Option '--rename' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
-        }
-        if (parameters->keep_lowercase) {
-            fprintf(stderr, "Option '--keep-lowercase' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
-        }
-        if (parameters->split_blocks) {
-            fprintf(stderr, "Option '--split-blocks' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
-        }
-    }
-
-    // Write this out for every debug verbose level.
-    if (parameters->verbose_level > 5) {
-        fprintf(stderr, "%s\n", argparser.VerboseArguments().c_str());
-    }
-
-    return 0;
-}
-
-int ProcessArgsRaptorFetch(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorFetch> parameters) {
-    bool help = false;
-    bool version = false;
-
-    ArgumentParser argparser;
-
-    argparser.AddArgument(&parameters->in_path, VALUE_TYPE_STRING, "i", "input", "",
-                          "Input Raptor DB file.", 0,
-                          "Input/Output options");
-
-    argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
-                          "Other options");
-
-    argparser.AddArgument(&help, VALUE_TYPE_BOOL, "h", "help", "0", "View this help.", 0,
-                          "Other options");
-
-    argparser.ProcessArguments(argc, argv);
-
-    // Store the command line in parameters.
-    std::stringstream ss_command_line;
-    for (int i = 0; i < argc; i++) {
-        if (i > 0) ss_command_line << " ";
-        ss_command_line << argv[i];
-    }
-    parameters->command_line = ss_command_line.str();
-
-    // Check if help was triggered.
-    if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        std::stringstream ss;
-        ss << SOFTWARE_NAME
-           << " - Data fetching tool for Raptor - A very accurate and sensitive long-read, high error-rate sequence mapper\n"
-           << SOFTWARE_NAME << " ";
-        ss << "Version: " << RAPTOR_VERSION_STRING << "\n";
-        ss << "Build date: " << std::string(RELEASE_DATE).c_str() << "\n";
-        ss << "\n";
-        ss << LICENCE_INFORMATION << "\n";
-        ss << "\n";
-        ss << "Usage:\n";
-        ss << "\traptor-reshape [options] -r <reference_file>";
-        ss << "\n";
-
-        fprintf(stderr, "%s\n", ss.str().c_str());
-        fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
-        exit(0);
-    }
-
-    if (version) {
-        std::stringstream ss;
-        ss << RAPTOR_VERSION_STRING << "\n";
-        fprintf(stdout, "%s", ss.str().c_str());
-        exit(0);
-    }
-
-    // Sanity check for the input path.
-    if (!raptor::FileExists(parameters->in_path.c_str())) {
-        fprintf(stderr, "Input file does not exist: '%s'\n\n", parameters->in_path.c_str());
-        VerboseShortHelpAndExit(argc, argv);
-    }
-
-    // Write this out for every debug verbose level.
-    if (parameters->verbose_level > 5) {
-        fprintf(stderr, "%s\n", argparser.VerboseArguments().c_str());
-    }
-
-    return 0;
-}
+//     return 0;
+// }
 
 } /* namespace raptor */

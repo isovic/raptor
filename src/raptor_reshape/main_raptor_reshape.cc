@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <args.h>
+#include <args_raptor_reshape.h>
 #include <limits>
 #include <sequences/sequence_file.h>
 #include <sequences/sequence_file_composite_base.h>

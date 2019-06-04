@@ -99,7 +99,8 @@ raptor_cpp_sources = files([
   'writer/output_formatter.cc',
   'writer/raptor_results_writer.cc',
 
-  'args.cc',
+  'args_raptor.cc',
+  'args_raptor_reshape.cc',
 
 ])
 
