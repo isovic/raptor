@@ -20,7 +20,7 @@
 
 namespace raptor {
 
-void VerboseShortHelpAndExit(int argc, char **argv) {
+void VerboseShortHelpAndExit(int argc, char **argv, int ret_val) {
     fprintf(stderr, "For detailed help, please run with -h option.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Example usage:\n");
@@ -36,7 +36,7 @@ void VerboseShortHelpAndExit(int argc, char **argv) {
     fprintf(stderr, "Build date: %s\n", std::string(RELEASE_DATE).c_str());
     fprintf(stderr, "\n");
 
-    exit(0);
+    exit(ret_val);
 }
 
 mindex::SequenceFormat WrapGetSequenceFormatFromPath(const mindex::SequenceFormat& apriori_in_fmt, const std::string& path) {
@@ -560,22 +560,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Check if help was triggered.
     if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        std::stringstream ss;
-        ss << SOFTWARE_NAME
-           << " - A very accurate and sensitive long-read, high error-rate sequence mapper\n"
-           << SOFTWARE_NAME << " ";
-        ss << "Version: " << RAPTOR_VERSION_STRING << "\n";
-        ss << "Build date: " << std::string(RELEASE_DATE).c_str() << "\n";
-        ss << "\n";
-        ss << LICENCE_INFORMATION << "\n";
-        ss << "\n";
-        ss << "Usage:\n";
-        ss << "\traptor [options] -r <reference_file> -d <reads_file> -o <output_sam_path>\n";
-        ss << "\n";
-
-        fprintf(stderr, "%s\n", ss.str().c_str());
-        fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
-        exit(0);
+        VerboseShortHelpAndExit(argc, argv, 0);
     }
 
     if (version) {

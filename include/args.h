@@ -18,7 +18,7 @@
 
 namespace raptor {
 
-void VerboseShortHelpAndExit(int argc, char **argv);
+void VerboseShortHelpAndExit(int argc, char **argv, int ret_val = 1);
 int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptor> parameters);
 int ProcessArgsRaptorIndex(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorIndex> parameters);
 int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptorReshape> parametert);
