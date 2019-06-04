@@ -50,7 +50,7 @@ std::string LogSystem::GenerateErrorMessage(uint32_t error_type,
 
         std::stringstream ss;
         ss << std::string("#") << std::string(error_type_as_string)
-        << std::string(": ") << "Memory assertion failure. Possible cause - not enough memory or memory not allocated.";
+            << std::string(": ") << "Memory assertion failure. Possible cause - not enough memory or memory not allocated.";
         Error(SEVERITY_INT_FATAL, __FUNCTION__, ss.str());
 
         return ((std::string) "");
@@ -142,18 +142,20 @@ int LogSystem::Error(int severity, std::string function, std::string message) {
     const char *severity_lookup[] = {"INFO", "WARNING", "ERROR", "FATAL"};
 
     std::stringstream ss;
-    ss << "[" << timestamp << " ";
+    ss << "[" << timestamp << ", Severity:";
     if (severity == SEVERITY_INT_WARNING)
-        ss << severity_lookup[1] << "] ";
+        ss << severity_lookup[1];
     else if (severity == SEVERITY_INT_ERROR)
-        ss << severity_lookup[2] << "] ";
+        ss << severity_lookup[2];
     else if (severity == SEVERITY_INT_FATAL)
-        ss << severity_lookup[3] << "] ";
+        ss << severity_lookup[3];
     else
-        ss << severity_lookup[0] << "] ";
+        ss << severity_lookup[0];
 
+    ss << ", Fn:'" << function << "'";
+    ss << "] ";
     ss << message;
-    ss << " In function: '" << function << "'.";
+    // ss << " In function: '" << function << "'.";
     ss << "\n";
 
     WriteLog(ss.str(), is_critical);
