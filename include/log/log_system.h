@@ -1,8 +1,8 @@
 /*
- * ErrorHandling.h
+ * log_system.h
  *
  *  Created on: Apr 29, 2013
- *      Author: ivan
+ *      Author: Ivan Sovic
  */
 
 #ifndef ERRORHANDLING_H_
@@ -33,40 +33,36 @@
 #define ERROR_REPORT(error_code, ...)   LogSystem::GetInstance().Error(SEVERITY_INT_ERROR, __FUNCTION__, LogSystem::GetInstance().GenerateErrorMessage(error_code, __VA_ARGS__))
 #define FATAL_REPORT(error_code, ...)   LogSystem::GetInstance().Error(SEVERITY_INT_FATAL, __FUNCTION__, LogSystem::GetInstance().GenerateErrorMessage(error_code, __VA_ARGS__))
 
-// LogSystem class is used to standardize the error reporting process.
-// Sample usage:
-//    LOG(FATAL) << LogSystem::GenerateErrorMessage(ERR_MEMORY, "Parameter that caused the crash: fp = %ld", (int64_t) fp);
-//
 class LogSystem {
  public:
-  LogSystem();
-  ~LogSystem();
+    LogSystem();
+    ~LogSystem();
 
-  static LogSystem& GetInstance();
+    static LogSystem& GetInstance();
 
-  // GenerateErrorMessage takes the error number and an additional message
-  // formatted as C-style string (same as printf's formatted string). It then
-  // compiles an error message, converted to a C++ string, that can be given to
-  // a logging unit for output.
-  // Sample usage:
-  //  std::string error_message = ErrorHandling::GenerateErrorMessage (ERR_OPENING_FILE, "Could not open file: '%s'", file_path.c_str());
-  std::string GenerateErrorMessage(uint32_t error_type,
-                                          const char *additional_message, ...);
-  int WriteLog(std::string log_entry, bool always_output_to_std=false);
-  int Error(int severity, std::string function, std::string message);
-  int Log(uint32_t verbose_level, bool trigger_condition, std::string message, std::string calling_func="", std::string calling_file="", int32_t calling_line=-1);
-  void SetProgramVerboseLevelFromInt(int64_t verbose_level);
+    // GenerateErrorMessage takes the error number and an additional message
+    // formatted as C-style string (same as printf's formatted string). It then
+    // compiles an error message, converted to a C++ string, that can be given to
+    // a logging unit for output.
+    // Sample usage:
+    //  std::string error_message = ErrorHandling::GenerateErrorMessage (ERR_OPENING_FILE, "Could not open file: '%s'", file_path.c_str());
+    std::string GenerateErrorMessage(uint32_t error_type,
+                                            const char *additional_message, ...);
+    int WriteLog(std::string log_entry, bool always_output_to_std=false);
+    int Error(int severity, std::string function, std::string message);
+    int Log(uint32_t verbose_level, bool trigger_condition, std::string message, std::string calling_func="", std::string calling_file="", int32_t calling_line=-1);
+    void SetProgramVerboseLevelFromInt(int64_t verbose_level);
 
-  std::string GetLocalTime();
-  std::string GetUTCTime(std::string fmt="%a, %d %b %y %T %z");
-  // The function uses vasprintf for formatting the function arguments.
-  // This option was chosen because it preallocates the memory needed to store
-  // the output formatted string, unlike most other *printf alternatives
-  static std::string FormatString(const char* additional_message, ...);
+    std::string GetLocalTime();
+    std::string GetUTCTime(std::string fmt="%a, %d %b %y %T %z");
+    // The function uses vasprintf for formatting the function arguments.
+    // This option was chosen because it preallocates the memory needed to store
+    // the output formatted string, unlike most other *printf alternatives
+    static std::string FormatString(const char* additional_message, ...);
 
-  std::string LOG_FILE;
-  uint32_t LOG_VERBOSE_TYPE;
-  uint32_t PROGRAM_VERBOSE_LEVEL;
+    std::string LOG_FILE;
+    uint32_t LOG_VERBOSE_TYPE;
+    uint32_t PROGRAM_VERBOSE_LEVEL;
 };
 
 #define LOG_VERBOSE_STD     1 << 0
