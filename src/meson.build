@@ -101,6 +101,7 @@ raptor_cpp_sources = files([
 
   'raptor/args_raptor.cc',
   'raptor_reshape/args_raptor_reshape.cc',
+  'raptor_fetch/args_raptor_fetch.cc',
 
 ])
 
