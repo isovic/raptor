@@ -171,7 +171,7 @@ raptor_dep = declare_dependency(
 if not meson.is_subproject()
   raptor_bin = executable(
     'raptor',
-    ['src/mains/main_raptor.cc'],
+    ['src/raptor/main_raptor.cc'],
     install : true,
     install_rpath : '$ORIGIN/../' + get_option('libdir'),
     build_by_default : true,
