@@ -1,6 +1,7 @@
 #include <writer/raptor_results_writer_stream.h>
 #include <writer/output_formatter.h>
 #include <fstream>
+#include <log/log_tools.h>
 
 namespace raptor {
 
