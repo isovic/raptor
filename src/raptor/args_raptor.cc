@@ -20,7 +20,7 @@
 
 namespace raptor {
 
-void VerboseShortHelpAndExit(int argc, char **argv, int ret_val) {
+void VerboseShortHelp(int argc, char **argv) {
     fprintf(stderr, "For detailed help, please run with -h option.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Example usage:\n");
@@ -35,7 +35,10 @@ void VerboseShortHelpAndExit(int argc, char **argv, int ret_val) {
             RAPTOR_VERSION_PATCH, RAPTOR_VERSION_COMMIT.c_str());
     fprintf(stderr, "Build date: %s\n", std::string(RELEASE_DATE).c_str());
     fprintf(stderr, "\n");
+}
 
+void VerboseShortHelpAndExit(int argc, char **argv, int ret_val) {
+    VerboseShortHelp(argc, argv);
     exit(ret_val);
 }
 
@@ -173,6 +176,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n sam   - Sequence Alignment/Mapping format."
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
+                          "\n xml   - PacBio Dataset format."
 #endif
                           "\n fofn  - File Of File Names."
                           "\n rdb   - RaptorDB format."
@@ -189,6 +193,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n sam   - Sequence Alignment/Mapping format."
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
+                          "\n xml   - PacBio Dataset format."
 #endif
                           "\n fofn  - File Of File Names."
                           "\n rdb   - RaptorDB format."
@@ -201,6 +206,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     argparser.AddArgument(&outfmt, VALUE_TYPE_STRING, "", "out-fmt", "paf",
                           "Format in which to output results. Options are:"
                           "\n sam  - Standard SAM output."
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+                          "\n bam   - Binary Sequence Alignment/Mapping format."
+#endif
                           "\n paf  - PAF format useful for overlaps."
                           "\n gfa2 - GFA2 format."
                           "\n mhap - MHAP format useful for overlaps."
@@ -560,7 +568,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Check if help was triggered.
     if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        VerboseShortHelpAndExit(argc, argv, 0);
+        VerboseShortHelp(argc, argv);
+        fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
+        exit(0);
     }
 
     if (version) {
