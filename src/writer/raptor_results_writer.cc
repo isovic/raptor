@@ -3,8 +3,8 @@
 
 namespace raptor {
 
-std::unique_ptr<raptor::RaptorResultsWriter> createRaptorResultsWriter(std::ostream& oss, const mindex::IndexPtr index, OutputFormat outfmt) {
-    return std::unique_ptr<raptor::RaptorResultsWriter>(new raptor::RaptorResultsWriter(oss, index, outfmt));
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriter(std::ostream& oss, const mindex::IndexPtr index, OutputFormat outfmt) {
+    return std::unique_ptr<raptor::RaptorResultsWriterBase>(new raptor::RaptorResultsWriter(oss, index, outfmt));
 }
 
 RaptorResultsWriter::RaptorResultsWriter(std::ostream& oss,
@@ -48,7 +48,7 @@ void RaptorResultsWriter::WriteHeader(const mindex::HeaderGroupType header_group
     }
 }
 
-void RaptorResultsWriter::Write(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriter::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     for (auto& result: results) {
         WriteSingleResult(seqs, result, is_alignment_applied, write_custom_tags, one_hit_per_target);
     }

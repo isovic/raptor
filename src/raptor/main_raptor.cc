@@ -179,7 +179,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 
 			raptor->Clear();
 			raptor->Align(reads);
-			writer->Write(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
+			writer->WriteBatch(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
 			total_processed += reads->seqs().size();
 			if (parameters->num_reads_to_process > 0 &&
 				total_processed > (parameters->start_read + parameters->num_reads_to_process)) {
@@ -217,7 +217,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 
 			raptor->Clear();
 			raptor->Align(reads);
-			writer->Write(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
+			writer->WriteBatch(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
 			total_processed += reads->seqs().size();
 
 			if (parameters->num_reads_to_process > 0 &&
