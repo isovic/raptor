@@ -114,17 +114,8 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		#endif
 	}
 
-	// Set up the output stream.
-	std::shared_ptr<std::ostream> ofs_ptr(&std::cout, [](void*) {});
-	if (parameters->out_path.size() > 0) {
-		ofs_ptr = std::shared_ptr<std::ostream>(new std::ofstream(parameters->out_path));
-		if (((std::ofstream *) ofs_ptr.get())->is_open() == false) {
-		FATAL_REPORT(ERR_OPENING_FILE, "Could not open file '%s'.", parameters->out_path.c_str());
-		}
-	}
-
-	// Create a writer for results.
-	auto writer = raptor::createRaptorResultsWriterStream(ofs_ptr, index, parameters->outfmt);
+	// Create a writer for results. If "-" or empty, writing is to stdout.
+	auto writer = raptor::createRaptorResultsWriterStream(parameters->out_path, index, parameters->outfmt);
 
 	int64_t total_processed = 0;
 
