@@ -97,7 +97,7 @@ raptor_cpp_sources = files([
   'utility/tictoc.cc',
 
   'writer/output_formatter.cc',
-  'writer/raptor_results_writer.cc',
+  'writer/raptor_results_writer_stream.cc',
 
   'raptor/args_raptor.cc',
   'raptor_reshape/args_raptor_reshape.cc',

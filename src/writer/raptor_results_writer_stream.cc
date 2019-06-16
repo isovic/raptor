@@ -1,4 +1,4 @@
-#include <writer/raptor_results_writer.h>
+#include <writer/raptor_results_writer_stream.h>
 #include <writer/output_formatter.h>
 
 namespace raptor {

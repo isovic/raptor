@@ -8,7 +8,7 @@
 #include <lib/argparser.h>
 #include <sequences/sequence_file.h>
 // #include <utility/utility_general.h>
-#include <writer/raptor_results_writer.h>
+#include <writer/raptor_results_writer_stream.h>
 #include <graph/segment_graph_parser.h>
 
 #include <raptor/index_factory.h>

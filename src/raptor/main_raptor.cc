@@ -12,7 +12,7 @@
 #include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
-#include <writer/raptor_results_writer.h>
+#include <writer/raptor_results_writer_stream.h>
 #include <graph/segment_graph_parser.h>
 #include <graph/split_segment_graph.h>
 #include <iostream>

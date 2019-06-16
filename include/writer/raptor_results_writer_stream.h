@@ -1,5 +1,5 @@
 /*
- * raptor_results_writer.h
+ * raptor_results_writer_stream.h
  *
  *  Created on: Dec 3, 2017
  *      Author: Ivan Sovic
