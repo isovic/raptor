@@ -12,7 +12,11 @@
 
 namespace raptor {
 
-enum class OutputFormat { SAM, MHAP, PAF, GFA2, M4, CAGE_OVL, Unknown };
+enum class OutputFormat { SAM, MHAP, PAF, GFA2, M4, CAGE_OVL,
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+                            BAM,
+#endif
+                            Unknown };
 
 inline OutputFormat OutputFormatFromString(const std::string& format_str) {
     OutputFormat ret;
@@ -30,6 +34,11 @@ inline OutputFormat OutputFormatFromString(const std::string& format_str) {
         ret = OutputFormat::GFA2;
     } else if (format_str == "cage-ovl") {
         ret = OutputFormat::CAGE_OVL;
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+    } else if (format_str == "bam") {
+        ret = OutputFormat::BAM;
+#endif
+
     } else {
         ret = OutputFormat::Unknown;
     }
