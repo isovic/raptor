@@ -12,7 +12,7 @@
 #include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
-#include <writer/raptor_results_writer_stream.h>
+#include <writer/raptor_results_writer_factory.h>
 #include <graph/segment_graph_parser.h>
 #include <graph/split_segment_graph.h>
 #include <iostream>
@@ -47,7 +47,7 @@ void APIExample() {
     auto graph_mapper = raptor::createGraphMapper(index, graph, ssg, mapper_params);
 
     // Create a writer object for output to std::cout.
-    auto writer = raptor::createRaptorResultsWriterStream("-", index, raptor::OutputFormat::PAF);
+    auto writer = raptor::createRaptorResultsWriter("-", index, raptor::OutputFormat::PAF);
 
     // Process reads one by one in a single thread.
 	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({reads_path}, mindex::SequenceFormat::Fastq);
@@ -115,7 +115,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	}
 
 	// Create a writer for results. If "-" or empty, writing is to stdout.
-	auto writer = raptor::createRaptorResultsWriterStream(parameters->out_path, index, parameters->outfmt);
+	auto writer = raptor::createRaptorResultsWriter(parameters->out_path, index, parameters->outfmt);
 
 	int64_t total_processed = 0;
 
