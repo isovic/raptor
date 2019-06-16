@@ -21,6 +21,6 @@ static const std::string RAPTOR_VERSION_STRING = std::to_string(RAPTOR_VERSION_M
 
 static const std::string RELEASE_DATE = (std::string(__DATE__) + std::string(" at ") + std::string(__TIME__));
 
-static const std::string LICENCE_INFORMATION = std::string("Raptor by Ivan Sovic, 2017-2019.\n");
+static const std::string LICENCE_INFORMATION = std::string("Raptor by Ivan Sovic, 2017-*.\n");
 
 #endif
