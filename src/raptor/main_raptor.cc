@@ -9,6 +9,7 @@
 #include <log/log_tools.h>
 #include <sequences/sequence_file.h>
 #include <sequences/sequence_file_composite_fofn.h>
+#include <sequences/sequence_file_composite_pbxml.h>
 #include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
@@ -183,7 +184,38 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	} else {
 		// Open a sequence file object which will iterate through all inputs.
 		std::vector<mindex::SequenceFormat> query_fmts(parameters->query_paths.size(), parameters->infmt);
-		mindex::SequenceFileCompositeBasePtr reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, query_fmts);
+
+		mindex::SequenceFileCompositeBasePtr reads_parser = nullptr;
+
+		///////////////////////////////
+		/// PacBio DataSet support. ///
+		///////////////////////////////
+		bool is_xml_used = false;
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+		// Sanity check for the input files. Allow only one XML file to be specified,
+		// as by design of the SequenceFileCompositePbXml.
+		for (const auto& in_path: parameters->query_paths) {
+			if (mindex::GetSequenceFormatFromPath(in_path) == mindex::SequenceFormat::XML) {
+				is_xml_used = true;
+				break;
+			}
+		}
+#endif
+		// Set-up the parser for the correct sequence format.
+		if (is_xml_used && parameters->query_paths.size() != 1) {
+			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "When using XML as input, only a single input can be specified.");
+		} else if (is_xml_used && parameters->query_paths.size() == 1) {
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+			reads_parser = mindex::createSequenceFileCompositePbXml(parameters->query_paths[0]);
+#else
+			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The raptor-reshape tool was not compiled with PacBio BAM support. Cannot use the .xml input files.");
+#endif
+		} else {
+			reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, parameters->infmt);
+		}
+		///////////////////////////////
+
+		// mindex::SequenceFileCompositeBasePtr reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, query_fmts);
 		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
 
 		const auto& header_groups = reads_parser->GetHeaderGroups();
