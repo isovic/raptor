@@ -70,7 +70,7 @@ TEST(APIExamples, APITest1) {
 
     // Create a writer object for output.
     std::ostringstream oss;
-    auto writer = raptor::createRaptorResultsWriter(oss, index, raptor::OutputFormat::PAF);
+    auto writer = raptor::createRaptorResultsWriterStream(oss, index, raptor::OutputFormat::PAF);
 
     auto reads = mindex::createSequenceFile();
     reads->LoadAll(qnames_1, queries_1);

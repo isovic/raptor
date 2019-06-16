@@ -15,24 +15,24 @@
 
 namespace raptor {
 
-class RaptorResultsWriter;
+class RaptorResultsWriterStream;
 
-std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriter(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
 
-class RaptorResultsWriter : RaptorResultsWriterBase {
+class RaptorResultsWriterStream : RaptorResultsWriterBase {
  public:
-  friend std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriter(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+  friend std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
 
-  ~RaptorResultsWriter();
+  ~RaptorResultsWriterStream();
 
   void WriteHeader(const mindex::HeaderGroupType header_groups);
   void WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tag, bool one_hit_per_targets);
   void WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target);
 
  private:
-  RaptorResultsWriter(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
-  RaptorResultsWriter(const RaptorResultsWriter&) = delete;
-  RaptorResultsWriter& operator=(const RaptorResultsWriter&) = delete;
+  RaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+  RaptorResultsWriterStream(const RaptorResultsWriterStream&) = delete;
+  RaptorResultsWriterStream& operator=(const RaptorResultsWriterStream&) = delete;
 
   std::ostream& oss_;
   const mindex::IndexPtr index_;
