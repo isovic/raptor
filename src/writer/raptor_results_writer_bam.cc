@@ -1,3 +1,6 @@
+
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <writer/raptor_results_writer_bam.h>
 #include <writer/output_formatter.h>
 #include <fstream>
@@ -213,51 +216,8 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
     }
 
     return record;
-
-
-
-
-//     ss  << q_name << "\t"
-//         << flag << "\t"
-//         << t_name << "\t"
-//         << t_start + 1 << "\t"
-//         << mapq << "\t"
-//         << cigar << "\t"
-//         << "*" << "\t"
-//         << "0" << "\t"
-//         << "0" << "\t"
-//         << seq << "\t"
-//         << qual;
-
-//     // Extra tags provided in the alignment.
-//     for (const auto& vals: qseq->tags()) {
-//         ss << "\t" << vals.FormatAsSAM();
-//     }
-
-//     if (write_custom_tags) {
-//         // Specific tags to Raptor.
-//         ss << "\t"
-//             << "NM:i:" << edit_dist << "\t"
-//             << "AS:i:" << score << "\t"
-//             << "QS:i:" << q_start << "\t"
-//             << "QE:i:" << q_end << "\t"
-//             << "QL:i:" << q_len << "\t"
-//             << "TS:i:" << t_start << "\t"
-//             << "TE:i:" << t_end << "\t"
-//             << "TL:i:" << t_len << "\t"
-//             << "pi:i:" << path_id << "\t"
-//             << "pj:i:" << segment_in_path << "\t"
-//             << "pn:i:" << num_segments_in_path << "\t"
-//             << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0);
-
-// #ifdef RAPTOR_DEBUG_TIMINGS
-//     ss << "\t" << "tt:Z:" << timings;
-// #endif
-//     }
-
-//     ss << "\n";
-
-//     return ss.str();
 }
 
 }
+
+#endif

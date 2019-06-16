@@ -8,6 +8,8 @@
 #ifndef SRC_RAPTOR_RESULTS_WRITER_BAM_H_
 #define SRC_RAPTOR_RESULTS_WRITER_BAM_H_
 
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+
 #include <writer/raptor_results_writer_base.h>
 #include <stdint.h>
 #include <memory>
@@ -50,3 +52,5 @@ class RaptorResultsWriterBAM : RaptorResultsWriterBase {
 } /* namespace raptor */
 
 #endif /* SRC_RAPTOR_RESULT_WRITER_H_ */
+
+#endif
