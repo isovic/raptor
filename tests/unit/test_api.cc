@@ -69,8 +69,10 @@ TEST(APIExamples, APITest1) {
     auto graph_mapper = raptor::createGraphMapper(index, graph, ssg, mapper_params);
 
     // Create a writer object for output.
+    // std::ostringstream oss;
     std::ostringstream oss;
-    auto writer = raptor::createRaptorResultsWriterStream(oss, index, raptor::OutputFormat::PAF);
+    std::shared_ptr<std::ostream> oss_ptr(&oss, [](void*) {});
+    auto writer = raptor::createRaptorResultsWriterStream(oss_ptr, index, raptor::OutputFormat::PAF);
 
     auto reads = mindex::createSequenceFile();
     reads->LoadAll(qnames_1, queries_1);

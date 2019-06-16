@@ -46,8 +46,8 @@ void APIExample() {
     // Create a graph mapper from the graph.
     auto graph_mapper = raptor::createGraphMapper(index, graph, ssg, mapper_params);
 
-    // Create a writer object for output.
-    auto writer = raptor::createRaptorResultsWriterStream(std::cout, index, raptor::OutputFormat::PAF);
+    // Create a writer object for output to std::cout.
+    auto writer = raptor::createRaptorResultsWriterStream("-", index, raptor::OutputFormat::PAF);
 
     // Process reads one by one in a single thread.
 	auto seq_file_parser = mindex::createSequenceFileCompositeFofn({reads_path}, mindex::SequenceFormat::Fastq);
@@ -124,7 +124,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	}
 
 	// Create a writer for results.
-	auto writer = raptor::createRaptorResultsWriterStream(*ofs_ptr, index, parameters->outfmt);
+	auto writer = raptor::createRaptorResultsWriterStream(ofs_ptr, index, parameters->outfmt);
 
 	int64_t total_processed = 0;
 

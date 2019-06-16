@@ -1,16 +1,25 @@
 #include <writer/raptor_results_writer_stream.h>
 #include <writer/output_formatter.h>
+#include <fstream>
 
 namespace raptor {
 
-std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, OutputFormat outfmt) {
-    return std::unique_ptr<raptor::RaptorResultsWriterBase>(new raptor::RaptorResultsWriterStream(oss, index, outfmt));
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::shared_ptr<std::ostream>& oss_ptr, const mindex::IndexPtr index, OutputFormat outfmt) {
+    return std::unique_ptr<raptor::RaptorResultsWriterBase>(new raptor::RaptorResultsWriterStream(oss_ptr, index, outfmt));
 }
 
-RaptorResultsWriterStream::RaptorResultsWriterStream(std::ostream& oss,
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(const std::string& out_fn, const mindex::IndexPtr index, OutputFormat outfmt) {
+    std::shared_ptr<std::ostream> oss_ptr(&std::cout, [](void*) {});
+    if (out_fn.size() > 0 && out_fn != "-") {
+        oss_ptr = std::shared_ptr<std::ostream>(new std::ofstream(out_fn));
+    }
+    return std::unique_ptr<raptor::RaptorResultsWriterBase>(new raptor::RaptorResultsWriterStream(oss_ptr, index, outfmt));
+}
+
+RaptorResultsWriterStream::RaptorResultsWriterStream(std::shared_ptr<std::ostream>& oss_ptr,
                                         const mindex::IndexPtr index,
                                         raptor::OutputFormat outfmt)
-                                        : oss_(oss), index_(index),
+                                        : oss_ptr_(oss_ptr), index_(index),
                                         outfmt_(outfmt) {
 
 }
@@ -21,29 +30,29 @@ RaptorResultsWriterStream::~RaptorResultsWriterStream() {
 
 void RaptorResultsWriterStream::WriteHeader(const mindex::HeaderGroupType header_groups) {
     if (outfmt_ == raptor::OutputFormat::SAM) {
-        oss_ << "@HD\tVN:1.5" << std::endl;
+        *oss_ptr_ << "@HD\tVN:1.5" << std::endl;
 
         for (const auto& it_field: header_groups) {
-            oss_ << "@" << it_field.first;
+            *oss_ptr_ << "@" << it_field.first;
             for (const auto& it_ids: it_field.second) {
                 for (const auto& it_tags: it_ids.second) {
-                    oss_ << "\t" << it_tags.name << ":" << it_tags.val;
+                    *oss_ptr_ << "\t" << it_tags.name << ":" << it_tags.val;
                 }
             }
-            oss_ << "\n";
+            *oss_ptr_ << "\n";
         }
 
         for (size_t i = 0; i < index_->seqs()->size(); ++i) {
             std::string header = TrimToFirstSpace(index_->header(i));
-            oss_ << "@SQ\tSN:" << header << "\tLN:" << index_->len(i) << std::endl;
+            *oss_ptr_ << "@SQ\tSN:" << header << "\tLN:" << index_->len(i) << std::endl;
         }
 
     } else if (outfmt_ == raptor::OutputFormat::GFA2) {
-        oss_ << "H\tVN:Z:2.0" << std::endl;
+        *oss_ptr_ << "H\tVN:Z:2.0" << std::endl;
 
         for (size_t i = 0; i < index_->seqs()->size(); ++i) {
             std::string header = TrimToFirstSpace(index_->header(i));
-            oss_ << "S\t" << header << "\t" << index_->len(i) << "\t" << "*" << std::endl;
+            *oss_ptr_ << "S\t" << header << "\t" << index_->len(i) << "\t" << "*" << std::endl;
         }
     }
 }
@@ -52,7 +61,7 @@ void RaptorResultsWriterStream::WriteBatch(const mindex::SequenceFilePtr seqs, c
     for (auto& result: results) {
         WriteSingleResult(seqs, result, is_alignment_applied, write_custom_tags, one_hit_per_target);
     }
-    oss_.flush();
+    oss_ptr_->flush();
 }
 
 void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
@@ -86,7 +95,7 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
     if (outfmt_ == raptor::OutputFormat::GFA2) {
         for (const auto& seq: seqs->seqs()) {
             std::string header = TrimToFirstSpace(seq->header());
-            oss_ << "S\t" << header << "\t" << seq->len() << "\t" << "*" << std::endl;
+            *oss_ptr_ << "S\t" << header << "\t" << seq->len() << "\t" << "*" << std::endl;
         }
     }
 
@@ -99,15 +108,15 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
             auto& qseq = seqs->GetSeqByAbsID(aln->QueryID());
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
-                oss_ << OutputFormatter::ToSAM(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToSAM(index_, qseq, aln, mapq, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::PAF) {
-                oss_ << OutputFormatter::ToPAF(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToPAF(index_, qseq, aln, mapq, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::GFA2) {
-                oss_ << OutputFormatter::ToGFA2Edge(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToGFA2Edge(index_, qseq, aln, mapq, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::MHAP) {
-                oss_ << OutputFormatter::ToMHAP(index_, qseq, aln, mapq);
+                *oss_ptr_ << OutputFormatter::ToMHAP(index_, qseq, aln, mapq);
             } else if (outfmt_ == raptor::OutputFormat::M4) {
-                oss_ << OutputFormatter::ToM4(index_, qseq, aln, mapq);
+                *oss_ptr_ << OutputFormatter::ToM4(index_, qseq, aln, mapq);
             }
         }
     } else {
@@ -119,7 +128,7 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
             const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
-                oss_ << OutputFormatter::UnmappedSAM(qseq, write_custom_tags);
+                *oss_ptr_ << OutputFormatter::UnmappedSAM(qseq, write_custom_tags);
             } else if (outfmt_ == raptor::OutputFormat::PAF) {
                 // PAF simply doesn't report unmapped alignments.
             } else if (outfmt_ == raptor::OutputFormat::GFA2) {

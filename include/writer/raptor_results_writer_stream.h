@@ -17,11 +17,13 @@ namespace raptor {
 
 class RaptorResultsWriterStream;
 
-std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::shared_ptr<std::ostream>& oss_ptr, const mindex::IndexPtr index, OutputFormat outfmt);
+std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(const std::string& out_fn, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
 
 class RaptorResultsWriterStream : RaptorResultsWriterBase {
  public:
-  friend std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+  friend std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(std::shared_ptr<std::ostream>& oss_ptr, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+  friend std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriterStream(const std::string& out_fn, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
 
   ~RaptorResultsWriterStream();
 
@@ -30,15 +32,15 @@ class RaptorResultsWriterStream : RaptorResultsWriterBase {
   void WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target);
 
  private:
-  RaptorResultsWriterStream(std::ostream& oss, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
+  RaptorResultsWriterStream(std::shared_ptr<std::ostream>& oss_ptr, const mindex::IndexPtr index, raptor::OutputFormat outfmt);
   RaptorResultsWriterStream(const RaptorResultsWriterStream&) = delete;
   RaptorResultsWriterStream& operator=(const RaptorResultsWriterStream&) = delete;
 
-  std::ostream& oss_;
+  std::shared_ptr<std::ostream> oss_ptr_;
   const mindex::IndexPtr index_;
   raptor::OutputFormat outfmt_;
 };
 
 } /* namespace raptor */
 
-#endif /* SRC_RAPTOR_RESULT_WRITER_H_ */
+#endif /* SRC_RAPTOR_RESULT_WRITER_STREAM_H_ */
