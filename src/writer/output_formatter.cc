@@ -390,14 +390,17 @@ std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mind
     std::ostringstream edge_name;
     edge_name << "aln-" << q_id << "-" << t_id << ":" << path_id << "-" << segment_in_path;
 
+    std::string q_end_symbol = (q_end == q_len) ? "$" : "";
+    std::string t_end_symbol = (t_end == t_len) ? "$" : "";
+
     ss << "E" << "\t"
         << edge_name.str() << "\t"
         << q_name << "+" << "\t"
         << t_name << (t_is_rev ? "-" : "+") << "\t"
         << q_start << "\t"
-        << q_end << "\t"
+        << q_end << q_end_symbol << "\t"
         << t_start << "\t"
-        << t_end << "\t"
+        << t_end << t_end_symbol << "\t"
         << cigar;
 
     if (write_custom_tags) {
