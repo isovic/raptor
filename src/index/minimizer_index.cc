@@ -26,7 +26,9 @@ namespace mindex {
 
 std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(
     std::shared_ptr<mindex::IndexParams> params) {
-    return std::unique_ptr<mindex::MinimizerIndex>(new MinimizerIndex(params));
+    auto ret = std::unique_ptr<mindex::MinimizerIndex>(new MinimizerIndex(params));
+    ret->seqs_ = mindex::createSequenceFile();
+    return std::move(ret);
 }
 
 MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::IndexParams> params)
