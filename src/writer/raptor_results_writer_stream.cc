@@ -92,13 +92,14 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
         }
     }
 
-    // Write the header for the current sequences.
-    if (outfmt_ == raptor::OutputFormat::GFA2) {
-        for (const auto& seq: seqs->seqs()) {
-            std::string header = TrimToFirstSpace(seq->header());
-            *oss_ptr_ << "S\t" << header << "\t" << seq->len() << "\t" << "*" << std::endl;
-        }
-    }
+    // This cannot be written here - because it would be dumped after _each_ query sequence.
+    // // Write the header for the current sequences.
+    // if (outfmt_ == raptor::OutputFormat::GFA2) {
+    //     for (const auto& seq: seqs->seqs()) {
+    //         std::string header = TrimToFirstSpace(seq->header());
+    //         *oss_ptr_ << "S\t" << header << "\t" << seq->len() << "\t" << "*" << std::endl;
+    //     }
+    // }
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
