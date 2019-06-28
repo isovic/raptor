@@ -43,17 +43,20 @@ void RaptorResultsWriterStream::WriteHeader(const mindex::HeaderGroupType header
             *oss_ptr_ << "\n";
         }
 
-        for (size_t i = 0; i < index_->seqs()->size(); ++i) {
-            std::string header = TrimToFirstSpace(index_->header(i));
-            *oss_ptr_ << "@SQ\tSN:" << header << "\tLN:" << index_->len(i) << std::endl;
+        if (index_->seqs() != nullptr) {
+            for (size_t i = 0; i < index_->seqs()->size(); ++i) {
+                std::string header = TrimToFirstSpace(index_->header(i));
+                *oss_ptr_ << "@SQ\tSN:" << header << "\tLN:" << index_->len(i) << std::endl;
+            }
         }
-
     } else if (outfmt_ == raptor::OutputFormat::GFA2) {
         *oss_ptr_ << "H\tVN:Z:2.0" << std::endl;
 
-        for (size_t i = 0; i < index_->seqs()->size(); ++i) {
-            std::string header = TrimToFirstSpace(index_->header(i));
-            *oss_ptr_ << "S\t" << header << "\t" << index_->len(i) << "\t" << "*" << std::endl;
+        if (index_->seqs() != nullptr) {
+            for (size_t i = 0; i < index_->seqs()->size(); ++i) {
+                std::string header = TrimToFirstSpace(index_->header(i));
+                *oss_ptr_ << "S\t" << header << "\t" << index_->len(i) << "\t" << "*" << std::endl;
+            }
         }
     }
 }
