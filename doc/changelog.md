@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.11.0 -> 0.12.0
+- Fixed the GFA-2 output. It was missing the `$` symbol for end coordinates which match the length, and all sequences tended to be printed out for each query.
+- Fixed segfault when input reference set was empty, and output format is a SAM or a BAM.
+
 ## 0.10.0 -> 0.11.0
 - Added the BAM and PacBio Dataset (.xml) parsing support via Pbbam. Pbbam is a big dependency, so this is turned off by default. To compile with Pbbam, type `make release-pb`.
 - Refactored the sequence parsing.
