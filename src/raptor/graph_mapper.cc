@@ -484,10 +484,16 @@ void DiscoverPredecessorNodes_(
         DEBUG_RUN(verbose_debug_qid,
             LOG_ALL("  Running a binary search on taid = %ld, source_lookup_end = %ld.\n", taid, source_lookup_end)
         );
+
+        DEBUG_RUN(verbose_debug_qid,
+            LOG_ALL("  Hits used for binary search:\n%s\n", single_target_anchors->VerbosePointers().c_str())
+        );
+
     #endif
 
-    // Find the first anchor larger than the source_lookup_end. If all values are smaller, it returns .end().
-    // If all values are larger, then it returns .begin().
+    // Find the first anchor with the start coordinate _larger_ than the source_lookup_end.
+    // If all values are smaller, it returns .end(). If all values are larger, then it returns .begin().
+    // Then, we'll iterate in reverse from the last anchor until we find an anchor out of frame.
     auto it_anchor = std::upper_bound(single_target_anchors->hits().begin(),
                                     single_target_anchors->hits().end(),
                                     source_lookup_end,
@@ -502,12 +508,36 @@ void DiscoverPredecessorNodes_(
         auto& pred_anchor = *(it_anchor);
         num_predecessors += 1;
 
+        #ifdef RAPTOR_TESTING_MODE
+            DEBUG_RUN(verbose_debug_qid,
+                LOG_ALL("        [pred: %ld/%ld] Candidate predecessor anchor (pred_anchor->id() = %ld, anchor->id() = %ld): %s\n",
+                        num_predecessors, count, pred_anchor->id(), anchor->id(), pred_anchor->Verbose().c_str())
+            );
+        #endif
+
         // Safety heuristic.
         if (num_predecessors > chain_max_skip) {
+            #ifdef RAPTOR_TESTING_MODE
+                DEBUG_RUN(verbose_debug_qid,
+                    LOG_ALL("          Breaking because num_predecessors > chain_max_skip (%ld > %ld).\n",
+                            num_predecessors, chain_max_skip)
+                );
+            #endif
+
             break;
         }
 
-        if ((source_lookup_end - pred_anchor->TargetEnd()) > max_allowed_dist) {
+        // This condition is sketchy! Because sorting is on start coordinate and not on end coordinate, there can be a valid end
+        // coordinate which comes after this condition turns true!
+        // Perhaps the best option would be to revert back to using the interval tree.
+        if ((source_lookup_start - pred_anchor->TargetEnd()) > max_allowed_dist && (source_lookup_start - pred_anchor->TargetStart()) > max_allowed_dist) {
+            #ifdef RAPTOR_TESTING_MODE
+                DEBUG_RUN(verbose_debug_qid,
+                    LOG_ALL("          Breaking because (source_lookup_end - pred_anchor->TargetEnd()) > max_allowed_dist (%ld > %ld).\n",
+                            (source_lookup_end - pred_anchor->TargetEnd()), max_allowed_dist)
+                );
+            #endif
+
             break;
         }
 
