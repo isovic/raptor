@@ -138,13 +138,13 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Define the composite options which can be expanded internally.
     // std::string composite_str_overlap("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0");
-    std::string composite_str_ovl_raw("--overlap-skip-self -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10");
+    std::string composite_str_ovl_raw("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10");
     argparser.AddCompositeArgument("ovl-raw", composite_str_ovl_raw);
 
-    std::string composite_str_ovl_hifi("--overlap-skip-self -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
+    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
     argparser.AddCompositeArgument("ovl-hifi", composite_str_ovl_hifi);
 
-    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
+    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
     argparser.AddCompositeArgument("ovl-miniasm", composite_str_ovl_miniasm);
 
     // std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
@@ -230,11 +230,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "If the queries are in the RaptorDB format, this specifies a particular block to process. "
                           "Value < 0 processes each block as a bacth, sequentially.",
                           0, "Input/Output options");
-
-    // argparser.AddArgument(&parameters->batch_size_in_mb, VALUE_TYPE_INT64, "B", "batch-mb", "200",
-    //                       "Queries will be loaded in batches of the size specified in megabytes. "
-    //                       "Value <= 0 loads the entire file.",
-    //                       0, "Input/Output options");
 
     // argparser.AddArgument(&parameters->is_rna, VALUE_TYPE_BOOL, "", "rna", "0", "Query sequences
     // are RNAseq/IsoSeq. Impacts chaining process.", 0, "Input/Output options");
