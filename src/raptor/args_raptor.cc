@@ -176,7 +176,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "\n sam   - Sequence Alignment/Mapping format."
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
-                          "\n xml   - PacBio Dataset format."
 #endif
                           "\n fofn  - File Of File Names."
                           "\n rdb   - RaptorDB format."
@@ -366,11 +365,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "more accurate chaining.",
                           0, "Graph Mapping options");
 
-    // argparser.AddArgument(
-    //     &parameters->mapper_params->is_overlapper, VALUE_TYPE_BOOL, "", "overlapper", "0",
-    //     "Perform overlapping instead of mapping. Skips self-hits if reads and reference files "
-    //     "contain same sequences, and outputs only one arc direction.",
-    //     0, "Overlapping options");
     argparser.AddArgument(
         &parameters->mapper_params->overlap_skip_self_hits, VALUE_TYPE_BOOL, "", "overlap-skip-self", "0",
         "A mapping is discarded if the query and the target headers are the same. "
@@ -536,8 +530,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     argparser.AddArgument(&parameters->composite, VALUE_TYPE_COMPOSITE, "x", "composite", "",
         "Pre-set parameters for different use cases. Valid options are:\n"
         " \"ovl-raw\"   - Equivalent to: '" + composite_str_ovl_raw + "'\n" +
-        " \"ovl-hifi\"   - Equivalent to: '" + composite_str_ovl_hifi + "'\n" +
-        " \"ovl-miniasm\"   - Equivalent to: '" + composite_str_ovl_miniasm + "'\n", 0, "Composite options");
+        " \"ovl-hifi\"   - Equivalent to: '" + composite_str_ovl_hifi + "'\n"
+        // + " \"ovl-miniasm\"   - Equivalent to: '" + composite_str_ovl_miniasm + "'\n", 0, "Composite options"
+        );
 
     argparser.AddArgument(&version, VALUE_TYPE_BOOL, "", "version", "0", "Output the version and exit.", 0,
                           "Other options");
@@ -549,14 +544,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
 
 
-    // std::cerr << "Reference paths:\n";
-    // for (int32_t i = 0; i < parameters->ref_paths.size(); i++) {
-    //     std::cerr << "  parameters->ref_paths[i] = " << parameters->ref_paths[i] << "\n";
-    // }
-    // std::cerr << "Query paths:\n";
-    // for (int32_t i = 0; i < parameters->query_paths.size(); i++) {
-    //     std::cerr << "  parameters->query_paths[i] = " << parameters->query_paths[i] << "\n";
-    // }
 
     // Store the command line in parameters.
     std::stringstream ss_command_line;
