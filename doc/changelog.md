@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.12.0 -> 0.13.0
+- Important change in command line usage. The `-d`/`--reads` command line argument is now changed with `-q`/`--query`.
+
 ## 0.11.0 -> 0.12.0
 - Fixed the GFA-2 output. It was missing the `$` symbol for end coordinates which match the length, and all sequences tended to be printed out for each query.
 - Fixed segfault when input reference set was empty, and output format is a SAM or a BAM.
