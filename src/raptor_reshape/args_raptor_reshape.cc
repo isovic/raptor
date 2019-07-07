@@ -37,17 +37,22 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     argparser.AddArgument(&in_fmt, VALUE_TYPE_STRING, "", "in-fmt", "auto",
                           "Format of the input sequence file. Options are:"
                           "\n auto  - Determines the format automatically from file extension."
-                          "\n fastq - Loads FASTQ or FASTA files.\n fasta - Loads FASTQ or FASTA files."
-                          "\n gfa   - Graphical Fragment Assembly format.\n gfa1  - GFA-1 format."
-                          "\n gfa2  - GFA-2 format"
+                          "\n fasta - Loads FASTQ or FASTA files."
+                          "\n fastq - Loads FASTQ or FASTA files."
+                          "\n gfa   - Graphical Fragment Assembly format."
+                          "\n gfa1  - GFA-1 format."
+                          "\n gfa2  - GFA-2 format."
                           "\n sam   - Sequence Alignment/Mapping format."
 #ifdef RAPTOR_COMPILED_WITH_PBBAM
                           "\n bam   - Binary Sequence Alignment/Mapping format."
+                          "\n xml   - PacBio Dataset format."
 #endif
                           "\n fofn  - File Of File Names. Format is determined automatically.",
                           0, "Input/Output options");
+
     argparser.AddArgument(&out_fmt, VALUE_TYPE_STRING, "", "out-fmt", "fasta",
-                          "Format of the output file(s). Options are:\n fastq, fasta, gfa1, gfa2, sam.",
+                          "Format of the output file(s), unless '--symlink' is used. Options are:\n fastq, fasta.",
+                        //   "Format of the output file(s), unless '--symlink' is used. Options are:\n fastq, fasta, gfa1, gfa2, sam.",
                           0, "Input/Output options");
     argparser.AddArgument(&parameters->in_batch_size, VALUE_TYPE_DOUBLE, "", "in-batch", "400",
                           "Queries will be loaded in batches of the size specified in megabytes. "
@@ -112,6 +117,7 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
         ss << "Usage:\n";
         ss << "\traptor-reshape [options] -r <reference_file>";
         ss << "\n";
+
 
         fprintf(stderr, "%s\n", ss.str().c_str());
         fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());

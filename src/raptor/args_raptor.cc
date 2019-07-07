@@ -155,7 +155,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     argparser.AddArgument(&parameters->ref_paths, VALUE_TYPE_STRING_LIST, "r", "ref", "",
                           "Path to the reference sequence (fastq or fasta). Can be specified multiple times.", 0,
                           "Input/Output options");
-    argparser.AddArgument(&parameters->query_paths, VALUE_TYPE_STRING_LIST, "d", "reads", "",
+    argparser.AddArgument(&parameters->query_paths, VALUE_TYPE_STRING_LIST, "q", "query", "",
                           "Path to the reads file. Can be specified multiple times.", 0, "Input/Output options");
     argparser.AddArgument(&parameters->graph_path, VALUE_TYPE_STRING, "g", "agraph", "",
                           "Path to the graph file. Graph is assumed to be asymmetric in the sense "
