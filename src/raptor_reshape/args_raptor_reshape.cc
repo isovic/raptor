@@ -31,7 +31,7 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     argparser.AddArgument(&parameters->in_paths, VALUE_TYPE_STRING_LIST, "i", "in", "",
                           "Path to the sequences (fastq or fasta). Can be specified multiple times.", 0,
                           "Input/Output options");
-    argparser.AddArgument(&parameters->out_prefix, VALUE_TYPE_STRING, "o", "out-prefix", "",
+    argparser.AddArgument(&parameters->out_prefix, VALUE_TYPE_STRING, "o", "out-prefix", "out",
                           "Prefix of the output files that will be generated.", 0,
                           "Input/Output options");
     argparser.AddArgument(&in_fmt, VALUE_TYPE_STRING, "", "in-fmt", "auto",
