@@ -1,5 +1,14 @@
 # Raptor Changelog
 
+## 0.13.0 -> 0.14.0
+- The `nm` tag in the SAM/PAF was now renamed to `NM` to comply with the standard.
+- Also, changed `as:i:` -> `AS:i:`.
+- Fixed the flag in BAM output. It didn't mark secondary/supplementary alignments.
+- Added tests for SAM/BAM flag.
+- Updated cram tests to match the new tags.
+- Added a default `out-prefix` to `raptor-reshape`.
+- Added the custom tags to the BAM output.
+
 ## 0.12.0 -> 0.13.0
 - Important change in command line usage. The `-d`/`--reads` command line argument is now changed with `-q`/`--query`.
 

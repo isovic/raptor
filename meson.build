@@ -1,7 +1,7 @@
 project(
   'Raptor',
   'cpp',
-  version : '0.13.0',
+  version : '0.14.0',
   default_options : [
     'buildtype=release',
     'warning_level=3',
