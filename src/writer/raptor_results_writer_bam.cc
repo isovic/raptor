@@ -168,10 +168,11 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
     int32_t edit_dist = mapping->EditDistance();
     int32_t score = mapping->Score();
 
-    int64_t path_id = mapping->PathId();
-    int64_t num_paths = mapping->PathsNum();
-    int64_t segment_in_path = mapping->SegmentId();
-    int64_t num_segments_in_path = mapping->SegmentsNum();
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
+    int32_t is_split_mapped = num_segments_in_path > 1;
 
     uint32_t flag = (t_is_rev) ? 16 : 0;
     if (mapping->IsSupplementary()) {
@@ -209,6 +210,17 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
         PacBio::BAM::BamRecordImpl& impl = record.Impl();
         impl.Flag(flag);
 
+        if (write_custom_tags) {
+            impl.AddTag("NM", PacBio::BAM::Tag(edit_dist));
+            impl.AddTag("AS", PacBio::BAM::Tag(score));
+            impl.AddTag("pi", PacBio::BAM::Tag(path_id));
+            impl.AddTag("pj", PacBio::BAM::Tag(segment_in_path));
+            impl.AddTag("pn", PacBio::BAM::Tag(num_segments_in_path));
+            impl.AddTag("ps", PacBio::BAM::Tag(is_split_mapped));
+            #ifdef RAPTOR_DEBUG_TIMINGS
+                impl.AddTag("tt", PacBio::BAM::Tag(timings));
+            #endif
+        }
     } else {
         PacBio::BAM::BamRecordImpl record_impl;
         record_impl.Name(q_name);
@@ -223,6 +235,18 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
                 );
         PacBio::BAM::BamRecordImpl& impl = record.Impl();
         impl.Flag(flag);
+
+        if (write_custom_tags) {
+            impl.AddTag("NM", PacBio::BAM::Tag(edit_dist));
+            impl.AddTag("AS", PacBio::BAM::Tag(score));
+            impl.AddTag("pi", PacBio::BAM::Tag(path_id));
+            impl.AddTag("pj", PacBio::BAM::Tag(segment_in_path));
+            impl.AddTag("pn", PacBio::BAM::Tag(num_segments_in_path));
+            impl.AddTag("ps", PacBio::BAM::Tag(is_split_mapped));
+            #ifdef RAPTOR_DEBUG_TIMINGS
+                impl.AddTag("tt", PacBio::BAM::Tag(timings));
+            #endif
+        }
     }
 
     return record;
