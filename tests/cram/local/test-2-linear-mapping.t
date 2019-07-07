@@ -1,10 +1,10 @@
 Mappping the same pair of reads where one is query and the other target, and then reversing the pair (i.e. overlapping with symmetric arcs). This should return identical results.
-  $ ${BIN_DIR}/raptor -x ovl-raw -k 15 -w 5 --min-map-len 100 --out-fmt m4 -r ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -d ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -v 0
+  $ ${BIN_DIR}/raptor -x ovl-raw -k 15 -w 5 --min-map-len 100 --out-fmt m4 -r ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -q ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -v 0
   14183 16026 -842 100 0 44 884 19004 0 8831 9674 9689
   16026 14183 -842 100 0 8831 9674 9689 0 44 884 19004
 
 Mapping first 100 reads, all of which should be in fwd.
-  $ ${BIN_DIR}/raptor -n 100 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -d ${PROJECT_DIR}/test-data/ecoli-small/reads.6x.fwd.fasta -v 0
+  $ ${BIN_DIR}/raptor -n 100 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/reads.6x.fwd.fasta -v 0
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3005/0_5852	5852	19	5705	+	gi|545778205|gb|U00096.3|	100000	40536	46052	3201	5516	60	cm:i:274	nm:i:-1	as:i:3195	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3414/0_11983	11983	10949	11786	+	gi|545778205|gb|U00096.3|	100000	19806	20537	239	731	60	cm:i:21	nm:i:-1	as:i:239	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292	24292	317	24259	+	gi|545778205|gb|U00096.3|	100000	24806	47832	12337	23026	60	cm:i:1050	nm:i:-1	as:i:12323	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
@@ -69,7 +69,7 @@ Mapping first 100 reads, all of which should be in fwd.
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/10307/0_4189	4189	53	3813	+	gi|545778205|gb|U00096.3|	100000	3605	7155	1841	3550	60	cm:i:155	nm:i:-1	as:i:1838	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
 
 Mapping first 100 reads, all of which should be in rev.
-  $ ${BIN_DIR}/raptor -n 100 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -d ${PROJECT_DIR}/test-data/ecoli-small/reads.6x.rev.fasta -v 0
+  $ ${BIN_DIR}/raptor -n 100 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/reads.6x.rev.fasta -v 0
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3005/0_5852	5852	147	5833	-	gi|545778205|gb|U00096.3|	100000	40536	46052	3199	5516	60	cm:i:274	nm:i:-1	as:i:3195	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3414/0_11983	11983	197	1034	-	gi|545778205|gb|U00096.3|	100000	19806	20537	239	731	60	cm:i:21	nm:i:-1	as:i:239	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292	24292	33	23975	-	gi|545778205|gb|U00096.3|	100000	24806	47832	12337	23026	60	cm:i:1050	nm:i:-1	as:i:12324	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*

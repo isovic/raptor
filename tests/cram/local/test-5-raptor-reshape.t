@@ -88,57 +88,57 @@ Another test to check the edge case when one sequence overflows the block size, 
   B	0	0	2	200000
 
 Running Raptor using the RaptorDB as the reference file, loading all blocks.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 1-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 2-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
 
 Running Raptor using the RaptorDB as the reference file, loading only block 0.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 0
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 0
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 1-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
 
 Running Raptor using the RaptorDB as the reference file, loading only block 1.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 1
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 1
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 2-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
 
 Running Raptor using the RaptorDB as the reference file, loading block out of range.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -d ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 5 2>&1 | sed 's/.*#5: //')
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref 5 2>&1 | sed 's/.*#5: //')
   Unexpected value found! Specified block_id is larger than the number of blocks in RaptorDB. block_id = 5, rasf->db_blocks().size() = 2.
 
 Running Raptor using the RaptorDB as the reference file, ref block < 0, so all blocks should be processed.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -d ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref -1)
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fa --out-fmt m4 -v 0 --rdb-block-ref -1)
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 1-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 2-gi|545778205|gb|U00096.3| -12323 51.5287 0 317 24259 24292 0 24806 47832 100000
 
 
 Running Raptor using the RaptorDB as the reference file, loading all blocks.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0
   1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, ref block 0 and query block 0.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 0
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 0
   1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, ref block 0 and query block 1.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 1
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 1
   2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block 1.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0 --rdb-block-query 1
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query 1
   2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block < 0 so all blocks should be processed.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0 --rdb-block-query -1)
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query -1)
   1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
   2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block out of range.
-  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -d out.rdb --out-fmt m4 -v 0 --rdb-block-query 5 2>&1 | sed 's/.*#5: //')
+  $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query 5 2>&1 | sed 's/.*#5: //')
   Unexpected value found! The start_block_id >= num_blocks. start_block_id = 5, num_blocks = 2. Exiting.
 
 
