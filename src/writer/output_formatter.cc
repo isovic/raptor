@@ -204,7 +204,7 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
     if (write_custom_tags) {
         ss << "\t"
             << "cm:i:" << num_seeds << "\t"
-            << "nm:i:" << edit_dist << "\t"
+            << "NM:i:" << edit_dist << "\t"
             << "as:i:" << score << "\t"
             << "pi:i:" << path_id << "\t"
             << "pj:i:" << segment_in_path << "\t"
@@ -406,7 +406,7 @@ std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mind
     if (write_custom_tags) {
         ss << "\t"
             << "cm:i:" << num_seeds << "\t"
-            << "nm:i:" << edit_dist << "\t"
+            << "NM:i:" << edit_dist << "\t"
             << "as:i:" << score << "\t"
             << "pi:i:" << path_id << "\t"
             << "pj:i:" << segment_in_path << "\t"
