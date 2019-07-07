@@ -96,7 +96,7 @@ TEST(APIExamples, APITest1) {
     }
 
     std::ostringstream expected;
-    expected << "ecoli-120:180\t60\t0\t56\t+\tecoli-0:240\t240\t120\t176\t60\t56\t60\tcm:i:12\tNM:i:-1\tas:i:60\tpi:i:0\tpj:i:0\tpn:i:1\tps:i:0\tcg:Z:*\n";
+    expected << "ecoli-120:180\t60\t0\t56\t+\tecoli-0:240\t240\t120\t176\t60\t56\t60\tcm:i:12\tNM:i:-1\tAS:i:60\tpi:i:0\tpj:i:0\tpn:i:1\tps:i:0\tcg:Z:*\n";
 
     ASSERT_EQ(oss.str(), expected.str());
 }
