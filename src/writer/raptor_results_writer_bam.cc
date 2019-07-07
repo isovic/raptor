@@ -6,6 +6,7 @@
 #include <fstream>
 #include <log/log_tools.h>
 #include <pbbam/BamRecord.h>
+#include <pbbam/BamRecordImpl.h>
 #include <pbbam/Cigar.h>
 
 namespace raptor {
@@ -205,6 +206,8 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
                 PacBio::BAM::Cigar(cigar),
                 static_cast<uint8_t>(mapq)
                 );
+        PacBio::BAM::BamRecordImpl& impl = record.Impl();
+        impl.Flag(flag);
 
     } else {
         PacBio::BAM::BamRecordImpl record_impl;
@@ -218,6 +221,8 @@ PacBio::BAM::BamRecord RaptorResultsWriterBAM::ToBAM(const mindex::IndexPtr inde
                     PacBio::BAM::Cigar(cigar),
                     static_cast<uint8_t>(mapq)
                 );
+        PacBio::BAM::BamRecordImpl& impl = record.Impl();
+        impl.Flag(flag);
     }
 
     return record;
