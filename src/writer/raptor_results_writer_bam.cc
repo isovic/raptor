@@ -20,6 +20,11 @@ RaptorResultsWriterBAM::RaptorResultsWriterBAM(const std::string& out_fn,
                                             bam_writer_(nullptr),
                                             index_(index) {
 
+    // Pbbam expects "-" to write to stdout instead of a logical "".
+    if (out_fn_.empty()) {
+        out_fn_ = "-";
+    }
+
 }
 
 RaptorResultsWriterBAM::~RaptorResultsWriterBAM() {
