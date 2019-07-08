@@ -27,7 +27,7 @@ Raptor is a very versatile and fast **graph based sequence mapper/aligner** with
 - Sequence-to-Graph mapping and path alignment.
 - Linear sequence-to-sequence mapping/alignment when no graph is provided.
 - Overlapping of sequences.
-- Very fast mapping - on the order of magnitude of Minimap2, though somewhat slower.
+- Very fast mapping - on the order of magnitude of Minimap2, though slower.
 - Minimizer indexing.
 - Homopolymer suppression for mapping.
 - Large number of input formats supported: `fasta`, `fastq`, `gfa1`, `gfa2`, `sam`, `bam`, `rdb` (RaptorDB), and `gzipped` versions of those. Also, PacBio `.xml`.
@@ -54,6 +54,8 @@ Thorough benchmarking is still on the to do list:
 ## <a name="disclaimer"></a>Disclaimer
 This is a proof-of-concept work in further rapid development of features.
 
+The default parameters have not yet been optimized, and it's possible that performance can be increased with better parameter selection.
+
 Graph-based mapping in `raptor` is currently best suited for graphs representing large variations such as:
 - Assembly graphs (e.g. `p_ctg` and `a_ctg` in Falcon)
 - Haplotig graphs (e.g. from Falcon-Unzip)
@@ -63,6 +65,8 @@ Graph-based mapping in `raptor` is currently best suited for graphs representing
 - (and similar)
 
 At the moment, `raptor` does not yet align through small nucleotide variations (SNPs and short indels). **This feature is currently in development.**
+
+Note: The default indexing parameters in `raptor` are different than the ones in Minimap2, so in case you're performing a runtime comparison remember to set them properly.
 
 ## <a name="building"></a>Building
 Raptor uses Meson as the build system, but the entire process is wrapped using Makefile to simplify the command line usage.
@@ -259,6 +263,7 @@ With alignments:
 raptor --align --out-fmt sam -r ref.fa -q reads.fasta -o out.sam
 raptor --align --out-fmt bam -r ref.fa -q reads.fasta -o out.bam
 raptor --align --out-fmt paf -r ref.fa -q reads.fasta -o out.paf
+raptor --align --out-fmt mhap -r ref.fa -q reads.fasta -o out.mhap
 raptor --align --out-fmt m4 -r ref.fa -q reads.fasta -o out.m4
 raptor --align --out-fmt gfa2 -r ref.fa -q reads.fasta -o out.gfa2
 ```
@@ -317,6 +322,7 @@ raptor -r ref.fa -q reads1.fasta -q reads2.fasta -q reads3.fasta -o out.paf
 ```
 
 18. Overlapping.
+
 Overlapping low-accuracy reads:
 ```
 raptor -x ovl-raw -r reads.fasta -q reads.fasta -o out.paf
@@ -358,9 +364,26 @@ Each block can also be written into a separate FASTA file for convenience (e.g. 
 raptor-reshape -i subreads1.fasta -i subreads2.bam --out-fmt fasta --out-prefix out --block-size 400 --split-blocks
 ```
 
+20. Overlapping with a RaptorDB.
+
+The RaptorDB can be used as any other input file for both mapping and overlapping:
+```
+raptor -x ovl-raw -r reads.rdb -q reads.rdb -o overlaps.paf
+```
+This will load the entire `reads.rdb` as the target set and index the sequences, while queries will be loaded and processed one block at a time.
+
+Using `.rdb` allows for blocked running, nicely suited for HPC applications. For example, running a single query block with ID `3` against all target blocks:
+```
+raptor -x ovl-raw -r reads.rdb -q reads.rdb -o overlaps.paf --rdb-block-query 3
+```
+Running a specific query block against a specific target block:
+```
+raptor -x ovl-raw -r reads.rdb -q reads.rdb -o overlaps.paf --rdb-block-ref 2 --rdb-block-query 3
+```
+
 ## <a name="graph_mapping"></a>Graph Mapping
 
-`raptor` can currently read both GFA-1 and GFA-2 formats to define the graph. The version of the GFA is determined automatically from the GFA header.
+`raptor` can currently read both GFA-1 and GFA-2 formats to define the graph. The version of the GFA is determined automatically from the GFA header, or specified manually via the command line.
 
 Some notes:
 1. The GFA-2 format is highly recommended for mapping. Defining graphs in this format is much more flexible because coordinates are provided explicitly.
@@ -382,7 +405,7 @@ H	VN:Z:2.0
 S	gi|545778205|gb|U00096.3|	4641652	*
 E	edge1	gi|545778205|gb|U00096.3|+	gi|545778205|gb|U00096.3|+	4641652$	4641652$	0	0	*
 ```
-The `asymmetric` graphs can be loaded using the `-g` command line argumenr. Raptor will automatically add a reverse-complement edge for any edge in the input file.
+The `asymmetric` graphs can be loaded using the `-g` command line argument. Raptor will automatically add a reverse-complement edge for any edge in the input file.
 
 3. The GFA-2 format defines coordinates to always be on the fwd strand of the sequence. Keep this in mind when designing edges which enter/exit the rev strand of a sequence.
 
@@ -417,7 +440,7 @@ Raptor is licensed under "BSD 3-Clause Clear" License.
 
 Credit needs to be given to authors of libraries which Raptor utilizes for various purposes. These are:
 - Edlib - Author: Martin Sosic, License: "MIT", Link: https://github.com/Martinsos/edlib
-- KSW2 and Kseq - Author: Heng Li, License: "MIT", Link: https://github.com/lh3/minimap2/blob/master/ksw2.h
+- KSW2 and Kseq - Author: Heng Li, License: "MIT", Link: https://github.com/lh3/minimap2
 - ThreadPool - Author: Robert Vaser, License: "MIT", Link: https://github.com/rvaser/thread_pool
 - IntervalTree - Author: Erik Garrison, License: "MIT", Link: https://github.com/ekg/intervaltree
 - SparseHash - Author: Google Inc., "License BSD 3-Clause "New" or "Revised"", Link: https://github.com/sparsehash/sparsehash
