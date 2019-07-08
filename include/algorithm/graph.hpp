@@ -46,7 +46,9 @@ public:
         // Do not allow duplicate nodes.
         auto it = name_to_node_id_.find(node_name);
         if (it != name_to_node_id_.end()) {
-            LOG_ALL("Warning: Node with the same name already exists, not adding again.\n");
+            #ifdef RAPTOR_TESTING_MODE
+                LOG_ALL("Warning: Node with the same name already exists, not adding again.\n");
+            #endif
             return false;
         }
 
