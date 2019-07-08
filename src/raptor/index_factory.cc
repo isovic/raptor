@@ -24,7 +24,8 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
     auto index = mindex::createMinimizerIndex(index_params);
 
     bool load = !rebuild_index && raptor::FileExists(index_path);
-    bool store = !index_on_the_fly;
+    bool store = false;
+    // bool store = !index_on_the_fly; // Not available for now.
 
     if (load) {
         LOG_ALL("Loading index from file: '%s'.\n", index_path.c_str());
@@ -60,14 +61,9 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
                         index->AddSequence(ref->data(), ref->header());
                     }
                 }
-                // refs->LoadAll();
-                // // for (size_t i = 0; i < ref.size(); i++) {
-                // for (auto& ref : refs->seqs()) {
-                //     index->AddSequence(ref->data(), ref->header());
-                // }
             }
 
-            // index->Create(ref, 0.0f, true, use_minimizers, minimizer_window, num_threads, true);
+            LOG_ALL("Building the index.\n");
             index->Build();
             LOG_ALL("Finished building index.\n");
 
