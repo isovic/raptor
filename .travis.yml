@@ -12,11 +12,6 @@ compiler:
 #    - clang
     - gcc
 
-# addons:
-#   apt:
-#     packages:
-#         - ninja=1.9.0
-
 before_install:
 
 #    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
@@ -36,6 +31,18 @@ before_install:
     - if [ "$CXX" == "clang++" ]; then sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main"; fi
     - sudo apt-get -qq update
     - sudo apt-get install ninja-build
+
+    # Samtools is needed for some Cram tests, to validate the BAM files.
+    - sudo apt-get install libncurses5-dev libncursesw5-dev
+    - wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2
+    - tar -xjvf samtools-1.9.tar.bz2
+    - pushd samtools-1.9 && sudo make prefix=/usr/local/ install
+    - env
+    - pwd
+    - ls -lhrt
+    - popd
+    - which samtools
+    - samtools --version
 
     - wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
     - tar -xf boost_1_67_0.tar.gz
