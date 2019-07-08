@@ -217,7 +217,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     argparser.AddArgument(&parameters->strict_format, VALUE_TYPE_BOOL, "", "strict-fmt", "0",
                           "If specified, all non-mandatory fields will be omitted from the output. Useful for tests.",
                           0, "Input/Output options");
-    argparser.AddArgument(&batch_size_str, VALUE_TYPE_STRING, "B", "batch", "200",
+    argparser.AddArgument(&batch_size_str, VALUE_TYPE_STRING, "B", "batch", "500",
                           "Queries will be loaded in batches of the size specified in megabytes. If there is a "
                           "trailing 'x', then the batch size is in terms of coverage of reference genome. "
                           "Value <= 0 loads the entire file.",
