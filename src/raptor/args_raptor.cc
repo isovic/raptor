@@ -228,7 +228,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           0, "Input/Output options");
     argparser.AddArgument(&parameters->rdb_block_query, VALUE_TYPE_INT64, "", "rdb-block-query", "-1",
                           "If the queries are in the RaptorDB format, this specifies a particular block to process. "
-                          "Value < 0 processes each block as a bacth, sequentially.",
+                          "Value < 0 processes each block as a batch, sequentially.",
                           0, "Input/Output options");
 
     // argparser.AddArgument(&parameters->is_rna, VALUE_TYPE_BOOL, "", "rna", "0", "Query sequences
