@@ -1,5 +1,11 @@
 # Raptor Changelog
 
+## 0.14.0 -> 0.15.0
+- The default batch size is now 500MB instead of 200MB.
+- Updated the .travis.yml to install Samtools so that BAM Cram tests don't fail.
+- Minor change in logging.
+- Updated the README.
+
 ## 0.13.0 -> 0.14.0
 - The `nm` tag in the SAM/PAF was now renamed to `NM` to comply with the standard.
 - Also, changed `as:i:` -> `AS:i:`.
