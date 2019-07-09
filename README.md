@@ -30,6 +30,7 @@ Raptor is a very versatile and fast **graph based sequence mapper/aligner** with
 - Very fast mapping - on the order of magnitude of Minimap2, though slower.
 - Minimizer indexing.
 - Homopolymer suppression for mapping.
+- Mapping to a specific region. (e.g. `"chr01:100000-150000"`)
 - Large number of input formats supported: `fasta`, `fastq`, `gfa1`, `gfa2`, `sam`, `bam`, `rdb` (RaptorDB), and `gzipped` versions of those. Also, PacBio `.xml`.
 - A number of supported output formats: `paf`, `sam`, `bam`, `m4`, `mhap`, `gfa2`.
 - Interchangeable aligners. For now: Edlib, KSW2; easy to add new ones.
@@ -39,9 +40,11 @@ Raptor is a very versatile and fast **graph based sequence mapper/aligner** with
 
 Note that it's potentially possible to also perform overlapping of sequences with graphs, but this hasn't yet been tested.
 
+Any and all feedback is welcome!
+
 ## <a name="wip"></a>Work in progress
 Features:
-- **Graph alignment**, to support alignment over small nucleotide variations. (Current graph mapping implementation is better suited for graphs with larger variations, such as assembly graphs, structural variations, transcriptomes, and similar).
+- **Graph alignment**, to support alignment over small nucleotide variations. (Current graph mapping implementation is suited only for graphs with larger variations, such as assembly graphs, structural variations, transcriptomes, and similar).
 - Mapping with inversions.
 - RNA-seq/Isoseq mapping.
 - Graph-based sequence simulator.
@@ -70,6 +73,8 @@ Note: The default indexing parameters in `raptor` are different than the ones in
 
 ## <a name="building"></a>Building
 Raptor uses Meson as the build system, but the entire process is wrapped using Makefile to simplify the command line usage.
+
+Meson can be installed via your favorite package manager, as well as pip: `pip3 install meson`.
 
 ### <a name="building_with_bam"></a>Building with BAM support (both input and output)
 This will compile `raptor` with support for BAM files, as well as the PacBio Dataset format (`.xml` files).
@@ -100,7 +105,12 @@ This will still support `.sam` output.
 ### <a name="dependencies"></a>Dependencies
 - Meson 0.48 (to install: `pip3 install meson`)
 - C++14 (either GCC >= 6.4 or Clang >= 4.0)
-- Optionally, if compiling with BAM support: Boost 1.67. `pbbam` and `htslib` are wrapped within the subprojects.
+- `zlib` (if a system installation is not available, Meson's wrap system will pull and setup a local build automatically).
+- `gtest` (if a system installation is not available, Meson's wrap system will pull and setup a local build automatically).
+- Optionally, if compiling with BAM support:
+  - `pbbam` - wrapped within the Meson subprojects.
+  - `htslib` - wrapped within the Meson subprojects.
+  - Boost 1.67 - can't be wrapped with Meson, manual installation is needed. For help, please check `.travis.yml`  script.
 
 ## <a name="concrete_examples"></a>Concrete examples on small test data
 These example command lines can be copy/pasted into the terminal. The data is available in the repo, and is commonly used for Cram and unit tests.
@@ -428,7 +438,7 @@ Concretely, it is likely that the graph information will be encoded into tags in
 1. Input is a set of target sequences, a set of query sequences and an optional graph in one of the supported formats.
 2. Target sequences are indexed independently as linear sequences.
 3. A `SegmentGraph` is constructed from the input graph file, where nodes are the target sequences.
-4. For a query, all k-mer hits are looked-up and chained into anchors linearly (using the common dynamic programming approach).
+4. For a query, all k-mer hits are looked-up in the index and chained into anchors linearly (using the common dynamic programming approach).
 5. Anchors are broken on any branching point in each target sequence.
 6. An `AnchorGraph` is constructed, where nodes are anchors, and edges are either: (1) explicit edges from the SegmentGraph, or (2) implicit edges between neighboring anchors on the same target sequence. This allows initial linear anchoring to be more stringent in bandwidth.
 7. Graph-based dynamic programming is applied on the `AnchorGraph` to chain the anchors over the graph.
