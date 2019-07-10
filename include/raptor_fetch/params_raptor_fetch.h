@@ -27,14 +27,19 @@ class ParamsRaptorFetch {
     friend std::shared_ptr<raptor::ParamsRaptorFetch> createParamsRaptorFetch();
     ~ParamsRaptorFetch() = default;
 
-    /*
-      Command-line related options.
-    */
-    std::string subprogram = "";
-    std::string command_line = "";
-
     int64_t verbose_level;
-    std::string in_path;
+    std::string command_line;
+    int64_t debug_qid;
+    std::string debug_qname;
+
+    std::string rdb_path;
+    std::vector<std::string> in_paths;
+    std::string out_prefix;
+    int32_t min_cov;
+    int64_t min_len;
+    double min_score;
+    double min_idt;
+    std::string job_str;
 
    private:
     ParamsRaptorFetch();

@@ -14,10 +14,18 @@ std::shared_ptr<raptor::ParamsRaptorFetch> createParamsRaptorFetch() {
 }
 
 ParamsRaptorFetch::ParamsRaptorFetch()
-    : subprogram(),
+    : verbose_level(0),
       command_line(),
-      verbose_level(0),
-      in_path()
+      debug_qid(-1),
+      debug_qname(""),
+      rdb_path(),
+      in_paths(),
+      out_prefix(),
+      min_cov(0),
+      min_len(0),
+      min_score(0.0),
+      min_idt(0.0),
+      job_str("query")
 
 {}
 
