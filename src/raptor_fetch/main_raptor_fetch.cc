@@ -56,24 +56,33 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorFetch> params) {
                     if (a_written == false) {
                         auto seq_a = seq_file->FetchSequence(qda->name);
                         if (seq_a == nullptr) {
-                            std::cerr << "Warning could not find seq_a, name: '" << qda->name << "'. Skipping all seq_a overlaps.\n";
+							WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Could not find seq_a, name: '%s'. Skipping all seq_a overlaps.", qda->name.c_str());
                             break;
                         }
                         if (ovl->a_rev()) {
                             seq_a->ReverseComplement();
                         }
-                        fprintf (stdout, "%09lld\t%s\n", seq_a->abs_id(), seq_a->GetSequenceAsString().c_str());
+						if (params->use_id_for_output) {
+							fprintf (stdout, "%09lld\t%s\n", seq_a->abs_id(), seq_a->GetSequenceAsString().c_str());
+						} else {
+							fprintf (stdout, "%s\t%s\n", raptor::TrimToFirstWhiteSpace(seq_a->header()).c_str(), seq_a->GetSequenceAsString().c_str());
+						}
                         a_written = true;
                     }
                     auto seq_b = seq_file->FetchSequence(qdb->name);
                     if (seq_b == nullptr) {
-                        std::cerr << "Warning could not find seq_b, name: '" << qdb->name << "'. Skipping the overlap.\n";
+						WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Could not find seq_b, name: '%s'. Skipping all seq_a overlaps.", qdb->name.c_str());
                         break;
                     }
                     if (ovl->b_rev()) {
                         seq_b->ReverseComplement();
                     }
-                    fprintf (stdout, "%09lld\t%s\n", seq_b->abs_id(), seq_b->GetSequenceAsString().c_str());
+
+					if (params->use_id_for_output) {
+	                    fprintf (stdout, "%09lld\t%s\n", seq_b->abs_id(), seq_b->GetSequenceAsString().c_str());
+					} else {
+	                    fprintf (stdout, "%s\t%s\n", raptor::TrimToFirstWhiteSpace(seq_b->header()).c_str(), seq_b->GetSequenceAsString().c_str());
+					}
                 }
 
                 std::cout << "+ +\n";
@@ -97,10 +106,14 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorFetch> params) {
             int32_t end = std::stoi(tokens[2]);
             auto seq = seq_file->FetchSequence(tokens[0]);
             if (seq == nullptr) {
-                std::cerr << "Warning: could not find sequence: '" << tokens[0] << "' in the RaptorDB. Skipping.\n";
+				WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Could not find find sequence: '%s' in the RaptorDB. Skipping.", tokens[0].c_str());
                 continue;
             }
-            fprintf (stdout, ">%09lld\n%s\n", seq->abs_id(), seq->GetSubsequenceAsString(start, end).c_str());
+			if (params->use_id_for_output) {
+	            fprintf (stdout, ">%09lld\n%s\n", seq->abs_id(), seq->GetSubsequenceAsString(start, end).c_str());
+			} else {
+	            fprintf (stdout, ">%s\n%s\n", raptor::TrimToFirstWhiteSpace(seq->header()).c_str(), seq->GetSubsequenceAsString(start, end).c_str());
+			}
 
         }
     } else if (params->job_str == "fetch") {
@@ -113,16 +126,19 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorFetch> params) {
             }
             auto seq = seq_file->FetchSequence(tokens[0]);
             if (seq == nullptr) {
-                std::cerr << "Warning: could not find sequence: '" << tokens[0] << "' in the RaptorDB. Skipping.\n";
+				WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Could not find find sequence: '%s' in the RaptorDB. Skipping.", tokens[0].c_str());
                 continue;
             }
             auto header_tokens = raptor::TokenizeToWhitespaces(seq->header());
-            fprintf (stdout, ">%s\n%s\n", header_tokens[0].c_str(), seq->GetSequenceAsString().c_str());
+			if (params->use_id_for_output) {
+	            fprintf (stdout, ">%09lld\n%s\n", seq->abs_id(), seq->GetSequenceAsString().c_str());
+			} else {
+	            fprintf (stdout, ">%s\n%s\n", header_tokens[0].c_str(), seq->GetSequenceAsString().c_str());
+			}
         }
 
     } else {
-        std::cerr << "ERROR: Unknown job_str: '" << params->job_str << "'. Exiting.\n";
-        return;
+		ERROR_REPORT(ERR_UNEXPECTED_VALUE, "Unknown job_str: '%s'.", params->job_str.c_str());
     }
 
 	LOG_ALL("Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));

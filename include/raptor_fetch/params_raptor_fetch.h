@@ -39,6 +39,7 @@ class ParamsRaptorFetch {
     int64_t min_len;
     double min_score;
     double min_idt;
+    bool use_id_for_output;
     std::string job_str;
 
    private:

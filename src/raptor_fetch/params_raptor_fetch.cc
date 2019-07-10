@@ -25,6 +25,7 @@ ParamsRaptorFetch::ParamsRaptorFetch()
       min_len(0),
       min_score(0.0),
       min_idt(0.0),
+      use_id_for_output(false),
       job_str("query")
 
 {}

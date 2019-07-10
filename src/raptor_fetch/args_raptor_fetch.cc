@@ -29,16 +29,19 @@ int ProcessArgsRaptorFetch(int argc, char **argv, std::shared_ptr<raptor::Params
     argparser.AddArgument(&params->in_paths, VALUE_TYPE_STRING_LIST, "i", "input", "",
                           "One or more input overlap paths.", 0,
                           "Input/Output options");
-    argparser.AddArgument(&params->out_prefix, VALUE_TYPE_STRING, "o", "out-prefix", "",
-                          "Prefix of the output files to generate.", 0,
-                          "Input/Output options");
-    argparser.AddArgument(&params->job_str, VALUE_TYPE_STRING, "", "job", "erc",
+    // argparser.AddArgument(&params->out_prefix, VALUE_TYPE_STRING, "o", "out-prefix", "",
+    //                       "Prefix of the output files to generate.", 0,
+    //                       "Input/Output options");
+    argparser.AddArgument(&params->job_str, VALUE_TYPE_STRING, "", "job", "fetch",
                           "Options:"
                           "\n fetch - The input is a list of qnames, one per line. Fetches the sequences from the rdb."
                           "\n clip  - The input is a BED-3 file of sequences and regions to extract."
                           "\n erc   - The input is an M4 file of overlaps. Output is a pile of sequences for Falcon consensus."
                           , 0,
                           "Input/Output options");
+    argparser.AddArgument(&params->use_id_for_output, VALUE_TYPE_BOOL, "", "use-id", "0",
+                          "The output will contain sequence absolute ID instead of the sequence header.",
+                          0, "Input/Output options");
     argparser.AddArgument(&params->min_cov, VALUE_TYPE_INT32, "", "min-cov", "0",
                           "Minimum coverage of a sequence to retain it.",
                           0, "Filtering");

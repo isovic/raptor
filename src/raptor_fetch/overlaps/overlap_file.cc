@@ -201,10 +201,10 @@ int64_t FindQuerySpan(const std::vector<raptor::OverlapCompactPtr>& overlaps, in
 		return span;
 	}
 	for (int64_t i = start; i < num_overlaps; ++i) {
-		++span;
 		if (overlaps[i]->a_id() != overlaps[start]->a_id()) {
 			break;
 		}
+		++span;
 	}
 	return span;
 }
