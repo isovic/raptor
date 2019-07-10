@@ -15,6 +15,7 @@
 
 namespace raptor {
 
+void VerboseShortHelp(int argc, char **argv);
 void VerboseShortHelpAndExit(int argc, char **argv, int ret_val = 1);
 mindex::SequenceFormat WrapGetSequenceFormatFromPath(const mindex::SequenceFormat& apriori_in_fmt, const std::string& path);
 std::vector<std::string> ExpandPathList(
