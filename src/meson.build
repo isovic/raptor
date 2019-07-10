@@ -80,7 +80,6 @@ raptor_cpp_sources = files([
   'raptor_fetch/overlaps/overlap.cc',
   'raptor_fetch/overlaps/overlap_compact.cc',
   'raptor_fetch/overlaps/overlap_file.cc',
-  'raptor_fetch/overlaps/overlap_filter.cc',
 
   'sequences/sequence_file_parser_factory.cc',
   'sequences/sequence_file_parser_fastx.cc',

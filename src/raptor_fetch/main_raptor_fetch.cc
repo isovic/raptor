@@ -17,7 +17,6 @@
 #include <utility/stringutil.h>
 #include <raptor_fetch/params_raptor_fetch.h>
 #include <raptor_fetch/overlaps/overlap_file.h>
-#include <raptor_fetch/overlaps/overlap_filter.h>
 #include <raptor_fetch/args_raptor_fetch.h>
 
 void RunTool(std::shared_ptr<raptor::ParamsRaptorFetch> params) {
