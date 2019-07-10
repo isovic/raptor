@@ -26,6 +26,8 @@ constexpr uint32_t FLAG_QUERY_FILTERED    = ((static_cast<uint32_t>(1)) << 3);  
 
 OverlapFilePtr createOverlapFile(const std::string& path);
 
+int64_t FindQuerySpan(const std::vector<raptor::OverlapCompactPtr>& overlaps, int64_t start);
+
 class QueryData {
   public:
     QueryData()

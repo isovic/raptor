@@ -4,21 +4,6 @@
 
 namespace raptor {
 
-int64_t FindQuerySpan(const std::vector<raptor::OverlapCompactPtr>& overlaps, int64_t start) {
-	int64_t num_overlaps = static_cast<int64_t>(overlaps.size());
-	int64_t span = 0;
-	if (start < 0 || start >= num_overlaps) {
-		return span;
-	}
-	for (int64_t i = start; i < num_overlaps; ++i) {
-		++span;
-		if (overlaps[i]->a_id() != overlaps[start]->a_id()) {
-			break;
-		}
-	}
-	return span;
-}
-
 bool FindClippingRegions(raptor::OverlapFilePtr& ovl_file, size_t batch_start, size_t batch_end,
                          int32_t fwd_dist,
 						 int32_t min_user_cov_threshold, bool clip_ends_on_coverage,

@@ -104,8 +104,6 @@ raptor::OverlapPtr CalculateClippedOverlap(const raptor::OverlapCompactPtr& ovl,
 								 			const raptor::QueryDataPtr& qda,
 								 			const raptor::QueryDataPtr& qdb);
 
-int64_t FindQuerySpan(const std::vector<raptor::OverlapCompactPtr>& overlaps, int64_t start);
-
 bool FindClippingRegions(raptor::OverlapFilePtr& ovl_file, size_t batch_start, size_t bach_end,
                          int32_t fwd_dist,
 						 int32_t min_user_cov_threshold, bool clip_ends_on_coverage,

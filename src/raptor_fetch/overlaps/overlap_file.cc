@@ -194,4 +194,19 @@ bool OverlapFile::LoadNextBatch(size_t batch_size, bool single_query_only, int32
     return true;
 }
 
+int64_t FindQuerySpan(const std::vector<raptor::OverlapCompactPtr>& overlaps, int64_t start) {
+	int64_t num_overlaps = static_cast<int64_t>(overlaps.size());
+	int64_t span = 0;
+	if (start < 0 || start >= num_overlaps) {
+		return span;
+	}
+	for (int64_t i = start; i < num_overlaps; ++i) {
+		++span;
+		if (overlaps[i]->a_id() != overlaps[start]->a_id()) {
+			break;
+		}
+	}
+	return span;
+}
+
 }
