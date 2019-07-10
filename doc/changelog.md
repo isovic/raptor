@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.15.0 -> 0.16.0
+- Added `raptor-fetch` to allow fetching of sequences from the RaptorDB. It supports 3 modes: `fetch` for plain fetching of sequences, `clip` which extracts subregions of the sequences based on the input BED file, and `erc` which creates a pileup of sequences for error correction (using fc_consensus) based on the input M4 overlap file.
+
 ## 0.14.0 -> 0.15.0
 - The default batch size is now 500MB instead of 200MB.
 - Updated the .travis.yml to install Samtools so that BAM Cram tests don't fail.
