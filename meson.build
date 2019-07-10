@@ -208,13 +208,16 @@ if not meson.is_subproject()
   #########################
   # The raptor-fetch exe. #
   #########################
-  # raptor_fetch_bin = executable(
-  #   'raptor-fetch',
-  #   ['src/raptor_fetch/main_raptor_fetch.cc'],
-  #   dependencies : [raptor_thread_dep, raptor_zlib_dep, boost_dep],
-  #   include_directories : codebase_include_directories + raptor_include_directories,
-  #   link_with : [raptor_lib],
-  #   cpp_args : [raptor_warning_flags, raptor_cpp_flags])
+  raptor_fetch_bin = executable(
+    'raptor-fetch',
+    ['src/raptor_fetch/main_raptor_fetch.cc'],
+    install : true,
+    install_rpath : '$ORIGIN/../' + get_option('libdir'),
+    build_by_default : true,
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
+    include_directories : codebase_include_directories + raptor_include_directories,
+    link_with : [raptor_lib],
+    cpp_args : [raptor_warning_flags, raptor_cpp_flags])
 
   ######################
   # Tests              #
