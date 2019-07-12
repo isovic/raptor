@@ -17,8 +17,8 @@ export CRAM_DIR
 export BIN_DIR
 export LD_LIBRARY_PATH
 
-ls -l ${BIN_DIR}/../lib64
-ls -l ${BIN_DIR}/../lib
+# ls -l ${BIN_DIR}/../lib64
+# ls -l ${BIN_DIR}/../lib
 
 ldd ${BIN_DIR}/raptor
 ldd -r ${BIN_DIR}/raptor
