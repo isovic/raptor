@@ -1,5 +1,11 @@
 # Raptor Changelog
 
+## 0.16.0 -> 0.16.1
+- Added a Meson option `tests` to optionally compile with or without unit tests.
+- New Makefile rule `release-pb-no-tests` which compiles without unit tests.
+- More Cram tests for the `raptor-fetch` tool.
+- Refactoring of `raptor-fetch` and resolving warnings.
+
 ## 0.15.0 -> 0.16.0
 - Added `raptor-fetch` to allow fetching of sequences from the RaptorDB. It supports 3 modes: `fetch` for plain fetching of sequences, `clip` which extracts subregions of the sequences based on the input BED file, and `erc` which creates a pileup of sequences for error correction (using fc_consensus) based on the input M4 overlap file.
 
