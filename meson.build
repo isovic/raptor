@@ -95,9 +95,13 @@ if opt_compile_with_pbbam
 
     # Pbbam.
     pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
+
+    # Htslib.
+    htslib_dep = dependency('htslib', required : true, version : '>=1.4', fallback : ['htslib', 'htslib_dep'])
 else
     boost_dep = []
     pbbam_dep = []
+    htslib_dep = []
 endif
 
 # Google test.
@@ -168,11 +172,21 @@ all_sources = raptor_cpp_sources + codebase_cpp_sources
 # The raptor exe.    #
 ######################
 
+if not meson.is_subproject()
+  import('pkgconfig').generate(
+    raptor_lib,
+    version : meson.project_version(),
+    name : 'raptor',
+    filebase : 'raptor',
+    description : 'Raptor - graph-based mapping of long sequences')
+endif
+
+
 # raptor_dep is not used anywhere?
 raptor_dep = declare_dependency(
     include_directories: codebase_include_directories + raptor_include_directories,
     link_with: [raptor_lib, codebase_lib],
-    dependencies: [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
+    dependencies: [raptor_thread_dep, raptor_zlib_dep, htslib_dep, pbbam_dep, boost_dep],
     version: meson.project_version(),
     compile_args: raptor_warning_flags + raptor_cpp_flags)
 
@@ -183,7 +197,7 @@ if not meson.is_subproject()
     install : true,
     install_rpath : '$ORIGIN/../' + get_option('libdir'),
     build_by_default : true,
-    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, htslib_dep, pbbam_dep, boost_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -208,7 +222,7 @@ if not meson.is_subproject()
     install : true,
     install_rpath : '$ORIGIN/../' + get_option('libdir'),
     build_by_default : true,
-    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, htslib_dep, pbbam_dep, boost_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -222,7 +236,7 @@ if not meson.is_subproject()
     install : true,
     install_rpath : '$ORIGIN/../' + get_option('libdir'),
     build_by_default : true,
-    dependencies : [raptor_thread_dep, raptor_zlib_dep, pbbam_dep, boost_dep],
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, htslib_dep, pbbam_dep, boost_dep],
     include_directories : codebase_include_directories + raptor_include_directories,
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
@@ -236,7 +250,7 @@ if not meson.is_subproject()
         tests_bin = executable(
             'tests_raptor',
             tests_cpp_sources,
-            dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, pbbam_dep, boost_dep],
+            dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, htslib_dep, pbbam_dep, boost_dep],
             include_directories : codebase_include_directories + raptor_include_directories + tests_include_directories,
             link_with : [raptor_lib, codebase_lib],
             cpp_args : [raptor_warning_flags, raptor_cpp_flags])
