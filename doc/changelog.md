@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.16.1 -> 0.16.2
+- Updated the meson.build to support the latest Pbbam/Pbcopper updates.
+
 ## 0.16.0 -> 0.16.1
 - Added a Meson option `tests` to optionally compile with or without unit tests.
 - New Makefile rule `release-pb-no-tests` which compiles without unit tests.
