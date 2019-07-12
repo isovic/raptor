@@ -37,6 +37,15 @@ inline void WriteSequence(std::ostream& os, const mindex::SequencePtr& seq, bool
 }
 
 void WriteSubsequence(std::ostream& os, const mindex::SequencePtr& seq, bool use_id_for_output, const OutFormat& out_fmt, int64_t start, int64_t end) {
+    if (start < 0) {
+        WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Sequence '%s', start coordinate is start = %ld. Setting to 0 automatically.", raptor::TrimToFirstWhiteSpace(seq->header()).c_str(), start);
+        start = 0;
+    }
+    if (end < 0 || end > seq->len()) {
+        WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Sequence '%s', end coordinate is end = %ld, seq->len = %ld. Setting to seq->len automatically.", raptor::TrimToFirstWhiteSpace(seq->header()).c_str(), end, seq->len());
+        end = seq->len();
+    }
+
     if (out_fmt == OutFormat::FASTA) {
         os << ">";
     }
@@ -119,11 +128,7 @@ void RunToolClip(std::shared_ptr<raptor::ParamsRaptorFetch> params, std::ostream
     std::string line;
     while(std::getline(ifs, line)) {
         std::vector<std::string> tokens = raptor::TokenizeToWhitespaces(line);
-        if (tokens.size() < 5) {
-            continue;
-        }
-        if (tokens[4] != "0") {
-            // Check if the query was filtered. 0 means all good.
+        if (tokens.size() < 3) {
             continue;
         }
         int32_t start = std::stoi(tokens[1]);
@@ -134,7 +139,7 @@ void RunToolClip(std::shared_ptr<raptor::ParamsRaptorFetch> params, std::ostream
             continue;
         }
 
-        raptor::fetch::WriteSequence(os, seq, params->use_id_for_output, raptor::fetch::OutFormat::FASTA);
+        raptor::fetch::WriteSubsequence(os, seq, params->use_id_for_output, raptor::fetch::OutFormat::FASTA, start, end);
     }
 }
 
