@@ -77,6 +77,8 @@ if opt_compile_with_pbbam
   raptor_cpp_flags += ['-DRAPTOR_COMPILED_WITH_PBBAM']
 endif
 
+opt_compile_with_tests = get_option('tests')
+
 ################
 # Dependencies #
 ################
@@ -99,16 +101,19 @@ else
 endif
 
 # Google test.
-gtest_dep = dependency('gtest', main : true, required : false)
-if not gtest_dep.found()
-    gtest_proj = subproject('gtest')
-    gtest_inc = gtest_proj.get_variable('gtest_incdir')
-    gtest_lib = static_library('gtest', gtest_proj.get_variable('gtest_libsources'),
-                                gtest_proj.get_variable('gtest_mainsources'),
-                                include_directories : gtest_inc)
+if (not meson.is_subproject()) and opt_compile_with_tests
+  gtest_dep = dependency('gtest', main : true, required : false)
 
-    gtest_dep = declare_dependency(include_directories : gtest_inc,
-                               link_with : gtest_lib, dependencies: raptor_thread_dep)
+  if not gtest_dep.found()
+      gtest_proj = subproject('gtest')
+      gtest_inc = gtest_proj.get_variable('gtest_incdir')
+      gtest_lib = static_library('gtest', gtest_proj.get_variable('gtest_libsources'),
+                                  gtest_proj.get_variable('gtest_mainsources'),
+                                  include_directories : gtest_inc)
+
+      gtest_dep = declare_dependency(include_directories : gtest_inc,
+                                link_with : gtest_lib, dependencies: raptor_thread_dep)
+  endif
 endif
 
 #######################
@@ -152,7 +157,10 @@ codebase_lib = []
 
 # subdir('codebase')
 subdir('src')
-subdir('tests')
+
+if (not meson.is_subproject()) and opt_compile_with_tests
+  subdir('tests')
+endif
 
 all_sources = raptor_cpp_sources + codebase_cpp_sources
 
@@ -223,15 +231,18 @@ if not meson.is_subproject()
   # Tests              #
   ######################
 
-  if gtest_dep.found()
-      tests_bin = executable(
-          'tests_raptor',
-          tests_cpp_sources,
-          dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, pbbam_dep, boost_dep],
-          include_directories : codebase_include_directories + raptor_include_directories + tests_include_directories,
-          link_with : [raptor_lib, codebase_lib],
-          cpp_args : [raptor_warning_flags, raptor_cpp_flags])
+  if opt_compile_with_tests
+    if (gtest_dep.found())
+        tests_bin = executable(
+            'tests_raptor',
+            tests_cpp_sources,
+            dependencies : [raptor_thread_dep, raptor_zlib_dep, gtest_dep, pbbam_dep, boost_dep],
+            include_directories : codebase_include_directories + raptor_include_directories + tests_include_directories,
+            link_with : [raptor_lib, codebase_lib],
+            cpp_args : [raptor_warning_flags, raptor_cpp_flags])
+    endif
   endif
+
 endif
 
 # e = executable('testprog', 'test.cc', dependencies : gtest_dep)

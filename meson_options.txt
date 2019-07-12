@@ -1,3 +1,4 @@
-option('RAPTOR_TESTING_MODE', type : 'boolean', value : false)
-option('RAPTOR_DEBUG_TIMINGS', type : 'boolean', value : false)
-option('WITH_PBBAM', type : 'boolean', value : false)
+option('RAPTOR_TESTING_MODE', type : 'boolean', value : false, description : 'Enable detailed debug output.')
+option('RAPTOR_DEBUG_TIMINGS', type : 'boolean', value : false, description : 'Measure time consumption of various stages, and add it to each output line in some formats.')
+option('WITH_PBBAM', type : 'boolean', value : false, description : 'Compile with Pbbam support, to enable BAM and XML formats.')
+option('tests', type : 'boolean', value : true, description : 'Enable dependencies required for testing')
