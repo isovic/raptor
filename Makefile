@@ -46,6 +46,9 @@ meson-release:
 meson-release-pb:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dc_args=-O3"
+meson-release-pb-no-tests:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dtests=false -Dc_args=-O3"
 meson-testing:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DWITH_PBBAM=false -Dc_args=-O3"
@@ -68,6 +71,8 @@ release: | meson-release
 	${MAKE} install BDIR=meson-release
 release-pb: | meson-release-pb
 	${MAKE} install BDIR=meson-release-pb
+release-pb-no-tests: | meson-release-pb-no-tests
+	${MAKE} install BDIR=meson-release-pb-no-tests
 testing: | meson-testing
 	${MAKE} install BDIR=meson-testing
 time: | meson-time
