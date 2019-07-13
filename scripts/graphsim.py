@@ -478,6 +478,53 @@ def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     end_pos = min(ref_seq_len, start_pos + insert_len)
     return start_pos, end_pos, mid_pos, seq_strand
 
+def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, zmw_id, len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del):
+    # Step 1: Select a plain molecular insert length.
+    sim_insert_len = pick_insert_length(len_mean, len_std, len_min, len_max)
+
+    # Step 2: Determine the position where from the insert is taken on the genome.
+    start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_insert_len)
+
+    # Just a debug verbose of the simulation values.
+    if DEBUG_VERBOSE:
+        sys.stderr.write('start = %d, mid = %d, end = %d, sim_insert_len = %d, len(seq) = %d\n' % (start_pos, mid_pos, end_pos, sim_insert_len, len(seq)))
+
+    # Step 3: This part extracts an exact insert sequence from the graph. for example, the fragment which would be part of the SMRT bell.
+    insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=0)
+
+    # Step 4: Introduce error rates.
+    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
+                                error_rate, frac_snp, frac_ins, frac_del)
+
+    read_seqs = [(insert_name, read_seq)]
+
+                # Step x: Simulate missing adapters in the physical molecule.
+
+                # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
+                # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
+
+    # Debug verbose.
+    if DEBUG_VERBOSE:
+        sys.stderr.write('Insert_mappings:\n')
+        for m in insert_mappings:
+            sys.stderr.write('{}\n'.format(m))
+        sys.stderr.write('Read mappings:\n')
+        for m in read_mappings:
+            sys.stderr.write('{}\n'.format(m[0:12]))
+        sys.stderr.write('\n')
+
+    return read_seqs, read_mappings, sim_insert_len
+
+def write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings):
+    for read_name, read_seq in read_seqs:
+        fp_out_fasta.write('>%s\n' % (read_name))
+        fp_out_fasta.write(read_seq)
+        fp_out_fasta.write('\n')
+
+    for m in read_mappings:
+        fp_out_paf.write('\t'.join([str(val) for val in m]))
+        fp_out_paf.write('\n')
+
 def run(ref, gfa, out_prefix, seed, cov,
         len_mean, len_std, len_min, len_max,
         # error_rate, frac_snp, frac_ins, frac_del,
@@ -549,49 +596,14 @@ def run(ref, gfa, out_prefix, seed, cov,
             target_bases = len(seq) * cov
             seq_len = len(seq)
             while total_bases < target_bases:
-                # Step 1: Select a plain molecular insert length.
-                sim_insert_len = pick_insert_length(len_mean, len_std, len_min, len_max)
+                read_seqs, read_mappings, sim_insert_len = simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, num_generated_reads, len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del)
                 total_bases += sim_insert_len
-
-                # Step 2: Determine the position where from the insert is taken on the genome.
-                start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_insert_len)
-
-                # Just a debug verbose of the simulation values.
-                if DEBUG_VERBOSE:
-                    sys.stderr.write('start = %d, mid = %d, end = %d, total_bases = %d, sim_insert_len = %d, len(seq) = %d, target_bases = %d\n' % (start_pos, mid_pos, end_pos, total_bases, sim_insert_len, len(seq), target_bases))
-
-                # Step 3: This part extracts an exact insert sequence from the graph. for example, the fragment which would be part of the SMRT bell.
-                insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=num_generated_reads, subread_start=0)
-
-                # Step 4: Introduce error rates.
-                read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
-                                            error_rate, frac_snp, frac_ins, frac_del)
-
-                # Debug verbose.
-                if DEBUG_VERBOSE:
-                    sys.stderr.write('Insert_mappings:\n')
-                    for m in insert_mappings:
-                        sys.stderr.write('{}\n'.format(m))
-                    sys.stderr.write('Read mappings:\n')
-                    for m in read_mappings:
-                        sys.stderr.write('{}\n'.format(m[0:12]))
-                    sys.stderr.write('\n')
-
-                # Step x: Simulate missing adapters in the physical molecule.
-
-                read_name = insert_name
-                fp_out_fasta.write('>%s\n' % (read_name))
-                fp_out_fasta.write(read_seq)
-                fp_out_fasta.write('\n')
-
-                for m in read_mappings:
-                    fp_out_paf.write('\t'.join([str(val) for val in m]))
-                    fp_out_paf.write('\n')
-
                 num_generated_reads += 1
 
-                # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
-                # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
+                if DEBUG_VERBOSE:
+                    sys.stderr.write('total_bases = %d, target_bases = %d\n' % (total_bases, target_bases))
+
+                write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings)
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='Simulates reads from a genome graph, specified by a FASTA/FASTQ file of sequences and a relation graph in GFA-2 format.',
