@@ -266,7 +266,7 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
 
     return ret_seq, ret_mapping_paf, next_seq_name, next_seq_strand, next_seq_pos, next_max_dist
 
-def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=0, subread_start=0):
+def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=0, subread_start=0):
     """
     Extracts a sequence from the reference, as-is, with no mutations added.
     The sequence is composed of spliced parts, extracted from the walk down the graph.
@@ -278,7 +278,7 @@ def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, s
     read_name = 'read-1'
     read_seq = ''
 
-    next_seq_name, next_seq_strand, next_seq_pos, next_remaining_len = seq_name, seq_strand, start_pos + 0, sim_read_len + 0
+    next_seq_name, next_seq_strand, next_seq_pos, next_remaining_len = seq_name, seq_strand, start_pos + 0, sim_insert_len + 0
     mappings = []
     i = 0
     while True:
@@ -423,7 +423,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings,
 # def update_mappings(insert_name, insert_seq, insert_mappings, cigar):
 #     return insert_name, insert_seq, insert_mappings
 
-# def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
+# def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len,
 #                     error_rate, frac_snp, frac_ins, frac_del,
 #                     missing_adapter_rate, missing_adapter_len_lambda,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
 #                     b_rate, b_lambda,
@@ -432,7 +432,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings,
 #                     # missing_adapter_rate, second_pass_mean_len, second_pass_std,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
 
 #     # This part extracts an exact insert sequence; for example, the fragment which would be part of the SMRT bell.
-#     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=subread_start)
+#     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=subread_start)
 
 #     chance = random.random()
 #     if chance < missing_adapter_rate:
@@ -466,10 +466,10 @@ def pick_insert_length(len_mean, len_std, len_min, len_max):
     """
     Picks the length of an insert from the Gaussian distribution.
     """
-    sim_read_len = 0
-    while sim_read_len < len_min or sim_read_len > len_max:
-        sim_read_len = int(math.floor(random.gauss(len_mean, len_std)))
-    return sim_read_len
+    sim_insert_len = 0
+    while sim_insert_len < len_min or sim_insert_len > len_max:
+        sim_insert_len = int(math.floor(random.gauss(len_mean, len_std)))
+    return sim_insert_len
 
 def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     mid_pos = random.randint(0, ref_seq_len)
@@ -549,20 +549,19 @@ def run(ref, gfa, out_prefix, seed, cov,
             target_bases = len(seq) * cov
             seq_len = len(seq)
             while total_bases < target_bases:
-
                 # Step 1: Select a plain molecular insert length.
-                sim_read_len = pick_insert_length(len_mean, len_std, len_min, len_max)
-                total_bases += sim_read_len
+                sim_insert_len = pick_insert_length(len_mean, len_std, len_min, len_max)
+                total_bases += sim_insert_len
 
                 # Step 2: Determine the position where from the insert is taken on the genome.
-                start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_read_len)
+                start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_insert_len)
 
                 # Just a debug verbose of the simulation values.
                 if DEBUG_VERBOSE:
-                    sys.stderr.write('start = %d, mid = %d, end = %d, total_bases = %d, sim_read_len = %d, len(seq) = %d, target_bases = %d\n' % (start_pos, mid_pos, end_pos, total_bases, sim_read_len, len(seq), target_bases))
+                    sys.stderr.write('start = %d, mid = %d, end = %d, total_bases = %d, sim_insert_len = %d, len(seq) = %d, target_bases = %d\n' % (start_pos, mid_pos, end_pos, total_bases, sim_insert_len, len(seq), target_bases))
 
                 # Step 3: This part extracts an exact insert sequence from the graph. for example, the fragment which would be part of the SMRT bell.
-                insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=num_generated_reads, subread_start=0)
+                insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=num_generated_reads, subread_start=0)
 
                 # Step 4: Introduce error rates.
                 read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
@@ -579,21 +578,6 @@ def run(ref, gfa, out_prefix, seed, cov,
                     sys.stderr.write('\n')
 
                 # Step x: Simulate missing adapters in the physical molecule.
-
-
-                # new_read = generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
-                #                             error_rate, frac_snp, frac_ins, frac_del,
-                #                             missing_adapter_rate, missing_adapter_len_lambda,
-                #                             b_rate, b_lambda,
-                #                             read_prefix='graphsim',
-                #                             zmw_id=num_generated_reads,
-                #                             subread_start=0
-                #                             )
-
-                # If anything went wrong, skip.
-                # if new_read == None:
-                #     continue
-                # read_name, read_seq, read_mappings = new_read
 
                 read_name = insert_name
                 fp_out_fasta.write('>%s\n' % (read_name))
