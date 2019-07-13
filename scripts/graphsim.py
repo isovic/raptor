@@ -512,8 +512,9 @@ def run(ref, gfa, out_prefix, seed, cov,
     assert(len_max > len_mean)
 
     # Create the output directory.
-    if not os.path.exists(os.path.dirname(out_prefix)):
-        os.makedirs(os.path.dirname(out_prefix))
+    out_dir = os.path.dirname(out_prefix)
+    if out_dir and (not os.path.exists(out_dir)):
+        os.makedirs(out_dir)
 
     # Parse the reference sequences.
     ref_seqs = {seq[0][1:].split()[0]: seq[1] for seq in fastqparser.yield_seq([ref])}
@@ -568,11 +569,14 @@ def run(ref, gfa, out_prefix, seed, cov,
                                             error_rate, frac_snp, frac_ins, frac_del)
 
                 # Debug verbose.
-                sys.stderr.write('Insert_mappings:\n')
-                for m in insert_mappings:
-                    sys.stderr.write('{}\n'.format(m))
-
-
+                if DEBUG_VERBOSE:
+                    sys.stderr.write('Insert_mappings:\n')
+                    for m in insert_mappings:
+                        sys.stderr.write('{}\n'.format(m))
+                    sys.stderr.write('Read mappings:\n')
+                    for m in read_mappings:
+                        sys.stderr.write('{}\n'.format(m[0:12]))
+                    sys.stderr.write('\n')
 
                 # Step x: Simulate missing adapters in the physical molecule.
 
@@ -600,14 +604,7 @@ def run(ref, gfa, out_prefix, seed, cov,
                     fp_out_paf.write('\t'.join([str(val) for val in m]))
                     fp_out_paf.write('\n')
 
-                # Just debug output.
-                sys.stderr.write('Read mappings:\n')
-                for m in read_mappings:
-                    sys.stderr.write('{}\n'.format(m[0:12]))
-
                 num_generated_reads += 1
-
-                sys.stderr.write('\n')
 
                 # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
                 # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
