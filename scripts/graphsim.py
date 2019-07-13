@@ -13,6 +13,9 @@ import math
 import random
 import intervaltree
 import copy
+import collections
+
+SimParams = collections.namedtuple('SimParams', ['len_mean', 'len_std', 'len_min', 'len_max', 'error_rate', 'frac_snp', 'frac_ins', 'frac_del'])
 
 ################################
 ######### Utility tools ########
@@ -337,8 +340,7 @@ def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, s
 
     return read_name, read_seq, mappings
 
-def generate_mutations(insert_name, insert_seq, insert_mappings,
-                        error_rate, frac_snp, frac_ins, frac_del):
+def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params):
 
     def pick_alt_base(ref_base):
         bases = [val for val in ['A', 'C', 'T', 'G'] if val != ref_base]
@@ -351,7 +353,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings,
             cigar_list.append([1, new_op])
 
     # Define thresholds for random selection of errors.
-    thr_snp, thr_ins, thr_del = 0.0, frac_snp, frac_snp + frac_ins
+    thr_snp, thr_ins, thr_del = 0.0, sim_params.frac_snp, sim_params.frac_snp + sim_params.frac_ins
 
     # Placeholders for return results.
     new_seq = []
@@ -373,7 +375,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings,
             chance = random.random()
 
             # No error, just continue.
-            if chance >= error_rate:
+            if chance >= sim_params.error_rate:
                 add_op(curr_cigar, '=')
                 new_seq.append(ref_base)
                 num_eq += 1
@@ -478,9 +480,9 @@ def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     end_pos = min(ref_seq_len, start_pos + insert_len)
     return start_pos, end_pos, mid_pos, seq_strand
 
-def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, zmw_id, len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del):
+def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, zmw_id, sim_params):
     # Step 1: Select a plain molecular insert length.
-    sim_insert_len = pick_insert_length(len_mean, len_std, len_min, len_max)
+    sim_insert_len = pick_insert_length(sim_params.len_mean, sim_params.len_std, sim_params.len_min, sim_params.len_max)
 
     # Step 2: Determine the position where from the insert is taken on the genome.
     start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_insert_len)
@@ -493,8 +495,7 @@ def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, s
     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=0)
 
     # Step 4: Introduce error rates.
-    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
-                                error_rate, frac_snp, frac_ins, frac_del)
+    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings, sim_params)
 
     read_seqs = [(insert_name, read_seq)]
 
@@ -532,6 +533,14 @@ def run(ref, gfa, out_prefix, seed, cov,
         # b_rate, b_lambda
         ):
 
+    # TODO: Parametrize this via the command line:
+    error_rate, frac_snp, frac_ins, frac_del = 0.15, 0.25, 0.50, 0.25
+    # error_rate, frac_snp, frac_ins, frac_del = 0.00, 0.25, 0.50, 0.25
+    missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
+    b_rate, b_lambda = 0.0, 1.0
+
+    sim_params = SimParams(len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del)
+
     """
     test_intervals = [intervaltree.Interval(1, 7, 0), intervaltree.Interval(7, 11, 1)]
     test_tree = intervaltree.IntervalTree(test_intervals)
@@ -545,12 +554,6 @@ def run(ref, gfa, out_prefix, seed, cov,
 
     if seed and seed != 0:
         random.seed(seed)
-
-    # TODO: Parametrize this via the command line:
-    error_rate, frac_snp, frac_ins, frac_del = 0.15, 0.25, 0.50, 0.25
-    # error_rate, frac_snp, frac_ins, frac_del = 0.00, 0.25, 0.50, 0.25
-    missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
-    b_rate, b_lambda = 0.0, 1.0
 
     # Sanity check.
     assert((frac_snp + frac_ins + frac_del) == 1.0)
@@ -596,7 +599,7 @@ def run(ref, gfa, out_prefix, seed, cov,
             target_bases = len(seq) * cov
             seq_len = len(seq)
             while total_bases < target_bases:
-                read_seqs, read_mappings, sim_insert_len = simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, num_generated_reads, len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del)
+                read_seqs, read_mappings, sim_insert_len = simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, num_generated_reads, sim_params)
                 total_bases += sim_insert_len
                 num_generated_reads += 1
 
