@@ -529,7 +529,7 @@ def write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings):
         fp_out_paf.write('\t'.join([str(val) for val in m]))
         fp_out_paf.write('\n')
 
-def run(ref, gfa, out_prefix, seed, cov,
+def run(ref, gfa, out_prefix, seed, num_reads, cov,
         len_mean, len_std, len_min, len_max,
         err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del,
         missing_adapter_prob
@@ -610,6 +610,14 @@ def run(ref, gfa, out_prefix, seed, cov,
 
                 write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings)
 
+                # If there is a cap on number of generated reads, stop generating new ones.
+                if num_reads > 0 and num_generated_reads >= num_reads:
+                    break
+
+            # Skip generating reads on other sequences if we reached the capped number of reads.
+            if num_reads > 0 and num_generated_reads >= num_reads:
+                break
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='Simulates reads from a genome graph, specified by a FASTA/FASTQ file of sequences and a relation graph in GFA-2 format.',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -620,6 +628,7 @@ def parse_args(argv):
 
     parser.add_argument('--seed', type=int, default=12345, help='Random seed.')
 
+    parser.add_argument('--num-reads', type=int, default=0, help='Total number of reads to simulate. If <= 0, only --cov will be the cap.')
     parser.add_argument('--cov', type=float, default=5, help='Coverage of the genome to generate.')
 
     # Parameters to model the plain and accurate insert sequence.
