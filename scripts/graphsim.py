@@ -15,7 +15,7 @@ import intervaltree
 import copy
 import collections
 
-SimParams = collections.namedtuple('SimParams', ['len_mean', 'len_std', 'len_min', 'len_max', 'error_rate', 'frac_snp', 'frac_ins', 'frac_del'])
+SimParams = collections.namedtuple('SimParams', ['len_mean', 'len_std', 'len_min', 'len_max', 'err_mean', 'err_std', 'err_min', 'err_max', 'frac_snp', 'frac_ins', 'frac_del'])
 
 ################################
 ######### Utility tools ########
@@ -340,7 +340,7 @@ def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, s
 
     return read_name, read_seq, mappings
 
-def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params):
+def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params, error_rate):
 
     def pick_alt_base(ref_base):
         bases = [val for val in ['A', 'C', 'T', 'G'] if val != ref_base]
@@ -375,7 +375,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params):
             chance = random.random()
 
             # No error, just continue.
-            if chance >= sim_params.error_rate:
+            if chance >= error_rate:
                 add_op(curr_cigar, '=')
                 new_seq.append(ref_base)
                 num_eq += 1
@@ -422,47 +422,18 @@ def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params):
 
     return new_seq, new_mappings, all_cigars, num_eq, num_x, num_ins, num_del
 
-# def update_mappings(insert_name, insert_seq, insert_mappings, cigar):
-#     return insert_name, insert_seq, insert_mappings
-
-# def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len,
-#                     error_rate, frac_snp, frac_ins, frac_del,
-#                     missing_adapter_rate, missing_adapter_len_lambda,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
-#                     b_rate, b_lambda,
-#                     read_prefix='graphsim', zmw_id=0, subread_start=0):
-
-#                     # missing_adapter_rate, second_pass_mean_len, second_pass_std,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
-
-#     # This part extracts an exact insert sequence; for example, the fragment which would be part of the SMRT bell.
-#     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=subread_start)
-
-#     chance = random.random()
-#     if chance < missing_adapter_rate:
-#         # TODO: Implement this part.
-#         pass
-
-#     read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
-#                                 error_rate, frac_snp, frac_ins, frac_del)
-
-#     # print 'Cigar:'
-#     # print ''.join(['%d%s' % (val[0], val[1]) for val in cigar])
-#     # print 'num_eq = %d, num_x = %d, num_ins = %d, num_del = %d' % (num_eq, num_x, num_ins, num_del)
-
-#     # TODO: Left-align indels.
-
-#     # read_name, read_seq, read_mappings = update_mappings(insert_name, insert_seq, insert_mappings, cigar)
-
-#     sys.stderr.write('Insert_mappings:\n')
-#     for m in insert_mappings:
-#         sys.stderr.write('{}\n'.format(m))
-
-#     return insert_name, read_seq, read_mappings
-
 def mutate_seq():
     mutated = []
     return mutated
 
 
+
+###########################################
+### Random functions and distributions. ###
+###########################################
+def pick_error_rate(err_mean, err_std, err_min, err_max):
+    error_rate = random.gauss(err_mean, err_std)
+    return max(err_min, min(error_rate, err_max))
 
 def pick_insert_length(len_mean, len_std, len_min, len_max):
     """
@@ -479,6 +450,7 @@ def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     start_pos = max(0, mid_pos - insert_len / 2)
     end_pos = min(ref_seq_len, start_pos + insert_len)
     return start_pos, end_pos, mid_pos, seq_strand
+###########################################
 
 def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, zmw_id, sim_params):
     # Step 1: Select a plain molecular insert length.
@@ -495,7 +467,9 @@ def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, s
     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=0)
 
     # Step 4: Introduce error rates.
-    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings, sim_params)
+    error_rate = pick_error_rate(sim_params.err_mean, sim_params.err_std, sim_params.err_min, sim_params.err_max)
+    # sys.stderr.write('error_rate = {}\n'.format(error_rate))
+    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings, sim_params, error_rate)
 
     read_seqs = [(insert_name, read_seq)]
 
@@ -503,6 +477,11 @@ def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, s
 
                 # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
                 # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
+
+#     chance = random.random()
+#     if chance < missing_adapter_rate:
+#         # TODO: Implement this part.
+#         pass
 
     # Debug verbose.
     if DEBUG_VERBOSE:
@@ -528,18 +507,16 @@ def write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings):
 
 def run(ref, gfa, out_prefix, seed, cov,
         len_mean, len_std, len_min, len_max,
-        # error_rate, frac_snp, frac_ins, frac_del,
+        err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del
         # missing_adapter_rate, missing_adapter_len_lambda,
         # b_rate, b_lambda
         ):
 
     # TODO: Parametrize this via the command line:
-    error_rate, frac_snp, frac_ins, frac_del = 0.15, 0.25, 0.50, 0.25
-    # error_rate, frac_snp, frac_ins, frac_del = 0.00, 0.25, 0.50, 0.25
     missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
     b_rate, b_lambda = 0.0, 1.0
 
-    sim_params = SimParams(len_mean, len_std, len_min, len_max, error_rate, frac_snp, frac_ins, frac_del)
+    sim_params = SimParams(len_mean, len_std, len_min, len_max, err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del)
 
     """
     test_intervals = [intervaltree.Interval(1, 7, 0), intervaltree.Interval(7, 11, 1)]
@@ -626,14 +603,14 @@ def parse_args(argv):
     parser.add_argument('--len-min', type=float, default=500, help='Minimum read length to simulate.')
     parser.add_argument('--len-max', type=float, default=70000, help='Maximum read length to simulate.')
 
-    # # Parameters to simulate
-    # parser.add_argument('--err-mean', type=float, default=0.12, help='Error rate to simulate.')
-    # parser.add_argument('--err-std', type=float, default=0.02, help='Std. dev. of the error rate to simulate.')
-    # parser.add_argument('--err-min', type=float, default=0.00, help='Minimum error rate to simulate.')
-    # parser.add_argument('--err-max', type=float, default=0.15, help='Maximum error rate to simulate.')
-    # parser.add_argument('--frac-snp', type=float, default=0.25, help='Fraction of mismatch errors.')
-    # parser.add_argument('--frac-ins', type=float, default=0.50, help='Fraction of insertion errors.')
-    # parser.add_argument('--frac-del', type=float, default=0.25, help='Fraction of deletion errors.')
+    # Parameters to simulate
+    parser.add_argument('--err-mean', type=float, default=0.12, help='Error rate to simulate.')
+    parser.add_argument('--err-std', type=float, default=0.02, help='Std. dev. of the error rate to simulate.')
+    parser.add_argument('--err-min', type=float, default=0.00, help='Minimum error rate to simulate.')
+    parser.add_argument('--err-max', type=float, default=0.15, help='Maximum error rate to simulate.')
+    parser.add_argument('--frac-snp', type=float, default=0.25, help='Fraction of mismatch errors.')
+    parser.add_argument('--frac-ins', type=float, default=0.50, help='Fraction of insertion errors.')
+    parser.add_argument('--frac-del', type=float, default=0.25, help='Fraction of deletion errors.')
 
     # parser.add_argument('--missing-adapter-prob', type=float, default=0.005, help='Probability of a read having a missing adapter. Tested twice, on each end of an insert.')
 
