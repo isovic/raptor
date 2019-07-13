@@ -172,14 +172,14 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
 
     if remaining_len <= 0:
         if DEBUG_VERBOSE:
-            print '=== Stopping (1) ==='
+            sys.stderr.write('=== Stopping (1) ===\n')
         return None
 
     # interval_tree = interval_trees[seq_name]
     ref_seq = ref_seqs[seq_name] if seq_strand == '+' else ref_seqs_rev[seq_name]
 
     def get_fork_pos(interval_trees, seq_name, seq_strand, start, end):
-        intervals = interval_trees[seq_name].search(start, end) if seq_name in interval_trees else []
+        intervals = interval_trees[seq_name].overlap(start, end) if seq_name in interval_trees else []
         valid_intervals = [interval.data for interval in intervals if interval.data['v_orient'] == seq_strand]
         valid_intervals = sorted(valid_intervals, key = lambda x: x['v_start'])
         # Find the closest fork position
@@ -203,7 +203,7 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
         pos = len(ref_seq)  # Intentionally overwriting, to be safe that the coordinate is not bad.
         fork_pos, choices = get_fork_pos(interval_trees, seq_name, seq_strand, pos, pos + 1)
         if DEBUG_VERBOSE:
-            print 'Special case: reached the end of the seq.'
+            sys.stderr.write('Special case: reached the end of the seq.\n')
     else:
         end_pos = min(len(ref_seq), pos + remaining_len)
         # The +1 below is so that we don't pick already considered forks at the current start
@@ -223,7 +223,7 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
         # either because we had no out edges, or because the choice was made
         # to stay here.
         if DEBUG_VERBOSE:
-            print '=== Stopping (2) ==='
+            sys.stderr.write('=== Stopping (2) ===')
         return None
         # # Either way, the remaining_len should be set to 0, so that the next
         # # iteration will end
@@ -245,8 +245,8 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
         next_seq_pos = fork_pos
         next_max_dist = max(0, remaining_len - len(ret_seq))
         if DEBUG_VERBOSE:
-            print 'pos = %s, fork_pos = %s, seq_name = %s, seq_len = %d, len(ret_seq) = %d' % (str(pos), str(fork_pos), seq_name, len(ref_seq), len(ret_seq))
-            print '=== Staying ==='
+            sys.stderr.write('pos = %s, fork_pos = %s, seq_name = %s, seq_len = %d, len(ret_seq) = %d\n' % (str(pos), str(fork_pos), seq_name, len(ref_seq), len(ret_seq)))
+            sys.stderr.write('=== Staying ===\n')
 
     else:
         ret_seq = ref_seq[pos:fork_pos]
@@ -261,8 +261,8 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
         next_seq_pos = picked['w_start']
         next_max_dist = max(0, remaining_len - len(ret_seq))
         if DEBUG_VERBOSE:
-            print 'pos = %s, fork_pos = %s, seq_name = %s, seq_len = %d, len(ret_seq) = %d' % (str(pos), str(fork_pos), seq_name, len(ref_seq), len(ret_seq))
-            print '=== Forking ==='
+            sys.stderr.write('pos = %s, fork_pos = %s, seq_name = %s, seq_len = %d, len(ret_seq) = %d\n' % (str(pos), str(fork_pos), seq_name, len(ref_seq), len(ret_seq)))
+            sys.stderr.write('=== Forking ===\n')
 
     return ret_seq, ret_mapping_paf, next_seq_name, next_seq_strand, next_seq_pos, next_max_dist
 
@@ -283,8 +283,8 @@ def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, s
     i = 0
     while True:
         if DEBUG_VERBOSE:
-            print ''
-            print 'Before: next_seq_name = %s, next_seq_strand = %s, next_seq_pos = %d, next_remaining_len = %d' % (next_seq_name, next_seq_strand, next_seq_pos, next_remaining_len)
+            sys.stderr.write('\n')
+            sys.stderr.write('Before: next_seq_name = %s, next_seq_strand = %s, next_seq_pos = %d, next_remaining_len = %d\n' % (next_seq_name, next_seq_strand, next_seq_pos, next_remaining_len))
 
         new_splice = propagate_path(trees, ref_seqs, ref_seqs_rev, next_seq_name, next_seq_strand, next_seq_pos, next_remaining_len)
 
@@ -450,9 +450,9 @@ def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos
 
     # read_name, read_seq, read_mappings = update_mappings(insert_name, insert_seq, insert_mappings, cigar)
 
-    print 'Insert_mappings:'
+    sys.stderr.write('Insert_mappings:\n')
     for m in insert_mappings:
-        print m
+        sys.stderr.write('{}\n'.format(m))
 
     return insert_name, read_seq, read_mappings
 
@@ -538,7 +538,7 @@ def run(ref, gfa, out_prefix, cov, len_mean, len_std, len_min, len_max):
                     seq_strand = '+'
 
                 if DEBUG_VERBOSE:
-                    print 'start = %d, mid = %d, end = %d, total_bases = %d, sim_read_len = %d, len(seq) = %d, target_bases = %d' % (start_pos, mid_pos, end_pos, total_bases, sim_read_len, len(seq), target_bases)
+                    sys.stderr.write('start = %d, mid = %d, end = %d, total_bases = %d, sim_read_len = %d, len(seq) = %d, target_bases = %d\n' % (start_pos, mid_pos, end_pos, total_bases, sim_read_len, len(seq), target_bases))
 
                 new_read = generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
                                             error_rate, frac_snp, frac_ins, frac_del,
@@ -562,13 +562,13 @@ def run(ref, gfa, out_prefix, cov, len_mean, len_std, len_min, len_max):
                     fp_out_paf.write('\n')
 
                 # Just debug output.
-                print 'Read mappings:'
+                sys.stderr.write('Read mappings:\n')
                 for m in read_mappings:
-                    print m[0:12]
+                    sys.stderr.write('{}\n'.format(m[0:12]))
 
                 num_generated_reads += 1
 
-                print ''
+                sys.stderr.write('\n')
 
                 # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
                 # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
@@ -582,9 +582,9 @@ def parse_args(argv):
     parser.add_argument('out_prefix', type=str, default='out.graphsim', help='Prefix of the output files which will be generated.')
     parser.add_argument('--cov', type=float, default=5, help='Coverage of the genome to generate.')
     parser.add_argument('--len-mean', type=float, default=10000, help='Mean read length to simulate.')
-    parser.add_argument('--len-std', type=float, default=2000, help='Mean read length to simulate.')
-    parser.add_argument('--len-min', type=float, default=500, help='Mean read length to simulate.')
-    parser.add_argument('--len-max', type=float, default=70000, help='Mean read length to simulate.')
+    parser.add_argument('--len-std', type=float, default=2000, help='Std. dev. of the read length to simulate.')
+    parser.add_argument('--len-min', type=float, default=500, help='Minimum read length to simulate.')
+    parser.add_argument('--len-max', type=float, default=70000, help='Maximum read length to simulate.')
     # parser.add_argument('--match-rate-mean', type=float, default=, help='Mean read length to simulate.')
 
     args = parser.parse_args(argv[1:])
