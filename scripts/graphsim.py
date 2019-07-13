@@ -420,47 +420,71 @@ def generate_mutations(insert_name, insert_seq, insert_mappings,
 
     return new_seq, new_mappings, all_cigars, num_eq, num_x, num_ins, num_del
 
-def update_mappings(insert_name, insert_seq, insert_mappings, cigar):
-    return insert_name, insert_seq, insert_mappings
+# def update_mappings(insert_name, insert_seq, insert_mappings, cigar):
+#     return insert_name, insert_seq, insert_mappings
 
-def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
-                    error_rate, frac_snp, frac_ins, frac_del,
-                    missing_adapter_rate, missing_adapter_len_lambda,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
-                    b_rate, b_lambda,
-                    read_prefix='graphsim', zmw_id=0, subread_start=0):
+# def generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
+#                     error_rate, frac_snp, frac_ins, frac_del,
+#                     missing_adapter_rate, missing_adapter_len_lambda,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
+#                     b_rate, b_lambda,
+#                     read_prefix='graphsim', zmw_id=0, subread_start=0):
 
-                    # missing_adapter_rate, second_pass_mean_len, second_pass_std,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
+#                     # missing_adapter_rate, second_pass_mean_len, second_pass_std,    # If there was a missing adapter, choose the length of the second pass of the SMRT bell.
 
-    # This part extracts an exact insert sequence; for example, the fragment which would be part of the SMRT bell.
-    insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=subread_start)
+#     # This part extracts an exact insert sequence; for example, the fragment which would be part of the SMRT bell.
+#     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=subread_start)
 
-    chance = random.random()
-    if chance < missing_adapter_rate:
-        # TODO: Implement this part.
-        pass
+#     chance = random.random()
+#     if chance < missing_adapter_rate:
+#         # TODO: Implement this part.
+#         pass
 
-    read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
-                                error_rate, frac_snp, frac_ins, frac_del)
+#     read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
+#                                 error_rate, frac_snp, frac_ins, frac_del)
 
-    # print 'Cigar:'
-    # print ''.join(['%d%s' % (val[0], val[1]) for val in cigar])
-    # print 'num_eq = %d, num_x = %d, num_ins = %d, num_del = %d' % (num_eq, num_x, num_ins, num_del)
+#     # print 'Cigar:'
+#     # print ''.join(['%d%s' % (val[0], val[1]) for val in cigar])
+#     # print 'num_eq = %d, num_x = %d, num_ins = %d, num_del = %d' % (num_eq, num_x, num_ins, num_del)
 
-    # TODO: Left-align indels.
+#     # TODO: Left-align indels.
 
-    # read_name, read_seq, read_mappings = update_mappings(insert_name, insert_seq, insert_mappings, cigar)
+#     # read_name, read_seq, read_mappings = update_mappings(insert_name, insert_seq, insert_mappings, cigar)
 
-    sys.stderr.write('Insert_mappings:\n')
-    for m in insert_mappings:
-        sys.stderr.write('{}\n'.format(m))
+#     sys.stderr.write('Insert_mappings:\n')
+#     for m in insert_mappings:
+#         sys.stderr.write('{}\n'.format(m))
 
-    return insert_name, read_seq, read_mappings
+#     return insert_name, read_seq, read_mappings
 
 def mutate_seq():
     mutated = []
     return mutated
 
-def run(ref, gfa, out_prefix, cov, len_mean, len_std, len_min, len_max):
+
+
+def pick_insert_length(len_mean, len_std, len_min, len_max):
+    """
+    Picks the length of an insert from the Gaussian distribution.
+    """
+    sim_read_len = 0
+    while sim_read_len < len_min or sim_read_len > len_max:
+        sim_read_len = int(math.floor(random.gauss(len_mean, len_std)))
+    return sim_read_len
+
+def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
+    mid_pos = random.randint(0, ref_seq_len)
+    seq_strand = random.choice(['+', '-'])
+    start_pos = max(0, mid_pos - insert_len / 2)
+    end_pos = min(ref_seq_len, start_pos + insert_len)
+    return start_pos, end_pos, mid_pos, seq_strand
+
+def run(ref, gfa, out_prefix, seed, cov,
+        len_mean, len_std, len_min, len_max,
+        # error_rate, frac_snp, frac_ins, frac_del,
+        # missing_adapter_rate, missing_adapter_len_lambda,
+        # b_rate, b_lambda
+        ):
+
     """
     test_intervals = [intervaltree.Interval(1, 7, 0), intervaltree.Interval(7, 11, 1)]
     test_tree = intervaltree.IntervalTree(test_intervals)
@@ -472,35 +496,43 @@ def run(ref, gfa, out_prefix, cov, len_mean, len_std, len_min, len_max):
     exit(1)
     """
 
+    if seed and seed != 0:
+        random.seed(seed)
+
     # TODO: Parametrize this via the command line:
     error_rate, frac_snp, frac_ins, frac_del = 0.15, 0.25, 0.50, 0.25
     # error_rate, frac_snp, frac_ins, frac_del = 0.00, 0.25, 0.50, 0.25
     missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
     b_rate, b_lambda = 0.0, 1.0
 
+    # Sanity check.
     assert((frac_snp + frac_ins + frac_del) == 1.0)
     assert(len_min > 0)
     assert(len_max > len_min)
     assert(len_max > len_mean)
 
-
-
-    ref_seqs = {seq[0][1:].split()[0]: seq[1] for seq in fastqparser.yield_seq([ref])}
-    ref_seqs_rev = {key: revcmp(val) for key, val in ref_seqs.iteritems()}
-
+    # Create the output directory.
     if not os.path.exists(os.path.dirname(out_prefix)):
         os.makedirs(os.path.dirname(out_prefix))
 
+    # Parse the reference sequences.
+    ref_seqs = {seq[0][1:].split()[0]: seq[1] for seq in fastqparser.yield_seq([ref])}
+    ref_seqs_rev = {key: revcmp(val) for key, val in ref_seqs.iteritems()}
+
+    # Parse the graph if provided. Otherwise, use an empty graph.
     if gfa and os.path.exists(gfa):
         with open(gfa, 'r') as fp_in:
             graph = load_gfa2(fp_in, True)
     else:
         graph = GFAGraph(header={}, nodes={}, edges={})
 
-    # print graph.header
-    # print graph.nodes
-    # print graph.edges
+    # Verbose if required.
+    if DEBUG_VERBOSE:
+        sys.stderr.write('graph.header = {}\n'.format(graph.header))
+        sys.stderr.write('graph.nodes = {}\n'.format(graph.nodes))
+        sys.stderr.write('graph.edges = {}\n'.format(graph.edges))
 
+    # Construct the interval trees from the branching points in the graph.
     trees = make_interval_trees(graph)
 
     total_len = sum([len(seq) for qname, seq in ref_seqs.iteritems()])
@@ -509,50 +541,57 @@ def run(ref, gfa, out_prefix, cov, len_mean, len_std, len_min, len_max):
     with open('%s.paf' % (out_prefix), 'w') as fp_out_paf, \
             open('%s.fasta' % (out_prefix), 'w') as fp_out_fasta:
 
+        # For each sequence in the reference set, generate the "cov" coverage
+        # of simulated inserts.
         for seq_name, seq in ref_seqs.iteritems():
             total_bases = 0
             target_bases = len(seq) * cov
             seq_len = len(seq)
             while total_bases < target_bases:
-                mid_pos = random.randint(0, len(seq))
-                seq_strand = random.choice(['+', '-'])
 
-                if DEBUG_MODE:
-                    mid_pos = 19188
-                    seq_strand = '+'
-
-                sim_read_len = 0
-                while sim_read_len < len_min or sim_read_len > len_max:
-                    sim_read_len = int(math.floor(random.gauss(len_mean, len_std)))
-
+                # Step 1: Select a plain molecular insert length.
+                sim_read_len = pick_insert_length(len_mean, len_std, len_min, len_max)
                 total_bases += sim_read_len
-                start_pos = max(0, mid_pos - sim_read_len / 2)
-                end_pos = min(seq_len, start_pos + sim_read_len)
 
-                if DEBUG_MODE:
-                    start = 0
-                    mid = 19188
-                    end = 100581
-                    sim_read_len = 100581
-                    total_bases = 100581
-                    seq_strand = '+'
+                # Step 2: Determine the position where from the insert is taken on the genome.
+                start_pos, end_pos, mid_pos, seq_strand = pick_placement_of_insert_on_origin(len(seq), sim_read_len)
 
+                # Just a debug verbose of the simulation values.
                 if DEBUG_VERBOSE:
                     sys.stderr.write('start = %d, mid = %d, end = %d, total_bases = %d, sim_read_len = %d, len(seq) = %d, target_bases = %d\n' % (start_pos, mid_pos, end_pos, total_bases, sim_read_len, len(seq), target_bases))
 
-                new_read = generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
-                                            error_rate, frac_snp, frac_ins, frac_del,
-                                            missing_adapter_rate, missing_adapter_len_lambda,
-                                            b_rate, b_lambda,
-                                            read_prefix='graphsim',
-                                            zmw_id=num_generated_reads,
-                                            subread_start=0
-                                            )
+                # Step 3: This part extracts an exact insert sequence from the graph. for example, the fragment which would be part of the SMRT bell.
+                insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len, read_prefix='graphsim', zmw_id=num_generated_reads, subread_start=0)
 
-                if new_read == None:
-                    continue
-                read_name, read_seq, read_mappings = new_read
+                # Step 4: Introduce error rates.
+                read_seq, read_mappings, cigar, num_eq, num_x, num_ins, num_del = generate_mutations(insert_name, insert_seq, insert_mappings,
+                                            error_rate, frac_snp, frac_ins, frac_del)
 
+                # Debug verbose.
+                sys.stderr.write('Insert_mappings:\n')
+                for m in insert_mappings:
+                    sys.stderr.write('{}\n'.format(m))
+
+
+
+                # Step x: Simulate missing adapters in the physical molecule.
+
+
+                # new_read = generate_read(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_read_len,
+                #                             error_rate, frac_snp, frac_ins, frac_del,
+                #                             missing_adapter_rate, missing_adapter_len_lambda,
+                #                             b_rate, b_lambda,
+                #                             read_prefix='graphsim',
+                #                             zmw_id=num_generated_reads,
+                #                             subread_start=0
+                #                             )
+
+                # If anything went wrong, skip.
+                # if new_read == None:
+                #     continue
+                # read_name, read_seq, read_mappings = new_read
+
+                read_name = insert_name
                 fp_out_fasta.write('>%s\n' % (read_name))
                 fp_out_fasta.write(read_seq)
                 fp_out_fasta.write('\n')
@@ -580,12 +619,38 @@ def parse_args(argv):
     parser.add_argument('ref', help='Reference sequences in FASTA/FASTQ format.')
     parser.add_argument('gfa', help='Reference graph in GFA-2 format.')
     parser.add_argument('out_prefix', type=str, default='out.graphsim', help='Prefix of the output files which will be generated.')
+
+    parser.add_argument('--seed', type=int, default=12345, help='Random seed.')
+
     parser.add_argument('--cov', type=float, default=5, help='Coverage of the genome to generate.')
+
+    # Parameters to model the plain and accurate insert sequence.
     parser.add_argument('--len-mean', type=float, default=10000, help='Mean read length to simulate.')
     parser.add_argument('--len-std', type=float, default=2000, help='Std. dev. of the read length to simulate.')
     parser.add_argument('--len-min', type=float, default=500, help='Minimum read length to simulate.')
     parser.add_argument('--len-max', type=float, default=70000, help='Maximum read length to simulate.')
+
+    # # Parameters to simulate
+    # parser.add_argument('--err-mean', type=float, default=0.12, help='Error rate to simulate.')
+    # parser.add_argument('--err-std', type=float, default=0.02, help='Std. dev. of the error rate to simulate.')
+    # parser.add_argument('--err-min', type=float, default=0.00, help='Minimum error rate to simulate.')
+    # parser.add_argument('--err-max', type=float, default=0.15, help='Maximum error rate to simulate.')
+    # parser.add_argument('--frac-snp', type=float, default=0.25, help='Fraction of mismatch errors.')
+    # parser.add_argument('--frac-ins', type=float, default=0.50, help='Fraction of insertion errors.')
+    # parser.add_argument('--frac-del', type=float, default=0.25, help='Fraction of deletion errors.')
+
+    # parser.add_argument('--missing-adapter-prob', type=float, default=0.005, help='Probability of a read having a missing adapter. Tested twice, on each end of an insert.')
+
+    # parser.add_argument('--b-prob', type=float, default=0.25, help='Probability of a larger low-complexity indel event occuring. Probability here is uniform. Event length is modelled as Gaussian.')
+    # parser.add_argument('--b-mean', type=float, default=10000, help='Mean length of the b-event.')
+    # parser.add_argument('--b-std', type=float, default=2000, help='Std. dev. of the length of the b-event.')
+    # parser.add_argument('--b-min', type=float, default=500, help='Minimum length of the b-event.')
+    # parser.add_argument('--b-max', type=float, default=70000, help='Maximum length of the b-event.')
+
     # parser.add_argument('--match-rate-mean', type=float, default=, help='Mean read length to simulate.')
+
+    # missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
+    # b_rate, b_lambda = 0.0, 1.0
 
     args = parser.parse_args(argv[1:])
 
@@ -598,3 +663,18 @@ def main(argv=sys.argv):
 
 if __name__ == "__main__":  # pragma: no cover
     main(sys.argv)          # pragma: no cover
+
+"""
+Algorithm:
+1. Extract a plain insert sequence from the graph.
+2. If there is a missing adapter, duplicate the insert with a reverse complement.
+3. Draw a ZMW read length from a distribution. This will determine the number of passes.
+4. For a selected ZMW length,
+
+Insert extraction algorithm:
+1. Begin at a selected (ref_seq, ref_name, start_pos, strand, remaining_insert_len).
+2. Find all edges within [start_pos, min(start_pos + remaining_insert_len, len(ref_seq))] on the specified strand of ref, including the implicit edge on the same reference.
+3. Pick a random edge from a uniform distribution.
+4.a If the implicit edge was picked, continue down the same ref sequence until
+4.b If an explicit GFA-2 edge was picked, splice the distance to the junction point, and jump to the sequence specified by the edge sink.
+"""
