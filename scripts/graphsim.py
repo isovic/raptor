@@ -15,7 +15,7 @@ import intervaltree
 import copy
 import collections
 
-SimParams = collections.namedtuple('SimParams', ['len_mean', 'len_std', 'len_min', 'len_max', 'err_mean', 'err_std', 'err_min', 'err_max', 'frac_snp', 'frac_ins', 'frac_del'])
+SimParams = collections.namedtuple('SimParams', ['len_mean', 'len_std', 'len_min', 'len_max', 'err_mean', 'err_std', 'err_min', 'err_max', 'frac_snp', 'frac_ins', 'frac_del', 'missing_adapter_prob'])
 
 ################################
 ######### Utility tools ########
@@ -371,6 +371,7 @@ def generate_mutations(insert_name, insert_seq, insert_mappings, sim_params, err
         i = qstart
         while i < qend:
             ref_base = insert_seq[i]
+
             # Should we introduce an error here?
             chance = random.random()
 
@@ -452,6 +453,29 @@ def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     return start_pos, end_pos, mid_pos, seq_strand
 ###########################################
 
+def introduce_missing_adapter(insert_name, insert_seq, insert_mappings):
+    # Add the reverse complemented sequence.
+    new_insert_seq = insert_seq + revcmp(insert_seq)
+
+    # Mirror all the mappings.
+    qpos = len(insert_seq)
+    new_insert_mappings = []
+    for mapping in insert_mappings:
+        new_mapping = mapping[:]
+        new_mapping[1] = len(new_insert_seq)
+        new_insert_mappings.append(new_mapping)
+    for mapping in insert_mappings[::-1]:
+        new_mapping = mapping[:]
+        qspan = mapping[3] - mapping[2]
+        new_mapping[1] = len(new_insert_seq)
+        new_mapping[2] = qpos
+        new_mapping[3] = qpos + qspan
+        new_mapping[4] = '-' if mapping[4] == '+' else '+'
+        qpos += qspan
+        new_insert_mappings.append(new_mapping)
+
+    return new_insert_seq, new_insert_mappings
+
 def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq, zmw_id, sim_params):
     # Step 1: Select a plain molecular insert length.
     sim_insert_len = pick_insert_length(sim_params.len_mean, sim_params.len_std, sim_params.len_min, sim_params.len_max)
@@ -466,6 +490,11 @@ def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, s
     # Step 3: This part extracts an exact insert sequence from the graph. for example, the fragment which would be part of the SMRT bell.
     insert_name, insert_seq, insert_mappings = generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, start_pos, sim_insert_len, read_prefix='graphsim', zmw_id=zmw_id, subread_start=0)
 
+    chance_missing_adapter = random.random()
+    if chance_missing_adapter < sim_params.missing_adapter_prob:
+        insert_seq, insert_mappings = introduce_missing_adapter(insert_name, insert_seq, insert_mappings)
+
+
     # Step 4: Introduce error rates.
     error_rate = pick_error_rate(sim_params.err_mean, sim_params.err_std, sim_params.err_min, sim_params.err_max)
     # sys.stderr.write('error_rate = {}\n'.format(error_rate))
@@ -477,11 +506,6 @@ def simulate_and_mutate_single_insert(trees, ref_seqs, ref_seqs_rev, seq_name, s
 
                 # path = generate_path(trees[seq_name], seq_name, seq, start_pos, read_len)
                 # propagate_path(trees[seq_name], seq_name, seq, seq_strand, start_pos, read_len)
-
-#     chance = random.random()
-#     if chance < missing_adapter_rate:
-#         # TODO: Implement this part.
-#         pass
 
     # Debug verbose.
     if DEBUG_VERBOSE:
@@ -507,16 +531,17 @@ def write_output(fp_out_fasta, fp_out_paf, read_seqs, read_mappings):
 
 def run(ref, gfa, out_prefix, seed, cov,
         len_mean, len_std, len_min, len_max,
-        err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del
+        err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del,
+        missing_adapter_prob
         # missing_adapter_rate, missing_adapter_len_lambda,
         # b_rate, b_lambda
         ):
 
     # TODO: Parametrize this via the command line:
-    missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
+    # missing_adapter_rate, missing_adapter_len_lambda = 0.01, 1.0
     b_rate, b_lambda = 0.0, 1.0
 
-    sim_params = SimParams(len_mean, len_std, len_min, len_max, err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del)
+    sim_params = SimParams(len_mean, len_std, len_min, len_max, err_mean, err_std, err_min, err_max, frac_snp, frac_ins, frac_del, missing_adapter_prob)
 
     """
     test_intervals = [intervaltree.Interval(1, 7, 0), intervaltree.Interval(7, 11, 1)]
@@ -612,7 +637,7 @@ def parse_args(argv):
     parser.add_argument('--frac-ins', type=float, default=0.50, help='Fraction of insertion errors.')
     parser.add_argument('--frac-del', type=float, default=0.25, help='Fraction of deletion errors.')
 
-    # parser.add_argument('--missing-adapter-prob', type=float, default=0.005, help='Probability of a read having a missing adapter. Tested twice, on each end of an insert.')
+    parser.add_argument('--missing-adapter-prob', type=float, default=0.0, help='Probability of a read having a missing adapter. Tested twice, on each end of an insert.')
 
     # parser.add_argument('--b-prob', type=float, default=0.25, help='Probability of a larger low-complexity indel event occuring. Probability here is uniform. Event length is modelled as Gaussian.')
     # parser.add_argument('--b-mean', type=float, default=10000, help='Mean length of the b-event.')
@@ -638,11 +663,24 @@ if __name__ == "__main__":  # pragma: no cover
     main(sys.argv)          # pragma: no cover
 
 """
-Algorithm:
+General algorithm:
 1. Extract a plain insert sequence from the graph.
 2. If there is a missing adapter, duplicate the insert with a reverse complement.
 3. Draw a ZMW read length from a distribution. This will determine the number of passes.
 4. For a selected ZMW length,
+
+Mutation:
+    - Select an "error_rate" for the current insert from a Gaussian distribution with (err_mean, err_std) with capping at [err_min, err_max].
+    - Sort insert mappings. They need to be successive, without any query coordinate gaps between them.
+    - For each mapping of the insert, loop through query bases.
+    - For each base, pick a number in [0.0, 1.0> from a uniform distribution.
+        - If it's above "error_rate", do not introduce a mutation at this particular base.
+        - Otherwise, pick a mutation (each of the mutations is exactly 1 base long):
+            - Pick a new number from the uniform distribution.
+            - If it's is in [0.0, frac_snp> introduce a mismatch.
+            - If it's in [frac_snp, frac_snp+frac_ins> introduce an insertion. When an insertion is introduced, we do not move 1 base down the insert. This is done to allow multiple insertions to be inserted.
+            - If it's larger, introduce a deletion. The total frac_snp+frac_ins+frac_del must be equal to 1.0. For deletions, we move 1 base down after. Each base can be deleted independently, thus allowing successive deletions.
+        - Add the selected base to a new sequence vector, and record the CIGAR operation at that position.
 
 Insert extraction algorithm:
 1. Begin at a selected (ref_seq, ref_name, start_pos, strand, remaining_insert_len).
