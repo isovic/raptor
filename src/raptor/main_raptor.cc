@@ -149,10 +149,10 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 			LOG_ALL("Only block %ld will be processed.\n", start_block_id);
 		}
 
-		if (start_block_id >= num_blocks) {
+		if (num_blocks > 0 && start_block_id >= num_blocks) {
 			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The start_block_id >= num_blocks. start_block_id = %ld, num_blocks = %ld. Exiting.", start_block_id, num_blocks);
 		}
-		if (end_block_id > num_blocks) {	// Non-inclusive end.
+		if (num_blocks > 0 && end_block_id > num_blocks) {	// Non-inclusive end.
 			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The end_block_id >= num_blocks. end_block_id = %ld, num_blocks = %ld. Exiting.", end_block_id, num_blocks);
 		}
 

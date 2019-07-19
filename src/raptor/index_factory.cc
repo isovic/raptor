@@ -74,8 +74,9 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
         } else {
             LOG_ALL("Loading reference sequences from RaptorDB file: '%s'.\n", ref_paths[0].c_str());
             auto rasf = mindex::createRandomAccessSequenceFile(ref_paths[0], 50);
+            int64_t num_blocks = static_cast<int64_t>(rasf->db_blocks().size());
 
-            if (rdb_block_id >= static_cast<int64_t>(rasf->db_blocks().size())) {
+            if (num_blocks > 0 && rdb_block_id >= num_blocks) {
                 FATAL_REPORT(
                     ERR_UNEXPECTED_VALUE,
                     "Specified block_id is larger than the number of blocks in RaptorDB. block_id = %ld, rasf->db_blocks().size() = %lu.", rdb_block_id, rasf->db_blocks().size());
