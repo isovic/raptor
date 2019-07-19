@@ -69,6 +69,11 @@ std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegi
         }
     }
 
+//    std::cerr << "[GraphMappingResult::CollectRegions]:\n";
+//    for (size_t i = 0; i < ret.size(); ++i) {
+//        std::cerr << "[" << i << "] " << ret[i]->WriteAsCSV('\t') << "\n";
+//    }
+
     return ret;
 }
 

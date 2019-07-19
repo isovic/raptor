@@ -135,7 +135,7 @@ class RegionAligned : public raptor::RegionBase {
         return (path_id_ > 0);
     }
     bool IsSupplementary() const {
-        return (segment_id_ > 0);
+        return (segment_id_ > 0);  Ovo mozda moram updateati! Mozda treba razmisliti da li neki dio moze biti i secondary i supplementary ili ne? Ako ne, onda treba ovdje i uvjet "&& path_id_ == 0".
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;

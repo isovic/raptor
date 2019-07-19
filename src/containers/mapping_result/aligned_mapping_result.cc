@@ -31,16 +31,22 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
 
         for (size_t j = 0; j < path_aln->alns().size(); j++) {
             auto& aln = path_aln->alns()[j];
+
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
-                  continue;
+                    continue;
                 }
                 query_target_pairs[pair_name] = 1;
             }
             ret.emplace_back(aln);
         }
     }
+
+//    std::cerr << "[AlignedMappingResult::CollectRegions]:\n";
+//    for (size_t i = 0; i < ret.size(); ++i) {
+//        std::cerr << "[" << i << "] " << ret[i]->WriteAsCSV('\t') << "\n";
+//    }
 
     return ret;
 }
