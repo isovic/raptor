@@ -231,11 +231,11 @@ Test symlink on multiple input files.
   $ (${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 --symlink -v 0 && cat out.rdb | sed "s#${PROJECT_DIR}##g")
   V	0.2
   F	0	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
+  F	1	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
   S	0	1-gi|545778205|gb|U00096.3|	100000	0	0	100089
   B	0	0	1	100000
   S	1	2-gi|545778205|gb|U00096.3|	100000	0	100089	100088
   B	1	1	2	100000
-  F	1	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
   S	2	1-gi|545778205|gb|U00096.3|	100000	1	0	100089
   B	2	2	3	100000
   S	3	2-gi|545778205|gb|U00096.3|	100000	1	100089	100088
@@ -254,11 +254,11 @@ Test the FOFN functionality.
   $ (echo "${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta" > input.fofn) && (echo "${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta" >> input.fofn) && (${BIN_DIR}/raptor-reshape -i input.fofn -o out --block-size 0.09 --symlink -v 0 && cat out.rdb | sed "s#${PROJECT_DIR}##g")
   V	0.2
   F	0	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
+  F	1	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
   S	0	1-gi|545778205|gb|U00096.3|	100000	0	0	100089
   B	0	0	1	100000
   S	1	2-gi|545778205|gb|U00096.3|	100000	0	100089	100088
   B	1	1	2	100000
-  F	1	/test-data/ecoli-small/double-ecoli-0-100000.fasta	fasta
   S	2	1-gi|545778205|gb|U00096.3|	100000	1	0	100089
   B	2	2	3	100000
   S	3	2-gi|545778205|gb|U00096.3|	100000	1	100089	100088
@@ -268,18 +268,18 @@ Test the PacBio XML functionality.
   $ (ln -s ${PROJECT_DIR}/test-data/small-xml/subreads1.bam && ln -s ${PROJECT_DIR}/test-data/small-xml/subreads1.bam.pbi && ln -s ${PROJECT_DIR}/test-data/small-xml/subreads2.bam && ln -s ${PROJECT_DIR}/test-data/small-xml/subreads2.bam.pbi && ln -s ${PROJECT_DIR}/test-data/small-xml/subreads3.bam && ln -s ${PROJECT_DIR}/test-data/small-xml/subreads3.bam.pbi && ln -s ${PROJECT_DIR}/test-data/small-xml/subreadset.xml) && ${BIN_DIR}/raptor-reshape -i subreadset.xml --symlink -o out -v 0 && cat out.rdb
   V	0.2
   F	0	./subreads1.bam	bam
+  F	1	./subreads2.bam	bam
+  F	2	./subreads3.bam	bam
   S	0	ref1/1/0_42148	42148	0	29032448	865206272
   S	1	ref1/2/0_42124	42124	0	894238720	864354304
   S	2	ref1/3/0_42176	42176	0	1758593024	866451456
   S	3	ref1/4/0_42179	42179	0	2625044480	866123776
   S	4	ref1/5/0_42280	42280	0	3491168256	867565568
-  F	1	./subreads2.bam	bam
   S	5	ref2/1/0_42148	42148	1	29032448	865861632
   S	6	ref2/2/0_42124	42124	1	894894080	861798400
   S	7	ref2/3/0_42176	42176	1	1756692480	865206272
   S	8	ref2/4/0_42179	42179	1	2621898752	866320384
   S	9	ref2/5/0_42280	42280	1	3488219136	866451456
-  F	2	./subreads3.bam	bam
   S	10	ref1/158/0_23696	23696	2	29032448	490733568
   S	11	ref1/159/0_42173	42173	2	519766016	866451456
   S	12	ref1/160/0_42090	42090	2	1386217472	862978048
