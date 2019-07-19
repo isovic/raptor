@@ -100,6 +100,10 @@ SequenceFileCompositeFofn::~SequenceFileCompositeFofn() {
 
 }
 
+std::vector<std::string> SequenceFileCompositeFofn::GetFiles() const {
+    return files_;
+}
+
 std::vector<std::string> SequenceFileCompositeFofn::GetFileHeaders() const {
     return headers_;
 }

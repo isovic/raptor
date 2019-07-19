@@ -75,6 +75,10 @@ SequenceFileCompositePbXml::~SequenceFileCompositePbXml() {
 
 }
 
+std::vector<std::string> SequenceFileCompositePbXml::GetFiles() const {
+    return files_;
+}
+
 std::vector<std::string> SequenceFileCompositePbXml::GetFileHeaders() const {
     return headers_;
 }

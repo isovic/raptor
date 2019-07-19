@@ -30,6 +30,9 @@ public:
    // SequenceFileParserBase(const std::string& path);
    virtual ~SequenceFileCompositeBase() {}
 
+   // Returns the list of files in the composite file.
+   virtual std::vector<std::string> GetFiles() const = 0;
+
    // Returns a vector of all file headers in the order of input files.
    virtual std::vector<std::string> GetFileHeaders() const = 0;
 

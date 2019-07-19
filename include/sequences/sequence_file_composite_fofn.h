@@ -37,6 +37,9 @@ public:
 
    ~SequenceFileCompositeFofn();
 
+   // Returns the list of files in the composite file.
+   std::vector<std::string> GetFiles() const;
+
    // Returns a vector of all file headers in the order of input files.
    std::vector<std::string> GetFileHeaders() const;
 
