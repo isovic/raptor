@@ -89,6 +89,14 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 		std::string out_path = parameters->out_prefix + ".block." + std::to_string(total_out_files);
 		ofs.open(out_path);
 		ofs_rdb << "F\t" << total_out_files << "\t" << out_path << "\t" << uber_out_format << "\n";
+	} else {
+		auto files = seq_file_parser->GetFiles();
+		for (size_t file_id = 0; file_id < files.size(); ++file_id) {
+			const auto& curr_file = files[file_id];
+			auto curr_out_fmt_str = mindex::GetSequenceFormatFromPath(curr_file);
+			std::string out_format = mindex::SequenceFormatToString(curr_out_fmt_str);
+			ofs_rdb << "F\t" << file_id << "\t" << curr_file << "\t" << out_format << "\n";
+		}
 	}
 
 	int64_t file_before = -1;
@@ -128,14 +136,6 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 					<< "\t" << file_id << "\t" << num_written_bytes << "\t" << (num_written_bytes_after - num_written_bytes) << "\n";
 
 		} else {	// WITHOUT writing to disk, just pointing to existing locations.
-			if (file_now != file_before) {
-				// In case of symlinking, the out format has to be the same as input format.
-				auto curr_file = seq_file_parser->GetCurrentFilePath();
-				auto curr_out_fmt_str = mindex::GetSequenceFormatFromPath(curr_file);
-				std::string out_format = mindex::SequenceFormatToString(curr_out_fmt_str);
-				ofs_rdb << "F\t" << file_now << "\t" << curr_file << "\t" << out_format << "\n";
-			}
-
 			ofs_rdb << "S\t" << total_num_seqs << "\t" << raptor::TrimToFirstWhiteSpace(seq->header()) << "\t" << seq->len()
 					<< "\t" << file_id << "\t" << pos_last << "\t" << (pos_now - pos_last) << "\n";
 		}
