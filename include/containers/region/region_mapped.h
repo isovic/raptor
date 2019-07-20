@@ -13,6 +13,7 @@
 #include <string>
 #include <containers/region/region_base.h>
 #include <containers/mapping_env.h>
+#include <containers/region/region_type.h>
 
 namespace raptor {
 
@@ -130,13 +131,16 @@ public:
         return num_segments_;
     }
     bool IsPrimary() const {
-        return (path_id_ == 0 && segment_id_ == 0);
+        return region_type_ == raptor::RegionType::Primary;
+        // return (path_id_ == 0 && segment_id_ == 0);
     }
     bool IsSecondary() const {
-        return (path_id_ > 0);
+        return region_type_ == raptor::RegionType::Secondary;
+        // return (path_id_ > 0);
     }
     bool IsSupplementary() const {
-        return (segment_id_ > 0);
+        return region_type_ == raptor::RegionType::SupplementaryPrimary || region_type_ == raptor::RegionType::SupplementarySecondary;
+        // return (segment_id_ > 0);
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
@@ -241,6 +245,7 @@ private:
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
+    raptor::RegionType region_type_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

@@ -15,6 +15,7 @@
 #include <containers/mapping_env.h>
 #include <aligner/alignment_result.h>
 #include <log/log_tools.h>
+#include <containers/region/region_type.h>
 
 namespace raptor {
 
@@ -129,13 +130,16 @@ class RegionAligned : public raptor::RegionBase {
         return num_segments_;
     }
     bool IsPrimary() const {
-        return (path_id_ == 0 && segment_id_ == 0);
+        return region_type_ == raptor::RegionType::Primary;
+        // return (path_id_ == 0 && segment_id_ == 0);
     }
     bool IsSecondary() const {
-        return (path_id_ > 0);
+        return region_type_ == raptor::RegionType::Secondary;
+        // return (path_id_ > 0);
     }
     bool IsSupplementary() const {
-        return (segment_id_ > 0);  Ovo mozda moram updateati! Mozda treba razmisliti da li neki dio moze biti i secondary i supplementary ili ne? Ako ne, onda treba ovdje i uvjet "&& path_id_ == 0".
+        return region_type_ == raptor::RegionType::SupplementaryPrimary || region_type_ == raptor::RegionType::SupplementarySecondary;
+        // return (segment_id_ > 0);
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
@@ -185,7 +189,9 @@ class RegionAligned : public raptor::RegionBase {
                             :   env_(env),
                                 aln_(nullptr),
                                 path_id_(-1), num_paths_(-1),
-                                segment_id_(-1), num_segments_(-1) {
+                                segment_id_(-1), num_segments_(-1),
+                                region_type_(raptor::RegionType::Undefined)
+    {
     }
 
     RegionAligned(std::shared_ptr<raptor::MappingEnv> env,
@@ -195,7 +201,9 @@ class RegionAligned : public raptor::RegionBase {
                             :   env_(env),
                                 aln_(aln),
                                 path_id_(_path_id), num_paths_(_num_paths),
-                                segment_id_(_segment_id), num_segments_(_num_segments) {
+                                segment_id_(_segment_id), num_segments_(_num_segments),
+                                region_type_(raptor::RegionType::Undefined)
+    {
     }
 
     std::shared_ptr<raptor::MappingEnv> env_;
@@ -204,6 +212,7 @@ class RegionAligned : public raptor::RegionBase {
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
+    raptor::RegionType region_type_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
