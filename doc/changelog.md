@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.16.2 -> 0.16.3
+- No longer failing with a fatal error when the input RaptorDB is empty, and a block is specified.
+- Raptor-reshape in the --symlink mode now first outputs the list of files, and then the sequences. This is important because some BAM files might be empty, and if the files aren't listed then the headers will not be parsed and forwarded downstream to the output BAM.
+
 ## 0.16.1 -> 0.16.2
 - Updated the meson.build to support the latest Pbbam/Pbcopper updates.
 
