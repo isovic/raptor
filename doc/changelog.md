@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.16.3 -> 0.16.4
+- Fixed a segfault when a PacBio XML was used as the reference input to Raptor.
+- Minor change in debug output (now writing the number of sequences in the index to screen).
+
 ## 0.16.2 -> 0.16.3
 - No longer failing with a fatal error when the input RaptorDB is empty, and a block is specified.
 - Raptor-reshape in the --symlink mode now first outputs the list of files, and then the sequences. This is important because some BAM files might be empty, and if the files aren't listed then the headers will not be parsed and forwarded downstream to the output BAM.
