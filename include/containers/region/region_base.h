@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <aligner/cigar.h>
 #include <containers/sam_tag.h>
+#include <containers/region/region_type.h>
 
 namespace raptor {
 
@@ -58,6 +59,8 @@ public:
     virtual int32_t PathsNum() const = 0;       // Total number of alternative paths.
     virtual int32_t SegmentId() const = 0;      // ID of the supplementary alignment.
     virtual int32_t SegmentsNum() const = 0;    // Number of supplementary alignments for the path.
+
+    virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (primary, secondary, supplementary).
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
