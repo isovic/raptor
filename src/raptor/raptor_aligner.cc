@@ -35,27 +35,12 @@ std::shared_ptr<raptor::AlignedMappingResult> RaptorAligner::AlignPaths(
     status = raptor::MapperReturnValueBase::OK;
 
     // Calculate and accumulate the alignments.
+    int32_t num_paths = paths.size();
     std::vector<std::shared_ptr<raptor::PathAlignment>> alns;
-    for (const auto& path : paths) {
-        auto aln = path_aligner->Align(qseq, path, !params_->no_extend_alignment, params_);
+    for (int32_t path_id = 0; path_id < static_cast<int32_t>(paths.size()); ++path_id) {
+        const auto& path = paths[path_id];
+        auto aln = path_aligner->Align(qseq, path, path_id, num_paths, !params_->no_extend_alignment, params_);
         alns.emplace_back(aln);
-    }
-
-    // Update the alignment IDs (tracking of primary, secondary and supplementary alignments).
-    int32_t num_paths = static_cast<int32_t>(alns.size());
-    for (int32_t path_id = 0; path_id < num_paths; ++path_id) {
-        auto path_aln = alns[path_id];
-        if (path_aln == nullptr) {
-            continue;
-        }
-        int32_t num_segments = static_cast<int32_t>(path_aln->alns().size());
-        for (int32_t seg_id = 0; seg_id < path_aln->alns().size(); ++seg_id) {
-            auto& aln = path_aln->alns()[seg_id];
-            aln->path_id(static_cast<int32_t>(path_id));
-            aln->num_paths(num_paths);
-            aln->segment_id(static_cast<int32_t>(seg_id));
-            aln->num_segments(num_segments);
-        }
     }
 
     result->path_alignments(alns);

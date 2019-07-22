@@ -672,6 +672,7 @@ std::shared_ptr<raptor::LocalPath> PathAligner::FlankExtend(const mindex::IndexP
 
 std::shared_ptr<raptor::PathAlignment> PathAligner::Align(const mindex::SequencePtr& qseq,
                                                       const std::shared_ptr<raptor::LocalPath> path,
+                                                      int32_t path_id, int32_t num_paths,
                                                       bool use_extend_alignment,
                                                       const std::shared_ptr<raptor::ParamsAligner> params) {
     TicToc total_time;
@@ -815,6 +816,16 @@ std::shared_ptr<raptor::PathAlignment> PathAligner::Align(const mindex::Sequence
     result->entire_alignment(entire_alignment);
     result->path_score(total_score);
     result->alns(region_aln);
+
+    // Set the useful path/segment information values.
+    int32_t num_segments = static_cast<int32_t>(result->alns().size());
+    for (int32_t seg_id = 0; seg_id < result->alns().size(); ++seg_id) {
+        auto& aln = result->alns()[seg_id];
+        aln->path_id(static_cast<int32_t>(path_id));
+        aln->num_paths(num_paths);
+        aln->segment_id(static_cast<int32_t>(seg_id));
+        aln->num_segments(num_segments);
+    }
 
     // printf ("Aligned:\n");
     // printf ("  CIGAR: %s\n", CigarToString(entire_alignment->cigar).c_str());
