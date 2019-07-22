@@ -22,6 +22,21 @@ AlignedMappingResult::AlignedMappingResult(const mindex::SequencePtr& qseq, mind
 std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target) const {
     std::vector<std::shared_ptr<raptor::RegionBase>> ret;
 
+    // 1. Sort the paths by score.
+    // 2. Find the best scoring path. This one will be marked as the primary.
+    // 3. Collect all alignments.
+    // 4. Mark the primary ones.
+    // 5. For any unmarked, check if they do not overlap the primary path. These will be the supplementary ones.
+    // 6. Mark the rest as secondary.
+    std::vector<std::pair<int64_t, size_t>> path_scores;
+    for (size_t path_id = 0; path_id < path_alignments().size(); ++path_id) {
+        const std::shared_ptr<raptor::PathAlignment>& path_aln = path_alignments()[path_id];
+        path_scores.emplace_back(std::make_pair(path_aln->path_score(), path_id));
+    }
+    std::sort(path_scores.begin(), path_scores.end());
+
+
+
     // Used for filtering multiple hits to the same target.
     std::unordered_map<std::string, int32_t> query_target_pairs;
 
@@ -50,6 +65,39 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
 
     return ret;
 }
+
+// // Interface implementation.
+// std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target) const {
+//     std::vector<std::shared_ptr<raptor::RegionBase>> ret;
+
+//     // Used for filtering multiple hits to the same target.
+//     std::unordered_map<std::string, int32_t> query_target_pairs;
+
+//     // Go through each path.
+//     for (size_t i = 0; i < path_alignments().size(); i++) {
+//         const std::shared_ptr<raptor::PathAlignment>& path_aln = path_alignments()[i];
+
+//         for (size_t j = 0; j < path_aln->alns().size(); j++) {
+//             auto& aln = path_aln->alns()[j];
+
+//             if (one_hit_per_target) {
+//                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
+//                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
+//                     continue;
+//                 }
+//                 query_target_pairs[pair_name] = 1;
+//             }
+//             ret.emplace_back(aln);
+//         }
+//     }
+
+// //    std::cerr << "[AlignedMappingResult::CollectRegions]:\n";
+// //    for (size_t i = 0; i < ret.size(); ++i) {
+// //        std::cerr << "[" << i << "] " << ret[i]->WriteAsCSV('\t') << "\n";
+// //    }
+
+//     return ret;
+// }
 
 int64_t AlignedMappingResult::QueryId() const {
     return qseq_->abs_id();
