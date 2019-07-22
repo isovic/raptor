@@ -65,6 +65,8 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
 
             LOG_ALL("Building the index.\n");
             index->Build();
+
+            LOG_ALL("Number of sequences in the index: %ld\n", index->num_seqs());
             LOG_ALL("Finished building index.\n");
 
             if (store) {
@@ -88,9 +90,11 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
                 seq_file = rasf->FetchAll();
             }
 
+            LOG_ALL("Building the index.\n");
             index->SetSequenceFile(seq_file);
-
             index->Build();
+
+            LOG_ALL("Number of sequences in the index: %ld\n", index->num_seqs());
             LOG_ALL("Finished building index.\n");
 
             if (store) {
