@@ -15,6 +15,7 @@
 #include <sequences/sequence_file_composite_base.h>
 #include <sequences/sequence_file_composite_fofn.h>
 #include <sequences/sequence_file_composite_pbxml.h>
+#include <sequences/sequence_file_composite_factory.h>
 #include <sequences/sequence_serializer.h>
 #include <utility/memtime.h>
 #include <utility/stringutil.h>
@@ -40,32 +41,7 @@ void RunTool(std::shared_ptr<raptor::ParamsRaptorReshape> parameters) {
 	int64_t load_batch_size_int64 = static_cast<int64_t>(parameters->in_batch_size);
 	int64_t write_block_size_int64 = (parameters->block_size > 0) ? (static_cast<int64_t>(parameters->block_size * 1024 * 1024)) : std::numeric_limits<int64_t>::max();
 
-	mindex::SequenceFileCompositeBasePtr seq_file_parser = nullptr;
-
-	bool is_xml_used = false;
-#ifdef RAPTOR_COMPILED_WITH_PBBAM
-	// Sanity check for the input files. Allow only one XML file to be specified,
-	// as by design of the SequenceFileCompositePbXml.
-	for (const auto& in_path: parameters->in_paths) {
-		if (mindex::GetSequenceFormatFromPath(in_path) == mindex::SequenceFormat::XML) {
-			is_xml_used = true;
-			break;
-		}
-	}
-#endif
-
-	// Set-up the parser for the correct sequence format.
-	if (is_xml_used && parameters->in_paths.size() != 1) {
-		FATAL_REPORT(ERR_UNEXPECTED_VALUE, "When using XML as input, only a single input can be specified.");
-	} else if (is_xml_used && parameters->in_paths.size() == 1) {
-#ifdef RAPTOR_COMPILED_WITH_PBBAM
-		seq_file_parser = mindex::createSequenceFileCompositePbXml(parameters->in_paths[0]);
-#else
-		FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The raptor-reshape tool was not compiled with PacBio BAM support. Cannot use the .xml input files.");
-#endif
-	} else {
-		seq_file_parser = mindex::createSequenceFileCompositeFofn(parameters->in_paths, parameters->in_fmt);
-	}
+	mindex::SequenceFileCompositeBasePtr seq_file_parser = mindex::createSequenceFileCompositeFactory(parameters->in_paths, parameters->in_fmt);
 
 	auto seq_file = mindex::createSequenceFile();
 

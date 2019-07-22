@@ -12,7 +12,7 @@
 #include <params/params_raptor.h>
 #include <utility/files.hpp>
 #include <sequences/random_access_sequence_file.h>
-#include <sequences/sequence_file_composite_fofn.h>
+#include <sequences/sequence_file_composite_factory.h>
 
 namespace raptor {
 
@@ -54,7 +54,7 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
         if (ref_fmt != mindex::SequenceFormat::RaptorDB) {
             for (auto& ref_path: ref_paths) {
                 LOG_ALL("Loading reference sequences from file: '%s'.\n", ref_path.c_str());
-                auto refs_parser = mindex::createSequenceFileCompositeFofn({ref_path}, ref_fmt);
+                auto refs_parser = mindex::createSequenceFileCompositeFactory({ref_path}, ref_fmt);
                 auto refs = mindex::createSequenceFile();
                 while ((refs = refs_parser->YieldBatchOfOne()) != nullptr) {
                     for (auto& ref : refs->seqs()) {
