@@ -60,7 +60,7 @@ meson-time2:
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-debug:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=true -Dc_args=-O3"
 meson-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
