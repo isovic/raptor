@@ -135,7 +135,7 @@ public:
         // return (path_id_ == 0 && segment_id_ == 0);
     }
     bool IsSecondary() const {
-        return region_type_ == raptor::RegionType::Secondary;
+        return region_type_ == raptor::RegionType::Secondary || region_type_ == raptor::RegionType::SupplementarySecondary;
         // return (path_id_ > 0);
     }
     bool IsSupplementary() const {
@@ -144,6 +144,9 @@ public:
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
+    }
+    raptor::RegionType GetRegionType() const {
+        return region_type_;
     }
 
     /*

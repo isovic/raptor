@@ -134,7 +134,7 @@ class RegionAligned : public raptor::RegionBase {
         // return (path_id_ == 0 && segment_id_ == 0);
     }
     bool IsSecondary() const {
-        return region_type_ == raptor::RegionType::Secondary;
+        return region_type_ == raptor::RegionType::Secondary || region_type_ == raptor::RegionType::SupplementarySecondary;
         // return (path_id_ > 0);
     }
     bool IsSupplementary() const {
@@ -143,6 +143,9 @@ class RegionAligned : public raptor::RegionBase {
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
+    }
+    raptor::RegionType GetRegionType() const {
+        return region_type_;
     }
 
     ////////////////
@@ -212,7 +215,10 @@ class RegionAligned : public raptor::RegionBase {
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
-    raptor::RegionType region_type_;
+    raptor::RegionType region_type_;    // Primary, secondary or supplementary.
+    // int32_t region_group_id_;           // Ordinal ID of the region, e.g. after sorting by score. Primary and SupplementaryPrimary
+    //                                     // would have region_group_id_ == 0, and other secondary ones an increasing number.
+    //                                     // This would allow limiting the number of secondary alignments.
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
