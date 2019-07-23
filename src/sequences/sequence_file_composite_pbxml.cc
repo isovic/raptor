@@ -237,6 +237,12 @@ bool SequenceFileCompositePbXml::Open_(const std::string& in_path) {
 
     dataset_ = std::make_unique<PacBio::BAM::DataSet>(in_path);
 
+    auto dataset_type = dataset_->Type();
+    if (dataset_type != PacBio::BAM::DataSet::TypeEnum::SUBREAD && dataset_type != PacBio::BAM::DataSet::TypeEnum::ALIGNMENT) {
+        dataset_ = nullptr;
+        FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Only subreadset and alignmentset PacBio .xml files are supported.");
+    }
+
     const PacBio::BAM::PbiIndexCache pbiCache = PacBio::BAM::MakePbiIndexCache(*dataset_);
     const PacBio::BAM::PbiFilter filter = PacBio::BAM::PbiFilter::FromDataSet(*dataset_);
 
