@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.16.4 -> 0.16.5
+- Now explicitly failing if a PacBio .xml file is not a subreadset or an alignmentset.
+- Added some Cram tests.
+
 ## 0.16.3 -> 0.16.4
 - Fixed a segfault when a PacBio XML was used as the reference input to Raptor.
 - Minor change in debug output (now writing the number of sequences in the index to screen).
