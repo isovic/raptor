@@ -66,35 +66,15 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
     // The best path is the first one in the sorted list.
     auto& best_path = path_alignments()[std::get<1>(path_scores.back())];
 
-    // Primary and PrimarySupplementary alignments.
-    for (size_t aln_id = 0; aln_id < best_path->alns().size(); ++aln_id) {
-        auto& aln = best_path->alns()[aln_id];
-        if (aln_id == 0) {
-            aln->SetRegionType(raptor::RegionType::Primary);
-        } else {
-            aln->SetRegionType(raptor::RegionType::SupplementaryPrimary);
-        }
-        if (one_hit_per_target) {
-            std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
-            if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
-                continue;
-            }
-            query_target_pairs[pair_name] = 1;
-        }
-        ret.emplace_back(aln);
-    }
-
     // Secondary and SecondarySupplementary alignments.
-    for (int64_t path_id = (static_cast<int64_t>(path_scores.size()) - 2); path_id >= 0; --path_id) {
+    for (int64_t path_id = (static_cast<int64_t>(path_scores.size()) - 1); path_id >= 0; --path_id) {
         auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
         // Annotate all chunks as either Secondary or SecondarySupplementary.
         for (size_t aln_id = 0; aln_id < curr_path->alns().size(); ++aln_id) {
             auto& aln = curr_path->alns()[aln_id];
-            if (aln_id == 0) {
-                aln->SetRegionType(raptor::RegionType::Secondary);
-            } else {
-                aln->SetRegionType(raptor::RegionType::SupplementarySecondary);
-            }
+            aln->SetRegionPriority(static_cast<int64_t>(path_scores.size()) - 1 - path_id);
+            aln->SetRegionIsSupplementary(aln_id > 0);
+
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {

@@ -48,6 +48,8 @@ public:
     virtual int32_t CoveredBasesTarget() const = 0;
     virtual int32_t EditDistance() const = 0;
     virtual std::vector<raptor::CigarOp> Cigar() const = 0;
+
+    virtual bool IsPrimaryPath() const = 0;
     virtual bool IsPrimary() const = 0;
     virtual bool IsSecondary() const = 0;
     virtual bool IsSupplementary() const = 0;
@@ -60,7 +62,9 @@ public:
     virtual int32_t SegmentId() const = 0;      // ID of the supplementary alignment.
     virtual int32_t SegmentsNum() const = 0;    // Number of supplementary alignments for the path.
 
-    virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (primary, secondary, supplementary).
+    // virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (primary, secondary, supplementary).
+    virtual int32_t GetRegionPriority() const = 0;
+    virtual bool GetRegionIsSupplementary() const = 0;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

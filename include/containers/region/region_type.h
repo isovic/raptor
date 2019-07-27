@@ -12,9 +12,7 @@ namespace raptor {
 
 enum class RegionType {
     Primary,
-    SupplementaryPrimary,           // Extends the primary alignment.
-    Secondary,
-    SupplementarySecondary,          // Extends any non primary alignment.
+    Supplementary,
     Undefined
 };
 

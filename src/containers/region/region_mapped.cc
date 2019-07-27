@@ -42,7 +42,7 @@ RegionMapped::RegionMapped(
             num_seeds_(0), edit_dist_(-1), score_(-1),
             path_id_(-1), num_paths_(-1),
             segment_id_(-1), num_segments_(-1),
-            region_type_(raptor::RegionType::Undefined),
+            region_priority_(0), region_is_supplementary_(false),
             extra_tags_{} {
 
 }
@@ -68,7 +68,7 @@ RegionMapped::RegionMapped(
             score_(_score),
             path_id_(_path_id), num_paths_(_num_paths),
             segment_id_(_segment_id), num_segments_(_num_segments),
-            region_type_(raptor::RegionType::Undefined),
+            region_priority_(0), region_is_supplementary_(false),
             extra_tags_{} {
 
 }

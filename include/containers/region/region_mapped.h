@@ -130,26 +130,33 @@ public:
     int32_t SegmentsNum() const {
         return num_segments_;
     }
+    bool IsPrimaryPath() const {
+        return (region_priority_ == 0);
+    }
     bool IsPrimary() const {
-        return region_type_ == raptor::RegionType::Primary;
-        // return (path_id_ == 0 && segment_id_ == 0);
+        return (region_priority_ == 0 && region_is_supplementary_ == false);
     }
     bool IsSecondary() const {
-        return region_type_ == raptor::RegionType::Secondary || region_type_ == raptor::RegionType::SupplementarySecondary;
-        // return (path_id_ > 0);
+        return (region_priority_ > 0);
     }
     bool IsSupplementary() const {
-        return region_type_ == raptor::RegionType::SupplementaryPrimary || region_type_ == raptor::RegionType::SupplementarySecondary;
-        // return (segment_id_ > 0);
+        return region_is_supplementary_;
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
     }
-    raptor::RegionType GetRegionType() const {
-        return region_type_;
+
+    void SetRegionPriority(int32_t val) {
+        region_priority_ = val;
     }
-    void SetRegionType(const raptor::RegionType& val) {
-        region_type_ = val;
+    void SetRegionIsSupplementary(bool val) {
+        region_is_supplementary_ = val;
+    }
+    int32_t GetRegionPriority() const {
+        return region_priority_;
+    }
+    bool GetRegionIsSupplementary() const {
+        return region_is_supplementary_;
     }
 
     /*
@@ -251,7 +258,11 @@ private:
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
-    raptor::RegionType region_type_;
+
+    int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
+    bool region_is_supplementary_;
+
+    // raptor::RegionType region_type_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

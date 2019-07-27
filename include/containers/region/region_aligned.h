@@ -129,27 +129,42 @@ class RegionAligned : public raptor::RegionBase {
     int32_t SegmentsNum() const {
         return num_segments_;
     }
+
+    bool IsPrimaryPath() const {
+        return (region_priority_ == 0);
+    }
     bool IsPrimary() const {
-        return region_type_ == raptor::RegionType::Primary;
-        // return (path_id_ == 0 && segment_id_ == 0);
+        return (region_priority_ == 0 && region_is_supplementary_ == false);
     }
     bool IsSecondary() const {
-        return region_type_ == raptor::RegionType::Secondary || region_type_ == raptor::RegionType::SupplementarySecondary;
-        // return (path_id_ > 0);
+        return (region_priority_ > 0);
     }
     bool IsSupplementary() const {
-        return region_type_ == raptor::RegionType::SupplementaryPrimary || region_type_ == raptor::RegionType::SupplementarySecondary;
-        // return (segment_id_ > 0);
+        return region_is_supplementary_;
     }
+
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
     }
-    raptor::RegionType GetRegionType() const {
-        return region_type_;
+
+    void SetRegionPriority(int32_t val) {
+        region_priority_ = val;
     }
-    void SetRegionType(const raptor::RegionType& val) {
-        region_type_ = val;
+    void SetRegionIsSupplementary(bool val) {
+        region_is_supplementary_ = val;
     }
+    int32_t GetRegionPriority() const {
+        return region_priority_;
+    }
+    bool GetRegionIsSupplementary() const {
+        return region_is_supplementary_;
+    }
+    // raptor::RegionType GetRegionType() const {
+    //     return region_type_;
+    // }
+    // void SetRegionType(const raptor::RegionType& val) {
+    //     region_type_ = val;
+    // }
 
     ////////////////
     /// Setters. ///
@@ -196,7 +211,7 @@ class RegionAligned : public raptor::RegionBase {
                                 aln_(nullptr),
                                 path_id_(-1), num_paths_(-1),
                                 segment_id_(-1), num_segments_(-1),
-                                region_type_(raptor::RegionType::Undefined)
+                                region_priority_(0), region_is_supplementary_(false)
     {
     }
 
@@ -208,7 +223,7 @@ class RegionAligned : public raptor::RegionBase {
                                 aln_(aln),
                                 path_id_(_path_id), num_paths_(_num_paths),
                                 segment_id_(_segment_id), num_segments_(_num_segments),
-                                region_type_(raptor::RegionType::Undefined)
+                                region_priority_(0), region_is_supplementary_(false)
     {
     }
 
@@ -218,7 +233,11 @@ class RegionAligned : public raptor::RegionBase {
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
-    raptor::RegionType region_type_;    // Primary, secondary or supplementary.
+
+    int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
+    bool region_is_supplementary_;
+    // raptor::RegionType region_type_;    // Primary or supplementary. Primary in this context refers to the non-supplementary
+
     // int32_t region_group_id_;           // Ordinal ID of the region, e.g. after sorting by score. Primary and SupplementaryPrimary
     //                                     // would have region_group_id_ == 0, and other secondary ones an increasing number.
     //                                     // This would allow limiting the number of secondary alignments.
