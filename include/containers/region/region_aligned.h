@@ -147,6 +147,9 @@ class RegionAligned : public raptor::RegionBase {
     raptor::RegionType GetRegionType() const {
         return region_type_;
     }
+    void SetRegionType(const raptor::RegionType& val) {
+        region_type_ = val;
+    }
 
     ////////////////
     /// Setters. ///

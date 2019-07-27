@@ -148,6 +148,9 @@ public:
     raptor::RegionType GetRegionType() const {
         return region_type_;
     }
+    void SetRegionType(const raptor::RegionType& val) {
+        region_type_ = val;
+    }
 
     /*
     * Returns the score if it was initialized e.g. via alignment,
