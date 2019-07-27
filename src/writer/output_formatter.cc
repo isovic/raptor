@@ -177,6 +177,16 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
     int64_t segment_in_path = mapping->SegmentId();
     int64_t num_segments_in_path = mapping->SegmentsNum();
 
+    // This is how a flag is calculated for SAM/BAM alignments. It's not a standard in PAF
+    // but will  be output as an optional tag named "fg".
+    uint32_t flag = (t_is_rev) ? 16 : 0;
+    if (mapping->IsSupplementary()) {
+        flag |= 2048;
+    }
+    if (mapping->IsSecondary()) {
+        flag |= 256;
+    }
+
     if (t_is_rev) {
         std::swap(t_start, t_end);
         t_start = t_len - t_start;
@@ -209,8 +219,9 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
             << "pi:i:" << path_id << "\t"
             << "pj:i:" << segment_in_path << "\t"
             << "pn:i:" << num_segments_in_path << "\t"
-            << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0)
-            << "\t" << "cg:Z:" << cigar;
+            << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0) << "\t"
+            << "fg:i:" << flag << "\t"
+            << "cg:Z:" << cigar;
 
         #ifdef RAPTOR_DEBUG_TIMINGS
             ss << "\t" << "tt:Z:" << timings;
