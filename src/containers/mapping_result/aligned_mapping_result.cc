@@ -22,6 +22,9 @@ AlignedMappingResult::AlignedMappingResult(const mindex::SequencePtr& qseq, mind
 std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target) const {
     std::vector<std::shared_ptr<raptor::RegionBase>> ret;
 
+    // Used for filtering multiple hits to the same target.
+    std::unordered_map<std::string, int32_t> query_target_pairs;
+
     // 1. Sort the paths by score.
     // 2. Find the best scoring path. This one will be marked as the primary.
     // 3. Collect all alignments.
@@ -32,21 +35,66 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
     for (size_t path_id = 0; path_id < path_alignments().size(); ++path_id) {
         const std::shared_ptr<raptor::PathAlignment>& path_aln = path_alignments()[path_id];
         path_scores.emplace_back(std::make_pair(path_aln->path_score(), path_id));
+
+        // std::cerr << "(before) path_id = " << path_id << ", path_score = " << path_aln->path_score() << "\n";
+        // for (size_t aln_id = 0; aln_id < path_aln->alns().size(); ++aln_id) {
+        //     auto& aln = path_aln->alns()[aln_id];
+        //     std::cerr << "  " << aln->WriteAsCSV(' ') << "\n";
+        // }
     }
+
+    // Sort, but do not reverse so that the ordering of equal scores is stable.
+    // If there are multiple equal scores, then the last one on the list will always be marked as primary.
+    // TODO: Consider randombest?
+    // For example:
+    //   - If these are the expected mappings and the reference "1-gi|545778205|gb|U00096.3|" appears before "2-gi|545778205|gb|U00096.3|" in the reference file:
+    //      m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292	0	1-gi|545778205|gb|U00096.3|	24805	3 ...
+    //      m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292	256	2-gi|545778205|gb|U00096.3|	24805	3 ...
+    //   - Then, sorting will order them in the order they appeared during mapping/alignment, which may be the same as above.
+    //   - However, since we're taking the _last_ path as the primary, the last reference will have preference (2-gi|545778205|gb|U00096.3|).
     std::sort(path_scores.begin(), path_scores.end());
 
+    if (path_scores.empty()) {
+        return {};
+    }
 
+    // for (int64_t path_id = 0; path_id < path_scores.size(); ++path_id) {
+    //     auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
+    //     std::cerr << "(after sort) sorted_path_id = " << path_id << ", original_path_id = " << std::get<1>(path_scores[path_id]) << ", path_score = " << curr_path->path_score() << "\n";
+    // }
 
-    // Used for filtering multiple hits to the same target.
-    std::unordered_map<std::string, int32_t> query_target_pairs;
+    // The best path is the first one in the sorted list.
+    auto& best_path = path_alignments()[std::get<1>(path_scores.back())];
 
-    // Go through each path.
-    for (size_t i = 0; i < path_alignments().size(); i++) {
-        const std::shared_ptr<raptor::PathAlignment>& path_aln = path_alignments()[i];
+    // Primary and PrimarySupplementary alignments.
+    for (size_t aln_id = 0; aln_id < best_path->alns().size(); ++aln_id) {
+        auto& aln = best_path->alns()[aln_id];
+        if (aln_id == 0) {
+            aln->SetRegionType(raptor::RegionType::Primary);
+        } else {
+            aln->SetRegionType(raptor::RegionType::SupplementaryPrimary);
+        }
+        if (one_hit_per_target) {
+            std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
+            if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
+                continue;
+            }
+            query_target_pairs[pair_name] = 1;
+        }
+        ret.emplace_back(aln);
+    }
 
-        for (size_t j = 0; j < path_aln->alns().size(); j++) {
-            auto& aln = path_aln->alns()[j];
-
+    // Secondary and SecondarySupplementary alignments.
+    for (int64_t path_id = (static_cast<int64_t>(path_scores.size()) - 2); path_id >= 0; --path_id) {
+        auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
+        // Annotate all chunks as either Secondary or SecondarySupplementary.
+        for (size_t aln_id = 0; aln_id < curr_path->alns().size(); ++aln_id) {
+            auto& aln = curr_path->alns()[aln_id];
+            if (aln_id == 0) {
+                aln->SetRegionType(raptor::RegionType::Secondary);
+            } else {
+                aln->SetRegionType(raptor::RegionType::SupplementarySecondary);
+            }
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
@@ -57,11 +105,6 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
             ret.emplace_back(aln);
         }
     }
-
-//    std::cerr << "[AlignedMappingResult::CollectRegions]:\n";
-//    for (size_t i = 0; i < ret.size(); ++i) {
-//        std::cerr << "[" << i << "] " << ret[i]->WriteAsCSV('\t') << "\n";
-//    }
 
     return ret;
 }
