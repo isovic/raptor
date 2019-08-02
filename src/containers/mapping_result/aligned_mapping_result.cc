@@ -43,6 +43,7 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
     //   - Then, sorting will order them in the order they appeared during mapping/alignment, which may be the same as above.
     //   - However, since we're taking the _last_ path as the primary, the last reference will have preference (2-gi|545778205|gb|U00096.3|).
     std::sort(path_scores.begin(), path_scores.end());
+    std::reverse(path_scores.begin(), path_scores.end());
 
     if (path_scores.empty()) {
         return {};
@@ -52,12 +53,12 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
     // Used for filtering multiple hits to the same target.
     std::unordered_map<std::string, int32_t> query_target_pairs;
     // Secondary and SecondarySupplementary alignments.
-    for (int64_t path_id = (static_cast<int64_t>(path_scores.size()) - 1); path_id >= 0; --path_id) {
+    for (int64_t path_id = 0; path_id < static_cast<int64_t>(path_scores.size()); ++path_id) {
         auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
         // Annotate all chunks as either Secondary or SecondarySupplementary.
         for (size_t aln_id = 0; aln_id < curr_path->alns().size(); ++aln_id) {
             auto& aln = curr_path->alns()[aln_id];
-            aln->SetRegionPriority(static_cast<int64_t>(path_scores.size()) - 1 - path_id);
+            aln->SetRegionPriority(path_id);
             aln->SetRegionIsSupplementary(aln_id > 0);
 
             if (one_hit_per_target) {
