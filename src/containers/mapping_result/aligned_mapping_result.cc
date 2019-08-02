@@ -20,10 +20,6 @@ AlignedMappingResult::AlignedMappingResult(const mindex::SequencePtr& qseq, mind
 
 // Interface implementation.
 std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target) const {
-    std::vector<std::shared_ptr<raptor::RegionBase>> ret;
-
-    // Used for filtering multiple hits to the same target.
-    std::unordered_map<std::string, int32_t> query_target_pairs;
 
     // 1. Sort the paths by score.
     // 2. Find the best scoring path. This one will be marked as the primary.
@@ -35,12 +31,6 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
     for (size_t path_id = 0; path_id < path_alignments().size(); ++path_id) {
         const std::shared_ptr<raptor::PathAlignment>& path_aln = path_alignments()[path_id];
         path_scores.emplace_back(std::make_pair(path_aln->path_score(), path_id));
-
-        // std::cerr << "(before) path_id = " << path_id << ", path_score = " << path_aln->path_score() << "\n";
-        // for (size_t aln_id = 0; aln_id < path_aln->alns().size(); ++aln_id) {
-        //     auto& aln = path_aln->alns()[aln_id];
-        //     std::cerr << "  " << aln->WriteAsCSV(' ') << "\n";
-        // }
     }
 
     // Sort, but do not reverse so that the ordering of equal scores is stable.
@@ -58,14 +48,9 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
         return {};
     }
 
-    // for (int64_t path_id = 0; path_id < path_scores.size(); ++path_id) {
-    //     auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
-    //     std::cerr << "(after sort) sorted_path_id = " << path_id << ", original_path_id = " << std::get<1>(path_scores[path_id]) << ", path_score = " << curr_path->path_score() << "\n";
-    // }
-
-    // The best path is the first one in the sorted list.
-    auto& best_path = path_alignments()[std::get<1>(path_scores.back())];
-
+    std::vector<std::shared_ptr<raptor::RegionBase>> ret;
+    // Used for filtering multiple hits to the same target.
+    std::unordered_map<std::string, int32_t> query_target_pairs;
     // Secondary and SecondarySupplementary alignments.
     for (int64_t path_id = (static_cast<int64_t>(path_scores.size()) - 1); path_id >= 0; --path_id) {
         auto& curr_path = path_alignments()[std::get<1>(path_scores[path_id])];
