@@ -65,6 +65,8 @@ public:
     // virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (primary, secondary, supplementary).
     virtual int32_t GetRegionPriority() const = 0;
     virtual bool GetRegionIsSupplementary() const = 0;
+    virtual void SetRegionPriority(int32_t val) = 0;
+    virtual void SetRegionIsSupplementary(bool val) = 0;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
