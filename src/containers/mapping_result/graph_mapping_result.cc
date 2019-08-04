@@ -6,6 +6,7 @@
  */
 
 #include <containers/mapping_result/graph_mapping_result.h>
+#include <containers/mapping_result/mapping_result_common.h>
 #include <algorithm>
 #include <tuple>
 
@@ -35,39 +36,50 @@ GraphMappingResult::GraphMappingResult(int64_t _qseq_id,
 
 // Interface implementation.
 std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegions(bool one_hit_per_target) const {
-    std::vector<std::shared_ptr<raptor::RegionBase>> ret;
-
-    // Used for filtering multiple hits to the same target.
-    std::unordered_map<std::string, int32_t> query_target_pairs;
 
     int32_t num_paths = static_cast<int32_t>(paths().size());
 
-    for (size_t i = 0; i < paths().size(); i++) {
-        auto& path_aln = paths()[i];
-        auto merged_path = LocalPathTools::MergeImplicitEdges(path_aln);
+    std::vector<std::pair<int64_t, size_t>> path_scores;
+    for (size_t path_id = 0; path_id < paths().size(); ++path_id) {
+        const auto& path_aln = paths()[path_id];
+        path_scores.emplace_back(std::make_pair(path_aln->score(), path_id));
+    }
+    std::sort(path_scores.begin(), path_scores.end());
+    std::reverse(path_scores.begin(), path_scores.end());
 
+    std::vector<std::shared_ptr<raptor::RegionBase>> ret;
+    // Used for filtering multiple hits to the same target.
+    std::unordered_map<std::string, int32_t> query_target_pairs;
+    // Secondary and SecondarySupplementary alignments.
+    for (int64_t path_id = 0; path_id < static_cast<int64_t>(path_scores.size()); ++path_id) {
+        auto& curr_path = paths()[std::get<1>(path_scores[path_id])];
+        auto merged_path = LocalPathTools::MergeImplicitEdges(curr_path);
         if (merged_path == nullptr) {
             continue;
         }
-
         int32_t num_segments = static_cast<int32_t>(merged_path->nodes().size());
+        // Annotate all chunks as either Secondary or SecondarySupplementary.
+        for (size_t aln_id = 0; aln_id < merged_path->nodes().size(); ++aln_id) {
+            auto& aln = merged_path->nodes()[aln_id]->data();
+            aln->SetRegionPriority(path_id);
+            aln->SetRegionIsSupplementary(aln_id > 0);
 
-        for (size_t j = 0; j < merged_path->nodes().size(); j++) {
-            auto& aln = merged_path->nodes()[j]->data();
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
-                  continue;
+                    continue;
                 }
                 query_target_pairs[pair_name] = 1;
             }
-            aln->path_id(static_cast<int32_t>(i));
+            aln->path_id(static_cast<int32_t>(path_id));
             aln->num_paths(num_paths);
-            aln->segment_id(static_cast<int32_t>(j));
+            aln->segment_id(static_cast<int32_t>(aln_id));
             aln->num_segments(num_segments);
             ret.emplace_back(aln);
         }
     }
+
+    raptor::RelabelSupplementary(ret);
 
 //    std::cerr << "[GraphMappingResult::CollectRegions]:\n";
 //    for (size_t i = 0; i < ret.size(); ++i) {
