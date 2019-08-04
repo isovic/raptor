@@ -21,6 +21,7 @@ raptor_cpp_sources = files([
   'containers/mapping_result/linear_mapping_result.cc',
   'containers/mapping_result/graph_mapping_result.cc',
   'containers/mapping_result/aligned_mapping_result.cc',
+  'containers/mapping_result/mapping_result_common.cc',
   'containers/mapping_env.cc',
   'containers/path_alignment.cc',
 
