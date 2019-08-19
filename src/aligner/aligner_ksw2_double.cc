@@ -74,10 +74,10 @@ std::shared_ptr<raptor::AlignmentResult> AlignerKSW2Double::Global(const char *q
 
     auto mat = GenerateSimpleMatchMatrix<int8_t>((int8_t)opt_.p.match, (int8_t)opt_.p.mismatch, 5);
     // In Raptor definition, penalties are negative. KSW2 expects positive values.
-    int8_t q = -opt_.p.w[0].v;  // Gap open. The intercept component of the affine function.
-    int8_t e = -opt_.p.w[0].u;  // Gap extend. The slope of the affine function.
-    int8_t q2 = -opt_.p.w[1].v;
-    int8_t e2 = -opt_.p.w[1].u;
+    int8_t q = -opt_.p.w[0].open;  // Gap open. The intercept component of the affine function.
+    int8_t e = -opt_.p.w[0].ext;  // Gap extend. The slope of the affine function.
+    int8_t q2 = -opt_.p.w[1].open;
+    int8_t e2 = -opt_.p.w[1].ext;
 
     KSW2GlobalAlnWrapper_(km, (const int8_t *)qseq, qlen, (const int8_t *)tseq, tlen, 5, &mat[0], q,
                           e, q2, e2, opt_.bandwidth, zdrop, opt_.end_bonus, flag, &ez);
@@ -138,10 +138,10 @@ std::shared_ptr<raptor::AlignmentResult> AlignerKSW2Double::Extend(const char *q
 
     auto mat = GenerateSimpleMatchMatrix<int8_t>((int8_t)opt_.p.match, (int8_t)opt_.p.mismatch, 5);
     // In Raptor definition, penalties are negative. KSW2 expects positive values for affine pieces.
-    int8_t q = -opt_.p.w[0].v;  // Gap open. The intercept component of the affine function.
-    int8_t e = -opt_.p.w[0].u;  // Gap extend. The slope of the affine function.
-    int8_t q2 = -opt_.p.w[1].v;
-    int8_t e2 = -opt_.p.w[1].u;
+    int8_t q = -opt_.p.w[0].open;  // Gap open. The intercept component of the affine function.
+    int8_t e = -opt_.p.w[0].ext;  // Gap extend. The slope of the affine function.
+    int8_t q2 = -opt_.p.w[1].open;
+    int8_t e2 = -opt_.p.w[1].ext;
 
     KSW2GlobalAlnWrapper_(km, (const int8_t *)qseq, qlen, (const int8_t *)tseq, tlen, 5, &mat[0], q,
                           e, q2, e2, opt_.zbandwidth, opt_.zdrop, opt_.end_bonus, flag, &ez);

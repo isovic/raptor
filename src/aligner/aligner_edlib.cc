@@ -97,17 +97,17 @@ std::shared_ptr<raptor::AlignmentResult> AlignerEdlib::Extend(const char* qseq, 
                 break;
             case 'I':
                 if (streak == 1) {
-                    score += opt_.p.w[0].v;         // Gap open only if a new streak is found.
+                    score += opt_.p.w[0].open;         // Gap open only if a new streak is found.
                 }
-                score += opt_.p.w[0].u;  // This is the gap extend penalty.
+                score += opt_.p.w[0].ext;  // This is the gap extend penalty.
                 qpos += 1;
                 edit_dist += 1;
                 break;
             case 'D':
                 if (streak == 1) {
-                    score += opt_.p.w[0].v;         // Gap open only if a new streak is found.
+                    score += opt_.p.w[0].open;         // Gap open only if a new streak is found.
                 }
-                score += opt_.p.w[0].u;  // This is the gap extend penalty.
+                score += opt_.p.w[0].ext;  // This is the gap extend penalty.
                 tpos += 1;
                 edit_dist += 1;
                 break;
@@ -225,7 +225,7 @@ std::shared_ptr<raptor::AlignmentResult> AlignerEdlib::RunEdlib(const char* qseq
     result->max_t_pos(tlen);
     result->cigar(EdlibAlignmentToCigar(edlib_result.alignment, edlib_result.alignmentLength));
 
-    int64_t score = ScoreCigarAlignment(result->cigar(), opt.p.match, opt.p.mismatch, opt.p.w[0].v, opt.p.w[0].u);
+    int64_t score = ScoreCigarAlignment(result->cigar(), opt.p.match, opt.p.mismatch, opt.p.w[0].open, opt.p.w[0].ext);
 
     result->score(score);
     result->max_score(result->score());

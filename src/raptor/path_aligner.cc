@@ -336,7 +336,7 @@ std::vector<std::shared_ptr<raptor::RegionAligned>> PathAligner::SplitAlignment_
 
         auto new_cigar = AlignmentArrayToCigar((unsigned char*)(&aln_array[0] + region_op_start),
                                            (region_op_end - region_op_start));
-        int64_t new_score = ScoreCigarAlignment(new_cigar, aln_opt.p.match, aln_opt.p.mismatch, aln_opt.p.w[0].v, aln_opt.p.w[0].u);
+        int64_t new_score = ScoreCigarAlignment(new_cigar, aln_opt.p.match, aln_opt.p.mismatch, aln_opt.p.w[0].open, aln_opt.p.w[0].ext);
         int64_t new_edit_dist = EditDistFromExtCIGAR(new_cigar);
 
         aln->score(new_score);

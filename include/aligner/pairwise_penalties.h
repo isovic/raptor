@@ -30,12 +30,12 @@ class Penalties {
  */
 class AffinePiece {
    public:
-    AffinePiece() : u(-6.0), v(-8.0) {}
-    AffinePiece(float _u, float _v) : u(_u), v(_v) {}
+    AffinePiece() : ext(-6.0), open(-8.0) {}
+    AffinePiece(float _ext, float _open) : ext(_ext), open(_open) {}
 
-    inline float calc(int32_t k) const { return (u * (k) + v); }
+    inline float calc(int32_t k) const { return (ext * (k) + open); }
 
-    float u, v;  // Line equation parameters: w(k) = u * k + v.
+    float ext, open;  // Line equation parameters: w(k) = ext * k + open.
 };
 
 /* Penalties for a multiple affine function alignment.
@@ -52,7 +52,7 @@ class PiecewisePenalties {
         std::stringstream ss;
         ss << "match = " << match << ", mismatch = " << mismatch << "";
         for (size_t l = 0; l < w.size(); l++) {
-            ss << ", w[" << l << "] = {u = " << w[l].u << ", v = " << w[l].v << "}";
+            ss << ", w[" << l << "] = {ext = " << w[l].ext << ", open = " << w[l].open << "}";
         }
         ss << "\n";
         return ss.str();
