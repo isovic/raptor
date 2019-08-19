@@ -234,4 +234,36 @@ std::vector<int8_t> CigarToAlignmentArray(const std::vector<raptor::CigarOp>& ci
     return ret;
 }
 
+int64_t ScoreCigarAlignment(const std::vector<raptor::CigarOp>& cigar,
+                                        int32_t match, int32_t mismatch,
+                                        int32_t gap_open, int32_t gap_ext) {
+    int64_t score = 0;
+
+    for (size_t i = 0; i < cigar.size(); i++) {
+        const auto& op = cigar[i].op;
+        const auto& count = cigar[i].count;
+        switch (op) {
+            case '=':
+                // Scores are positive.
+                score += match * count;
+                break;
+            case 'X':
+                // Penalties are negative.
+                score += mismatch * count;
+                break;
+            case 'I':
+                // Penalties are negative.
+                score += gap_open + gap_ext * (count - 1);
+                break;
+            case 'D':
+                // Penalties are negative.
+                score += gap_open + gap_ext * (count - 1);
+                break;
+            default:
+                break;
+        }
+    }
+    return score;
+}
+
 }  // namespace raptor

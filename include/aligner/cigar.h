@@ -53,6 +53,10 @@ std::vector<raptor::CigarOp> AlignmentArrayToCigar(const unsigned char* aln, int
 
 std::vector<int8_t> CigarToAlignmentArray(const std::vector<raptor::CigarOp>& cigar);
 
+int64_t ScoreCigarAlignment(const std::vector<raptor::CigarOp>& cigar,
+                                        int32_t match, int32_t mismatch,
+                                        int32_t gap_open, int32_t gap_ext);
+
 /** @brief A container for a single CIGAR operation.
  *
  */
