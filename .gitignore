@@ -62,6 +62,7 @@ test-data/demos/demo-1-circular-synth/*
 !test-data/small-xml
 !test-data/graph-mapping
 !test-data/raptor-fetch
+!test-data/bugfixes
 
 tool*
 callgrind.*
