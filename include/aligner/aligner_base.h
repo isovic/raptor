@@ -38,6 +38,7 @@ class AlignerBase {
         const char* qseq, int64_t qlen, const char* tseq,
         int64_t tlen) = 0;  // Extend alignment mode. Does not necessarily
                             //  produce CIGAR,but generate max alignment coords
+    virtual raptor::AlignmentOptions GetAlignmentOptions() = 0;
 };
 
 } /* namespace raptor */

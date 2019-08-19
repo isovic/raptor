@@ -43,6 +43,10 @@ class AlignerKSW2Single : public AlignerBase {
     std::shared_ptr<raptor::AlignmentResult> Extend(const char* qseq, int64_t qlen,
                                                     const char* tseq, int64_t tlen);
 
+    raptor::AlignmentOptions GetAlignmentOptions() {
+        return opt_;
+    }
+
    protected:
     AlignerKSW2Single(
         const raptor::AlignmentOptions& opt);  // We don't want users attempting to instantiate

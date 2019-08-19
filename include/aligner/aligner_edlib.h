@@ -48,6 +48,10 @@ class AlignerEdlib : public AlignerBase {
                                                              EdlibAlignMode edlib_mode,
                                                              EdlibAlignTask edlib_task);
 
+    raptor::AlignmentOptions GetAlignmentOptions() {
+        return opt_;
+    }
+
    protected:
     AlignerEdlib(
         const raptor::AlignmentOptions& opt);  // We don't want users attempting to instantiate
