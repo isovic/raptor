@@ -225,7 +225,9 @@ std::shared_ptr<raptor::AlignmentResult> AlignerEdlib::RunEdlib(const char* qseq
     result->max_t_pos(tlen);
     result->cigar(EdlibAlignmentToCigar(edlib_result.alignment, edlib_result.alignmentLength));
 
-    result->score(result->op_counts().eq);
+    int64_t score = ScoreCigarAlignment(result->cigar(), opt.p.match, opt.p.mismatch, opt.p.w[0].v, opt.p.w[0].u);
+
+    result->score(score);
     result->max_score(result->score());
 
     edlibFreeAlignResult(edlib_result);

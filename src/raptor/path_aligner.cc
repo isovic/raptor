@@ -323,6 +323,8 @@ std::vector<std::shared_ptr<raptor::RegionAligned>> PathAligner::SplitAlignment_
 
     }
 
+    const auto aln_opt = aligner_->GetAlignmentOptions();
+
     for (size_t i = 0; i < ref_seq_regions.size(); i++) {
         auto aln = raptor::createAlignmentResult();
         auto result = createAlignedRegion(ref_seq_regions[i].env, aln, -1, -1, -1, -1);
@@ -334,8 +336,11 @@ std::vector<std::shared_ptr<raptor::RegionAligned>> PathAligner::SplitAlignment_
 
         auto new_cigar = AlignmentArrayToCigar((unsigned char*)(&aln_array[0] + region_op_start),
                                            (region_op_end - region_op_start));
-        aln->score(MatchesFromExtCIGAR(new_cigar));
-        aln->edit_dist(EditDistFromExtCIGAR(new_cigar));
+        int64_t new_score = ScoreCigarAlignment(new_cigar, aln_opt.p.match, aln_opt.p.mismatch, aln_opt.p.w[0].v, aln_opt.p.w[0].u);
+        int64_t new_edit_dist = EditDistFromExtCIGAR(new_cigar);
+
+        aln->score(new_score);
+        aln->edit_dist(new_edit_dist);
         // Internally store the original target coordinates (on the strand the original mapping was
         // made to).
         aln->position(raptor::AlignmentPosition(region_qstart, region_qend, ref_seq_regions[i].ref_start_pos,
