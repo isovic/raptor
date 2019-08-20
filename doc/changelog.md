@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.16.5 -> 0.16.6
+- Added unit tests for the new ScoreCigarAlignment.
+
 ## 0.16.4 -> 0.16.5
 - Now explicitly failing if a PacBio .xml file is not a subreadset or an alignmentset.
 - Added some Cram tests.
