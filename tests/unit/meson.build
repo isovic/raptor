@@ -4,6 +4,7 @@
 
 tests_cpp_sources = files([
   'test_api.cc',
+  'test_cigar.cc',
   'test_graph_mapper.cc',
   'test_graph_aligner.cc',
   'test_graph_mapper_tools.cc',
