@@ -3,6 +3,9 @@
 ## 0.16.4 -> 0.16.5
 - Now explicitly failing if a PacBio .xml file is not a subreadset or an alignmentset.
 - Added some Cram tests.
+- The alignment score (AS) for the edit distance based alignment is now calculated by rescoring the alignment path (CIGAR vector). Previously, it was only the number of matches. This was not a good choice in case an alignment was riddled with indels, because the AS would still be high, and the final sorting is performed on the AS. Now, this closely reflects what a non-edit-distance-based aligners would produce.
+- Updated the Cram tests according to the new AS calculation. Added a new Cram test file which will house tests for bugfixes. The test case which exposes the AS issue was added into that test file.
+- Renamed the piecewise penalties from `(v, u)` to `(open, ext)` to reduce potential future confusion.
 
 ## 0.16.3 -> 0.16.4
 - Fixed a segfault when a PacBio XML was used as the reference input to Raptor.
