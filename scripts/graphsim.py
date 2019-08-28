@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python3.7
 
 """
 Example usage:
@@ -140,18 +140,18 @@ def load_gfa2(fp_in, add_symmetric_arcs):
 def make_interval_trees(graph):
     out_edges = {}
     in_edges = {}
-    for edge_name, edge in graph.edges.iteritems():
+    for edge_name, edge in graph.edges.items():
         out_edges.setdefault(edge['v'], [])
         out_edges[edge['v']].append(edge)
         in_edges.setdefault(edge['w'], [])
         in_edges[edge['w']].append(edge)
 
     interval_dict = {}
-    for v, edges in out_edges.iteritems():
+    for v, edges in out_edges.items():
         interval_dict[v] = [intervaltree.Interval(edge['v_start'], edge['v_start'] + 1, edge) for edge in edges]
 
     interval_trees = {}
-    for v, intervals in interval_dict.iteritems():
+    for v, intervals in interval_dict.items():
         interval_trees[v] = intervaltree.IntervalTree(intervals)
 
     return interval_trees
@@ -190,7 +190,7 @@ def propagate_path(interval_trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand,
         # Compile a list of outbound edges from this fork position.
         choices = []
         # Find all outbound edges at the closes fork location.
-        for i in xrange(0, len(valid_intervals)):
+        for i in range(0, len(valid_intervals)):
             if valid_intervals[i]['v_start'] != fork_pos:
                 break
             choices.append(valid_intervals[i])
@@ -323,7 +323,7 @@ def generate_exact_insert(trees, ref_seqs, ref_seqs_rev, seq_name, seq_strand, s
     # Adjust the read mapping coordinates.
     read_name = '{}/{}/{}_{}'.format(read_prefix, zmw_id, subread_start, subread_start + len(read_seq))
     qpos = 0
-    for i in xrange(len(mappings)):
+    for i in range(len(mappings)):
         m = mappings[i]
         qspan = m[8] - m[7]
         mappings[i][0] = read_name
@@ -448,8 +448,8 @@ def pick_insert_length(len_mean, len_std, len_min, len_max):
 def pick_placement_of_insert_on_origin(ref_seq_len, insert_len):
     mid_pos = random.randint(0, ref_seq_len)
     seq_strand = random.choice(['+', '-'])
-    start_pos = max(0, mid_pos - insert_len / 2)
-    end_pos = min(ref_seq_len, start_pos + insert_len)
+    start_pos = int(max(0, mid_pos - insert_len / 2))
+    end_pos = int(min(ref_seq_len, start_pos + insert_len))
     return start_pos, end_pos, mid_pos, seq_strand
 ###########################################
 
@@ -570,13 +570,15 @@ def run(ref, gfa, out_prefix, seed, num_reads, cov,
 
     # Parse the reference sequences.
     ref_seqs = {seq[0][1:].split()[0]: seq[1] for seq in fastqparser.yield_seq([ref])}
-    ref_seqs_rev = {key: revcmp(val) for key, val in ref_seqs.iteritems()}
+    ref_seqs_rev = {key: revcmp(val) for key, val in ref_seqs.items()}
 
     # Parse the graph if provided. Otherwise, use an empty graph.
     if gfa and os.path.exists(gfa):
+        log('Using GFA from file: "{}"'.format(gfa))
         with open(gfa, 'r') as fp_in:
             graph = load_gfa2(fp_in, True)
     else:
+        log('GFA file not specified. Proceeding without a graph.')
         graph = GFAGraph(header={}, nodes={}, edges={})
 
     # Verbose if required.
@@ -588,7 +590,7 @@ def run(ref, gfa, out_prefix, seed, num_reads, cov,
     # Construct the interval trees from the branching points in the graph.
     trees = make_interval_trees(graph)
 
-    total_len = sum([len(seq) for qname, seq in ref_seqs.iteritems()])
+    total_len = sum([len(seq) for qname, seq in ref_seqs.items()])
     num_generated_reads = 0
 
     with open('%s.paf' % (out_prefix), 'w') as fp_out_paf, \
@@ -596,7 +598,7 @@ def run(ref, gfa, out_prefix, seed, num_reads, cov,
 
         # For each sequence in the reference set, generate the "cov" coverage
         # of simulated inserts.
-        for seq_name, seq in ref_seqs.iteritems():
+        for seq_name, seq in ref_seqs.items():
             total_bases = 0
             target_bases = len(seq) * cov
             seq_len = len(seq)

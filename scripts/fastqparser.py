@@ -1,14 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3.7
 
 """
 Observes the next num_chars characters from a given file handle.
 Returns the characters (if possible) and returns the handle back.
 """
 def peek(fp, num_chars):
+  prev_pos = fp.tell()
   data = fp.read(num_chars)
   if len(data) == 0:
     return ''
-  fp.seek(num_chars * -1, 1)
+  fp.seek(prev_pos, 0)
   return data
 
 """
@@ -27,66 +28,66 @@ Author: Ivan Sovic, 2015.
 def get_single_read(fp):
   lines = []
 
-  STATE_HEADER = 0;
-  STATE_SEQ = 1;
-  STATE_QUAL_SEPARATOR = 2;
-  STATE_QUAL = 4;
-  state = STATE_HEADER;     # State machine. States:
+  STATE_HEADER = 0
+  STATE_SEQ = 1
+  STATE_QUAL_SEPARATOR = 2
+  STATE_QUAL = 4
+  state = STATE_HEADER     # State machine. States:
                             # 0 header, 1 seq, 2 '+' line, 3 quals.
-  num_lines = 0;
-  header = '';
-  seq = '';
-  qual_separator = '';
-  qual = '';
-  lines = [];
+  num_lines = 0
+  header = ''
+  seq = ''
+  qual_separator = ''
+  qual = ''
+  lines = []
 
-  next_char = peek(fp, 1);
+  next_char = peek(fp, 1)
   while (len(next_char) > 0):
-    line = fp.readline().rstrip();
-    next_char = peek(fp, 1);
+    line = fp.readline().rstrip()
+    next_char = peek(fp, 1)
 
     if (state == STATE_HEADER):
-      if (len(line) == 0): continue;
-      header_separator = line[0];
-      header = line[1:];			# Strip the '>' or '@' sign from the beginning.
-      lines.append(line);
-      next_state = STATE_SEQ;
+      if (len(line) == 0): continue
+      header_separator = line[0]
+      header = line[1:]			# Strip the '>' or '@' sign from the beginning.
+      lines.append(line)
+      next_state = STATE_SEQ
     elif (state == STATE_SEQ):
-      seq += line;
+      seq += line
       if (len(next_char) == 0):
-        lines.append(seq);
-        next_state = STATE_HEADER;
-        break;      # EOF.
+        lines.append(seq)
+        next_state = STATE_HEADER
+        break      # EOF.
       elif (header_separator == '>' and next_char == header_separator):
-        lines.append(seq);
-        next_state = STATE_HEADER;
-        break;      # This function reads only one sequence.
+        lines.append(seq)
+        next_state = STATE_HEADER
+        break      # This function reads only one sequence.
       elif (header_separator == '@' and next_char == '+'):
-        lines.append(seq);
-        next_state = STATE_QUAL_SEPARATOR;
+        lines.append(seq)
+        next_state = STATE_QUAL_SEPARATOR
       else:
-        next_state = STATE_SEQ;
+        next_state = STATE_SEQ
 
     elif (state == STATE_QUAL_SEPARATOR):
-      qual_separator = line;
-      lines.append(line);
-      next_state = STATE_QUAL;
+      qual_separator = line
+      lines.append(line)
+      next_state = STATE_QUAL
 
     elif (state == STATE_QUAL):
-      qual += line;
+      qual += line
       if (len(next_char) == 0):
-        lines.append(qual);
-        next_state = STATE_HEADER;
-        break;      # EOF.
+        lines.append(qual)
+        next_state = STATE_HEADER
+        break      # EOF.
       elif (next_char == header_separator and len(qual) == len(seq)):
-        lines.append(qual);
-        next_state = STATE_HEADER;
-        break;      # This function reads only one sequence.
+        lines.append(qual)
+        next_state = STATE_HEADER
+        break      # This function reads only one sequence.
       else:
-        next_state = STATE_QUAL;
-    state = next_state;
+        next_state = STATE_QUAL
+    state = next_state
 
-  return [header, lines];
+  return [header, lines]
 
 def yield_seq(fofn_lines):
   """
@@ -94,14 +95,14 @@ def yield_seq(fofn_lines):
   by the list of file names.
   """
   for file_name in fofn_lines:
-    fp_in = open(file_name, 'r');
+    fp_in = open(file_name, 'r')
 
     while(True):
-      [header, seq] = get_single_read(fp_in);
-      if (len(seq) == 0): break;
+      [header, seq] = get_single_read(fp_in)
+      if (len(seq) == 0): break
       yield(seq)
 
-  fp_in.close();
+  fp_in.close()
 
 def main():                 # pragma: no cover
   pass                      # pragma: no cover
