@@ -24,7 +24,12 @@ before_install:
     # Workaround for pip3. Without the Pyenv line, build fails because both versions 3.6 and 3.6.3 are available.
     - pyenv global system 3.7.1
     - pip3 install meson
+    - pip3 install intervaltree
+    - python3.7 --version
+    - pip3 --version
+    - python --version
     - meson --version
+    - python3.7 -c "import intervaltree; print(intervaltree)"
 
     # Update the apt-get repos.
     - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
