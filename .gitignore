@@ -40,6 +40,7 @@ test-data/ecoli-small/*
 !test-data/ecoli-small/single_read_exact_match.fasta.gz
 !test-data/ecoli-small/two_identical_long_reads.fa
 !test-data/ecoli-small/double-ecoli-0-100000.fasta
+!test-data/ecoli-small/circular_edge.gfa2
 !test-data/test-no-duplicates
 test-data/test-no-duplicates/*
 !test-data/test-no-duplicates/target.fasta
