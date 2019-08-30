@@ -574,11 +574,13 @@ def run(ref, gfa, out_prefix, seed, num_reads, cov,
 
     # Parse the graph if provided. Otherwise, use an empty graph.
     if gfa and os.path.exists(gfa):
-        log('Using GFA from file: "{}"'.format(gfa))
+        if DEBUG_VERBOSE:
+            log('Using GFA from file: "{}"'.format(gfa))
         with open(gfa, 'r') as fp_in:
             graph = load_gfa2(fp_in, True)
     else:
-        log('GFA file not specified. Proceeding without a graph.')
+        if DEBUG_VERBOSE:
+            log('GFA file not specified. Proceeding without a graph.')
         graph = GFAGraph(header={}, nodes={}, edges={})
 
     # Verbose if required.
