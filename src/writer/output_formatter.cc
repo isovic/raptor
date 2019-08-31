@@ -213,6 +213,9 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
 
     if (write_custom_tags) {
         ss << "\t"
+            // << "pr:i:" << mapping->GetRegionPriority() << "\t"
+            // << "su:i:" << (mapping->GetRegionIsSupplementary() ? 1 : 0) << "\t"
+            // << "fg:i:" << flag << "\t"
             << "cm:i:" << num_seeds << "\t"
             << "NM:i:" << edit_dist << "\t"
             << "AS:i:" << score << "\t"
@@ -220,7 +223,6 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
             << "pj:i:" << segment_in_path << "\t"
             << "pn:i:" << num_segments_in_path << "\t"
             << "ps:i:" << ((num_segments_in_path > 1) ? 1 : 0) << "\t"
-            << "fg:i:" << flag << "\t"
             << "cg:Z:" << cigar;
 
         #ifdef RAPTOR_DEBUG_TIMINGS
