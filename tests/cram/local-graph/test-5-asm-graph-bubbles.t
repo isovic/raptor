@@ -1,4 +1,9 @@
 Mapping a long read to an assembly graph composed of two collapsed regions (at the front and the back) and a bubble in the middle. The bubble has 2 identical branches. The long read should span the bubble.
+This below is very questionable, because part2a is just a subportion of the larger graph-mapped region (it is an alternative branch),
+but it inherits the score from the top of the DAG, by design.
+This needs to be reworked, because this way the short alt-path has the same score as the longer path, and gets sorted ahead of the longer path as in this particular example.
+Unlike this, when aligning paths, the final alignment score AS depends on the length of the path, so this alt-path scores lower than the best path in this mapped graph.
+In short, part2a should be marked as secondary and not as primary, whereas the other path should be the primary.
   $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/demos/demo-5-assembly-graph-short-bubble/ref.fasta -g ${PROJECT_DIR}/test-data/demos/demo-5-assembly-graph-short-bubble/graph.gfa2 -q ${PROJECT_DIR}/test-data/demos/demo-5-assembly-graph-short-bubble/read-1.fasta -v 0
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/806/0_37037	37037	10856	21437	+	part2a	10000	6	9939	5681	9933	3	cm:i:482	NM:i:-1	AS:i:5674	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:*
   m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/806/0_37037	37037	215	10833	+	part1	12000	1986	11986	5668	10000	3	cm:i:482	NM:i:-1	AS:i:5657	pi:i:1	pj:i:0	pn:i:3	ps:i:1	cg:Z:*
