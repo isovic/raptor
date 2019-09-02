@@ -1319,6 +1319,25 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                                             const double edge_retain_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
                                             std::unordered_map<int64_t, int64_t>& node_to_path_score,
                                             const bool verbose_debug_qid) {
+    /*
+     * This function takes an anchor graph and does the following:
+     *  1. Finds the actual number of paths discovered during GraphDP. Those are annotated in the graph.
+     *  2. Iterates through all nodes, and for each node it counts the number of out edges which correspond to the same path.
+     *  3. If the num_valid_out_edges == 0 for a node, that's a sink node (leaf node). Append the leaf node for the current pid.
+     *      Store the score for the current node. Check if it's larger than the maximum for that pid, and set the max if so.
+     *  4. For every pid:
+     *      4.1 Find all leafs which have the score >= max_pid_leaf_score * edge_retain_frac and add
+     *          them to the fork_queue (each element of the queue is composed of <v_name, v_score>).
+     *      4.2 Pop a leaf node from the fork_queue.
+     *      4.3 Backtrack from the popped node by running a for loop from that node until there are either no more
+     *          input edges, or all input edges were visited, or there are no input edges on the same path.
+     *              4.3.1 Create an empty backtrack graph.
+     *              4.3.2 Find the maximum scoring input edge (`max_in_score`).
+     *              4.3.3 Calculate min_allowed_in_edge_score = max_in_score * edge_retain_frac
+     *              4.3.4 Find all alternate input edges within the min_allowed_in_edge_score to the fork_queue.
+     *              4.3.5 The source of the maximum scoring edge is added to the backtrack graph.
+     *              4.3.6 When there are no more nodes to backtrack through, jump to step 4.2.
+    */
 
     std::vector<raptor::AnchorGraphPtr> ret_graphs;
 
@@ -1351,6 +1370,8 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
             continue;
         }
 
+        // Count the number of valid out edges (edges in the same path ID),
+        // to determine if this node is a sink node or not.
         auto out_edges = graph->GetOutEdges(v);
         int64_t num_valid_out_edges = 0;
         for (const auto& e_item: out_edges) {
@@ -1363,7 +1384,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
             ++num_valid_out_edges;
         }
 
-        // Take only sources.
+        // Take only sinks.
         if (num_valid_out_edges == 0) {
             pid_leafs[pid].emplace_back(v);
             node_to_path_score[v] = v_data->score();
@@ -1410,7 +1431,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
         // Add the maximum leaf node to the queue. Backtrack will start from there.
         // The path score will be propagated with the queue, so that alternative bubbles
         // will appear in the output.
-        std::deque<std::pair<int64_t, int64_t>> fork_queue;
+        std::deque<std::pair<int64_t, int64_t>> fork_queue;     // The pair is: <v_name, v_score>
 
         // Emplace all leafs. We expect that the filtering was applied on the outside.
         double min_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid] * edge_retain_frac);
@@ -1510,6 +1531,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                 // Reiterate over all edges, and add all alternate paths to the queue.
                 // This expects that all edges which are not of interest are already
                 // filtered prior to entering this function.
+                // Add them to the fork_queue.
                 for (const auto& e_item: in_edges) {
                     if (e_item->is_removed()) {
                         // Skip if edge is marked as removed.
