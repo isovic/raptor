@@ -358,23 +358,34 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::MapBetter(const mindex:
 
 std::shared_ptr<raptor::GraphMappingResult> GraphMapper::DummyMap(const mindex::SequencePtr& qseq,
                                                               const std::shared_ptr<raptor::LinearMappingResult> input_mapping_result) {
+    TicToc tt_total;
+    tt_total.start();
 
     auto result = raptor::createGraphMappingResult(qseq->abs_id(),
                                                qseq->data().size(),
                                                qseq->header(), index_);
 
-    // // Stores the final results - the best scoring paths through the graph.
-    // std::vector<std::shared_ptr<LocalPath>> paths;
+    std::vector<std::shared_ptr<LocalPath>> paths;
 
-    // for (size_t chain_id = 0; chain_id < input_mapping_result->chains().size(); chain_id++) {
-    //     auto& chain = input_mapping_result->chains()[chain_id];
-    //     auto path = LocalPath::createPath(chain_id, chain);
-    //     path->score(anchor->Score());
-    //     paths.emplace_back(path);
-    // }
+    for (auto& single_target_anchors: input_mapping_result->target_anchors()) {
+        for (size_t anchor_ordinal_id = 0; anchor_ordinal_id < single_target_anchors->hits().size(); anchor_ordinal_id++) {
+            auto& anchor = single_target_anchors->hits()[anchor_ordinal_id];
+            auto path = LocalPath::createPath(static_cast<int64_t>(paths.size()), anchor);
+            path->score(anchor->Score());
+            paths.emplace_back(path);
+        }
+    }
 
-    // result->paths(paths);
-    // result->SetReturnValue(GraphMapperReturnValue::OK);
+    result->paths(paths);
+    result->SetReturnValue(raptor::MapperReturnValueBase::OK);
+
+    tt_total.stop();
+
+    result->timings()["gmap_total"] = tt_total.get_msecs();
+    result->timings()["gmap_break_anchors"] = 0.0;
+    result->timings()["gmap_align_anchors"] = 0.0;
+    result->timings()["gmap_constr_anchor_graph"] = 0.0;
+    result->timings()["gmap_graph_dp"] = 0.0;
 
     return result;
 }
