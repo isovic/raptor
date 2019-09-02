@@ -1263,7 +1263,7 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
         int64_t max_path_score = leaf_score;
         int64_t max_path_node = v_name;
 
-        // Find the maximum node in the path.
+        // Find the maximum node in the path before any forks are hit.
         while (out_edges.size() == 1) {
             const auto& edge_item = out_edges[0];
             auto w_name = edge_item->sink_name();
@@ -1275,6 +1275,11 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
                 max_path_node = w_name;
             }
             out_edges = graph->GetOutEdges(w_name);
+        }
+
+        if (out_edges.size() > 1) {
+            WARNING_REPORT(ERR_UNEXPECTED_VALUE, "The graph provided to GraphToPaths2_ is not a path graph. Found a node with out_edges.size() = %ld.\n",
+                out_edges.size());
         }
 
         // Extract the path up to the maximum node.
@@ -1311,8 +1316,8 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
 
 std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGraph(
                                             const std::shared_ptr<raptor::AnchorGraph>& graph,
-                                            const double edge_retain_frac,
-                                            std::unordered_map<int64_t, int64_t>& node_to_path_score,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                            const double edge_retain_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                            std::unordered_map<int64_t, int64_t>& node_to_path_score,
                                             const bool verbose_debug_qid) {
 
     std::vector<raptor::AnchorGraphPtr> ret_graphs;
