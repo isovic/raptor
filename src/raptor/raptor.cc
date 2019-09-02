@@ -246,7 +246,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
         results[i].q_id_in_batch = qseq->id();   // It's important that this is not the absolute ID, but the local batch ID.
         results[i].mapping_result = mapper->Map(qseq);
 
-        if (graph != nullptr) {
+        if (graph != nullptr && params->mapper_params->no_graph_mapping == false) {
             auto graph_mapping_result =
                 graph_mapper->Map(qseq, results[i].mapping_result);
             results[i].graph_mapping_result = graph_mapping_result;

@@ -359,6 +359,11 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "If specified, anchors will be scored via alignment during graph-based mapping. This can produce "
                           "more accurate chaining.",
                           0, "Graph Mapping options");
+    argparser.AddArgument(&parameters->mapper_params->no_graph_mapping, VALUE_TYPE_BOOL, "",
+                          "no-gm", "0",
+                          "If specified, graph mapping will not be applied. Instead, only linear mapping anchors will "
+                          "be used. Useful for faster overlapping.",
+                          0, "Graph Mapping options");
 
     argparser.AddArgument(
         &parameters->mapper_params->overlap_skip_self_hits, VALUE_TYPE_BOOL, "", "overlap-skip-self", "0",
