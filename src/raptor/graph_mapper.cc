@@ -667,7 +667,7 @@ void AddLocalEdges_(
                     int32_t chain_max_skip,
                     std::shared_ptr<raptor::AnchorGraph> local_graph,
                     bool verbose_debug_qid) {
-    // From every anchor, start a BFS to the furthes reach any walk can have,
+    // From every anchor, start a BFS to the furthest reach any walk can have,
     // constrained by the query length and other parameters.
     size_t num_anchors = flat_anchors.size();
 
@@ -1483,7 +1483,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                 visited_nodes[w_name] = 1;
 
                 // Find the best incomming edges.
-                std::vector<raptor::EdgeItemAnchorGraphPtr>in_edges = graph->GetInEdges(w_name);
+                std::vector<raptor::EdgeItemAnchorGraphPtr> in_edges = graph->GetInEdges(w_name);
 
                 // Find the maximum in-edge.
                 raptor::EdgeItemAnchorGraphPtr e_in_max = nullptr;
@@ -1558,7 +1558,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                         continue;
                     }
                     // Finally, add to the queue.
-                    fork_queue.push_back(std::make_pair(e_item->source_name(), leaf_score));
+                    fork_queue.push_back(std::make_pair(e_item->source_name(), e_item->data()->score()));
                 }
 
                 w_name = e_in_max->source_name();
