@@ -2,6 +2,9 @@
 
 ## 0.16.5 -> 0.16.6
 - Added unit tests for the new ScoreCigarAlignment.
+- Added a feature which allows to skip graph-mapping. This can add a little bit of speed for some contexts, e.g. overlapping.
+- Updated the GraphSim and added a simple error-rate model.
+- Added a tool to evaluate simulated results (graphsim-eval.py).
 
 ## 0.16.4 -> 0.16.5
 - Now explicitly failing if a PacBio .xml file is not a subreadset or an alignmentset.
