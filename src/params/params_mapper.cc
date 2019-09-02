@@ -38,7 +38,8 @@ ParamsMapper::ParamsMapper()
       max_hits(-1),
       ref_and_reads_path_same(false),
       graph_allowed_score_diff_frac(0.95),
-      flank_ext_len(200)
+      flank_ext_len(200),
+      no_graph_mapping(false)
 {}
 
 }  // namespace raptor

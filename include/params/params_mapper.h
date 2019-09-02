@@ -52,6 +52,7 @@ class ParamsMapper {
     bool ref_and_reads_path_same;          // Applicable for overlapping. If true, and "is_overlapper == true", then any overlap with t_id >= q_id will be ignored. Only overlaps with t_id < q_id will be output. Although it may seem redundant, there might be use cases when we want a sanity check that the mapper will find perfect mappings of a set onto itself. Or map only to reverse complement, in which case inputs are the same.
     double graph_allowed_score_diff_frac;
     int32_t flank_ext_len;
+    bool no_graph_mapping;
 
    private:
     ParamsMapper();
