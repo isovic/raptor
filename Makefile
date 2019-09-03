@@ -57,7 +57,7 @@ meson-time:
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-time2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-debug:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=true -Dc_args=-O3"
@@ -78,7 +78,7 @@ testing: | meson-testing
 time: | meson-time
 	${MAKE} install BDIR=meson-time
 time2: | meson-time2
-	${MAKE} install BDIR=meson-time
+	${MAKE} install BDIR=meson-time2
 debug: | meson-debug
 	${MAKE} install BDIR=meson-debug
 debug-gcc6: | meson-debug-gcc6
