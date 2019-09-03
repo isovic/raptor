@@ -71,6 +71,8 @@ void APIExample() {
 }
 
 void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
+	LOG_ALL("Num threads: %ld\n", parameters->num_threads);
+
 	/*
 	* Create the index.
 	*/
