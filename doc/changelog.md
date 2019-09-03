@@ -1,10 +1,12 @@
 # Raptor Changelog
 
-## 0.16.5 -> 0.16.6
+## 0.16.5 -> 0.17.0
 - Added unit tests for the new ScoreCigarAlignment.
-- Added a feature which allows to skip graph-mapping. This can add a little bit of speed for some contexts, e.g. overlapping.
+- Added a feature ("--no-gm") which allows to skip graph-mapping. This can add a little bit of speed for some contexts, e.g. overlapping. Hasn't yet been thoroughly tested.
 - Updated the GraphSim and added a simple error-rate model.
 - Added a tool to evaluate simulated results (graphsim-eval.py).
+- Updated the time2 rule in the Makefile.
+- Added a log output of the number of threads at the beginning of RunRaptor.
 
 ## 0.16.4 -> 0.16.5
 - Now explicitly failing if a PacBio .xml file is not a subreadset or an alignmentset.
