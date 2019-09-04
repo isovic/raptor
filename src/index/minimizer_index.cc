@@ -632,8 +632,13 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
 
     // For lookup, don't index the reverse complement;
     std::vector<mindex128_t> minimizers;
-    int ret_val = GenerateMinimizersGeneric_(
-        minimizers, seq, seq_len, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
+
+    // int ret_val = GenerateMinimizersGeneric_(
+    //     minimizers, seq, seq_len, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
+    //     params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
+
+    int ret_val = GenerateMinimizersNoQueue_(
+        minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     // tt1.stop();
@@ -961,14 +966,7 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
         mindex::Minimizer new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
         bool new_seed_set = false;
 
-        // std::cerr << "[pos = " << pos << "] before, kmer_starts (" << kmer_starts.size() << "):\n";
-        // for (const auto& val: kmer_starts) {
-        //     std::cerr << val << " ";
-        // }
-        // std::cerr << "\n";
-
         if (is_nuc[b]) {
-
             // If enabled, skip same bases.
             if (homopolymer_suppression) {
                 // In this case, find the stretch of homopolymers (at least 1 base), and
@@ -1016,6 +1014,9 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
                 new_seed_set = true;
             }
         } else {
+            // If we encountered a non-nucleotide base, this is enough to reset the minimizer
+            // coding. Simply setting the num_bases_in to 0 will disallow filling of the minimizer
+            // buffer by more than
             num_bases_in = 0;
         }
 
