@@ -946,14 +946,26 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
     std::deque<ind_t> kmer_starts;
     // Define the new circular buffer for the window.
     mindex::Minimizer win_buff[512];
+    bool win_pos_set[512];
     int32_t win_buff_pos = 0;
     int32_t win_buff_min_pos = -1;
     // // Minimum seed in the window.
     // mindex::Minimizer min_seed(UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
 
+    for (size_t i = 0; i < 512; ++i) {
+        win_pos_set[i] = false;
+    }
+
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
         int8_t b = seq[pos];
         mindex::Minimizer new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
+        bool new_seed_set = false;
+
+        // std::cerr << "[pos = " << pos << "] before, kmer_starts (" << kmer_starts.size() << "):\n";
+        // for (const auto& val: kmer_starts) {
+        //     std::cerr << val << " ";
+        // }
+        // std::cerr << "\n";
 
         if (is_nuc[b]) {
 
@@ -1001,13 +1013,40 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
                 int32_t kmer_span = pos - kmer_start;   // Not used, just for show.
                 kmer_starts.pop_front();
                 new_seed = mindex::Minimizer(key, seq_id, kmer_start + seq_offset, flag);
+                new_seed_set = true;
             }
         } else {
             num_bases_in = 0;
         }
 
-        // Store the new seed to the circular buffer.
-        win_buff[win_buff_pos] = new_seed;
+        // std::cerr << "win_buff_pos = " << win_buff_pos << "\n";
+        // std::cerr << "win_buff_min_pos = " << win_buff_min_pos << "\n";
+        // std::cerr << "num_bases_in = " << num_bases_in << "\n";
+        // std::cerr << "new_seed = (" << new_seed.Verbose() << ")\n";
+        // std::cerr << "new_seed_set = " << new_seed_set << "\n";
+        // std::cerr << "win_buff:\n";
+        // for (size_t i = 0; i < w; ++i) {
+        //     std::cerr << "(" << win_buff[i].Verbose() << "); ";
+        // }
+        // std::cerr << "\n";
+        // std::cerr << "win_pos_set:\n";
+        // for (size_t i = 0; i < w; ++i) {
+        //     std::cerr << win_pos_set[i] << " ";
+        // }
+        // std::cerr << "\n";
+        // std::cerr << "[pos = " << pos << "] after, kmer_starts (" << kmer_starts.size() << "):\n";
+        // for (const auto& val: kmer_starts) {
+        //     std::cerr << val << " ";
+        // }
+        // std::cerr << "\n";
+
+
+
+
+
+
+
+
 
         // The first time the buffer is filled, find and add the previous
         // distinct minimizer matches.
@@ -1015,64 +1054,82 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
             const auto& min_seed = win_buff[win_buff_min_pos];
             // First portion of the circular buffer.
             for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (min_seed.Compare(win_buff[j].key) == 2) {
+                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
                     minimizers.emplace_back(win_buff[j].to_128t());
                 }
             }
             // Second portion of the circular buffer.
             for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (min_seed.Compare(win_buff[j].key) == 2) {
+                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
                     minimizers.emplace_back(win_buff[j].to_128t());
                 }
             }
         }
 
-        if (win_buff_min_pos < 0) {
+        if (new_seed_set && win_buff_min_pos < 0) {
             // No minimum has been set yet. Set the current buffer pos.
             win_buff_min_pos = win_buff_pos;
-        }
-        else if (new_seed.key <= win_buff[win_buff_min_pos].key) {
+        } else if (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key) {
             if (num_bases_in >= (w + k)) {
                 minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
             }
             win_buff_min_pos = win_buff_pos;
-        } else if (win_buff_pos == win_buff_min_pos) {
+        } else if (win_buff_pos == win_buff_min_pos && win_buff_min_pos >= 0) {  // The entire window has been circled around to the minimum seed key.
             if (num_bases_in >= (w + k - 1)) {
                 minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
             }
+            win_buff_min_pos = -1;
             // First portion of the circular buffer.
             for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[win_buff_pos].key) {
+                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
                     win_buff_min_pos = j;
                 }
             }
+            // std::cerr << "(1) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
             // Second portion of the circular buffer.
             for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[win_buff_pos].key) {
+                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
                     win_buff_min_pos = j;
                 }
             }
+            // std::cerr << "(2) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
+            if (win_buff_min_pos < 0 || (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key)) {
+                win_buff_min_pos = win_buff_pos;
+            }
+            // std::cerr << "(3) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
             // Find and add identical seed keys.
-            if (num_bases_in >= (w + k - 1) && win_buff_min_pos >= 0) {
+            if (num_bases_in >= (w + k - 1)) {
                 const auto& min_seed = win_buff[win_buff_min_pos];
                 // First portion of the circular buffer.
                 for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                    if (min_seed.Compare(win_buff[j].key) == 2) {
+                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
                         minimizers.emplace_back(win_buff[j].to_128t());
                     }
                 }
                 // Second portion of the circular buffer.
                 for (int32_t j = 0; j < win_buff_pos; ++j) {
-                    if (min_seed.Compare(win_buff[j].key) == 2) {
+                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
                         minimizers.emplace_back(win_buff[j].to_128t());
                     }
                 }
             }
         }
+        // Store the new seed to the circular buffer.
+        win_buff[win_buff_pos] = new_seed;
+        win_pos_set[win_buff_pos] = new_seed_set;
         ++win_buff_pos;
         if (win_buff_pos == w) {
             win_buff_pos = 0;
         }
+
+        // std::cerr << "minimizers:\n";
+        // for (const auto& val: minimizers) {
+        //     auto val2 = mindex::Minimizer(val);
+        //     std::cerr << "(" << val2.Verbose() << "); ";
+        // }
+        // std::cerr << "\n";
+        // std::cerr << "\n";
+
     }
     if (win_buff_min_pos >= 0) {
         minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
