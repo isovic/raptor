@@ -153,7 +153,12 @@ int MinimizerIndex::Build() {
 #endif
 
         size_t num_seeds_before = seeds_.size();
-        GenerateMinimizersGeneric_(seeds_, &seq->data()[0], seq->len(), i, params_->k, params_->w,
+        // GenerateMinimizersGeneric_(seeds_, &seq->data()[0], seq->len(), i, params_->k, params_->w,
+        //                            !params_->index_only_fwd_strand,
+        //                            params_->homopolymer_suppression, params_->max_homopolymer_len,
+        //                            region_rstart, region_rend);
+
+        GenerateMinimizersNoQueue_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
                                    !params_->index_only_fwd_strand,
                                    params_->homopolymer_suppression, params_->max_homopolymer_len,
                                    region_rstart, region_rend);
@@ -894,11 +899,201 @@ int MinimizerIndex::GenerateMinimizersWithQueue_(std::vector<mindex128_t>& minim
     return 0;
 }
 
-int MinimizerIndex::GenerateMinimizersGeneric_(std::vector<mindex128_t>& minimizers, const int8_t* seq,
-                                               ind_t seq_len, indid_t seq_id, int32_t k, int32_t w,
-                                               bool use_rc, bool homopolymer_suppression,
-                                               int32_t max_homopolymer_run, ind_t seq_start,
-                                               ind_t seq_end) {
+int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimizers,
+                                                const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
+                                                indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                                bool homopolymer_suppression,
+                                                int32_t max_homopolymer_len,
+                                                ind_t seq_start, ind_t seq_end) {
+    // Sanity check that the seq is not NULL;
+    if (!seq) {
+        return 1;
+    }
+    // Sanity check for the size of k. It can't
+    // be too large, or it won't fit the uint64_t buffer.
+    if (k <= 0 || k >= 31) {
+        return 2;
+    }
+    // Not technically an error if the seq_len is 0,
+    // but there's nothing to do, so return.
+    if (seq_len == 0) {
+        return 0;
+    }
+
+    seq_start = (seq_start < 0) ? 0 : seq_start;
+    seq_end = (seq_end <= 0 || seq_end > seq_len) ? seq_len : seq_end;
+
+    if (seq_start >= seq_len) {
+        return 3;
+    }
+    if (seq_start >= seq_end) {
+        return 4;
+    }
+
+    // Preallocate local memory for the minimizers.
+    // size_t num_minimizers = 0;
+    // std::vector<mindex128_t> local_minimizers;
+    // local_minimizers.reserve(seq_len);
+    // This will keep track of the keys which were already used and enable minimizer compression.
+    // std::vector<bool> is_seed_used(seq_len, false);
+    // Mask the number of required bits for the k-mer.
+    const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;
+    minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
+    minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
+    int32_t shift = 0;         // We keep track of the amount to shift after each 'N' base.
+    int32_t num_bases_in = 0;   // Number of bases added to the buffer.
+    int32_t seed_span = 0;
+    // Keeps track of the start position of a k-mer.
+    std::deque<ind_t> kmer_starts;
+    // Define the new circular buffer for the window.
+    mindex::Minimizer win_buff[512];
+    int32_t win_buff_pos = 0;
+    int32_t win_buff_min_pos = -1;
+    // // Minimum seed in the window.
+    // mindex::Minimizer min_seed(UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
+
+    for (ind_t pos = seq_start; pos < seq_end; ++pos) {
+        int8_t b = seq[pos];
+        mindex::Minimizer new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
+
+        if (is_nuc[b]) {
+
+            // If enabled, skip same bases.
+            if (homopolymer_suppression) {
+                // In this case, find the stretch of homopolymers (at least 1 base), and
+                // add that stretch to "seed_span" (the seed_span is iteratively increased every
+                // loop iteration).
+                int32_t hp_len = 1;
+                for (hp_len = 1; hp_len < max_homopolymer_len && (pos + hp_len) < seq_len; ++hp_len) {
+                    if (seq[pos + hp_len] != b) {
+                        break;
+                    }
+                }
+                pos += hp_len - 1;
+                seed_span += hp_len;
+                if (hp_len >= max_homopolymer_len) {
+                    continue;
+                }
+            } else {
+                // For non-HPC, just determine the span based on the number of bases
+                // in the buffer.
+                seed_span = std::min(num_bases_in + 1, k);
+            }
+
+            // Add the base to the buffer.
+            buffer = ((buffer << 2) | ((((uint64_t)nuc_to_twobit[b]))));
+            buffer_rc = (buffer_rc >> 2) | ((((uint64_t)nuc_to_twobit_complement[b])) << (k * 2 - 2));
+            // Calculate the seed key.
+            minkey_t key = buffer & mask;
+            minkey_t rev_key = buffer_rc & mask;
+            // Record the start position in a small deque (size of k).
+            kmer_starts.push_back(pos);
+            // Skip symmetric k-mers.
+            if (buffer == buffer_rc) {
+                continue;
+            }
+
+            // Determine the orientation of the key.
+            int8_t flag = MINIMIZER_FLAG_DEFAULT_FWD;
+            if (use_rc && rev_key < key) {
+                std::swap(key, rev_key);
+                flag = MINIMIZER_FLAG_IS_REV;
+            }
+
+            ++num_bases_in;
+
+            if (num_bases_in >= k) {    // Minimap2 has another condition here: "kmer_span < 256". That's because it encodes the kmer span into the seed definition as 8 bits.
+                ind_t kmer_start = kmer_starts.front();
+                int32_t kmer_span = pos - kmer_start;   // Not used, just for show.
+                kmer_starts.pop_front();
+                new_seed = mindex::Minimizer(key, seq_id, kmer_start, flag);
+            }
+        } else {
+            num_bases_in = 0;
+        }
+
+        // Store the new seed to the circular buffer.
+        win_buff[win_buff_pos] = new_seed;
+
+        // The first time the buffer is filled, find and add the previous
+        // distinct minimizer matches.
+        if (num_bases_in == (w + k - 1) && win_buff_min_pos >= 0) {
+            const auto& min_seed = win_buff[win_buff_min_pos];
+            // First portion of the circular buffer.
+            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
+                if (min_seed.Compare(win_buff[j].key) == 2) {
+                    minimizers.emplace_back(win_buff[j].to_128t());
+                }
+            }
+            // Second portion of the circular buffer.
+            for (int32_t j = 0; j < win_buff_pos; ++j) {
+                if (min_seed.Compare(win_buff[j].key) == 2) {
+                    minimizers.emplace_back(win_buff[j].to_128t());
+                }
+            }
+        }
+
+        if (win_buff_min_pos < 0) {
+            // No minimum has been set yet. Set the current buffer pos.
+            win_buff_min_pos = win_buff_pos;
+        }
+        else if (new_seed.key <= win_buff[win_buff_min_pos].key) {
+            if (num_bases_in >= (w + k)) {
+                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            }
+            win_buff_min_pos = win_buff_pos;
+        } else if (win_buff_pos == win_buff_min_pos) {
+            if (num_bases_in >= (w + k - 1)) {
+                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            }
+            // First portion of the circular buffer.
+            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
+                if (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[win_buff_pos].key) {
+                    win_buff_min_pos = j;
+                }
+            }
+            // Second portion of the circular buffer.
+            for (int32_t j = 0; j < win_buff_pos; ++j) {
+                if (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[win_buff_pos].key) {
+                    win_buff_min_pos = j;
+                }
+            }
+            // Find and add identical seed keys.
+            if (num_bases_in >= (w + k - 1) && win_buff_min_pos >= 0) {
+                const auto& min_seed = win_buff[win_buff_min_pos];
+                // First portion of the circular buffer.
+                for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
+                    if (min_seed.Compare(win_buff[j].key) == 2) {
+                        minimizers.emplace_back(win_buff[j].to_128t());
+                    }
+                }
+                // Second portion of the circular buffer.
+                for (int32_t j = 0; j < win_buff_pos; ++j) {
+                    if (min_seed.Compare(win_buff[j].key) == 2) {
+                        minimizers.emplace_back(win_buff[j].to_128t());
+                    }
+                }
+            }
+        }
+        ++win_buff_pos;
+        if (win_buff_pos == w) {
+            win_buff_pos = 0;
+        }
+    }
+    if (win_buff_min_pos >= 0) {
+        minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+    }
+
+    return 0;
+}
+
+int MinimizerIndex::GenerateMinimizersGeneric_(std::vector<mindex128_t>& minimizers,
+                                               const int8_t* seq, ind_t seq_len,
+                                               indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                               bool homopolymer_suppression,
+                                               int32_t max_homopolymer_run,
+                                               ind_t seq_start, ind_t seq_end) {
+
     // Sanity check that the seq is not NULL;
     if (!seq) {
         return 1;
