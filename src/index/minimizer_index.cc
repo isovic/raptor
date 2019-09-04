@@ -1006,7 +1006,7 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
                 ind_t kmer_start = kmer_starts.front();
                 int32_t kmer_span = pos - kmer_start;   // Not used, just for show.
                 kmer_starts.pop_front();
-                new_seed = mindex::Minimizer(key, seq_id, kmer_start, flag);
+                new_seed = mindex::Minimizer(key, seq_id, kmer_start + seq_offset, flag);
             }
         } else {
             num_bases_in = 0;
