@@ -942,7 +942,6 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
     int32_t shift = 0;         // We keep track of the amount to shift after each 'N' base.
     int32_t num_bases_in = 0;   // Number of bases added to the buffer.
-    int32_t seed_span = 0;
     // Keeps track of the start position of a k-mer.
     std::deque<ind_t> kmer_starts;
     // Define the new circular buffer for the window.
@@ -970,14 +969,9 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
                     }
                 }
                 pos += hp_len - 1;
-                seed_span += hp_len;
                 if (hp_len >= max_homopolymer_len) {
                     continue;
                 }
-            } else {
-                // For non-HPC, just determine the span based on the number of bases
-                // in the buffer.
-                seed_span = std::min(num_bases_in + 1, k);
             }
 
             // Add the base to the buffer.
