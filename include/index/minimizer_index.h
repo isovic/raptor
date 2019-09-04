@@ -186,6 +186,17 @@ class MinimizerIndex {
                                           ind_t seq_end);
 
     /*
+     * The seq_offset is the distance from the beginning of the sequence, used for the seed position.
+     *
+    */
+    static int GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimizers,
+                                                const int8_t* seq, ind_t seq_len, ind_t seq_offset,
+                                                indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                                bool homopolymer_suppression,
+                                                int32_t max_homopolymer_run,
+                                                ind_t seq_start, ind_t seq_end);
+
+    /*
      * Expects that seq contains only [ACTG] bases.
      * Uses a deque to add/remove seeds and yield minimizers.
      */
