@@ -85,6 +85,18 @@ class Minimizer {
         return ss.str();
     }
 
+    inline int32_t Compare(const Minimizer& other) const {
+        if (key == other.key && seq_id == other.seq_id && pos == other.pos && flag == other.flag) {
+            // Exact seed match.
+            return 0;
+        } else if (key != other.key) {
+            // Keys are different, seeds do not match.
+            return 1;
+        }
+        // Key is the same, the rest of the seed is different.
+        return 2;
+    }
+
     minkey_t key;
     indid_t seq_id;
     ind_t pos;
