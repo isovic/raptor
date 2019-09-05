@@ -177,12 +177,12 @@ class MinimizerIndex {
      * The seq_offset is the distance from the beginning of the sequence, used for the seed position.
      *
     */
-    static int GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimizers,
-                                                const int8_t* seq, ind_t seq_len, ind_t seq_offset,
-                                                indid_t seq_id, int32_t k, int32_t w, bool use_rc,
-                                                bool homopolymer_suppression,
-                                                int32_t max_homopolymer_run,
-                                                ind_t seq_start, ind_t seq_end);
+    static int GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
+                                    const int8_t* seq, ind_t seq_len, ind_t seq_offset,
+                                    indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                    bool homopolymer_suppression,
+                                    int32_t max_homopolymer_run,
+                                    ind_t seq_start, ind_t seq_end);
 
     /*
      * Takes the vector of minimizers, initializes bucket for hashes, and constructs the hashes.
