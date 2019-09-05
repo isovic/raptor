@@ -4,8 +4,16 @@ It would be a shame to get them lost through time, so this document will serve a
 
 These are:
 1. GenerateMinimizersWithQueue_ (deprecated on Sep 05, 2019)
-2. GenerateMinimizersWithRMQ_
+2. GenerateMinimizersWithRMQ_ (work started on Dec 16, 2017, commit 290de8e421f62a84fc1c3c12245c2d4378be9a4f)
+3. Minheap-Minqueue (src/minimizer_index2/minimizer_generator2_minqueue.cc) (somewhere around this time: Dec 09, 2017, commit d16776b6092c3dd59e1b0e47ebd0fbb29bd35490)
 
+It looks like the last commit with all of these methods is this one:
+commit 82f073b7ac721d776a2e5e49db2d647f00599420 (HEAD)
+Author: Ivan Sovic <ivan.sovic@gmail.com>
+Date:   Sat Dec 16 01:17:24 2017 +0100
+
+    Small cleanup in the output formatter.
+    
 ## 1. Queue-based method
 The best one until recently was the queue-based approach which wraps the minimizer generation in a generator class. The generator takes in a new seed, and outputs the minimizers for the current window right away.
 The method was deprecated on Sep 04, 2019 in favor of a slightly faster approach.
