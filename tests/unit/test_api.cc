@@ -53,7 +53,7 @@ TEST(APIExamples, APITest1) {
     // Create the index.
     mindex::IndexPtr index = std::move(mindex::createMinimizerIndex(index_params));
     index->AddSequences(refs_1, rnames_1);
-    index->Build();
+    index->BuildIndex();
 
     // Create an empty graph.
     raptor::GraphPtr graph = raptor::createSegmentGraph();
@@ -121,7 +121,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
     // Create the index.
     mindex::IndexPtr index = std::move(mindex::createMinimizerIndex(index_params));
     index->AddSequences(refs_1, rnames_1);
-    index->Build();
+    index->BuildIndex();
 
     /////////////////////////////////
     /// Initialize an empty graph ///

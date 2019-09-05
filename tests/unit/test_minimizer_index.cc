@@ -238,7 +238,7 @@ TEST(MinimizerIndexTest, TestBuild1) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -289,7 +289,7 @@ TEST(MinimizerIndexTest, TestBuild2) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{   mindex::Minimizer::Encode(0, 0, 1, false),
@@ -337,7 +337,7 @@ TEST(MinimizerIndexTest, TestBuild3) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -396,7 +396,7 @@ TEST(MinimizerIndexTest, TestBuild4) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // "TCTGACTGCA" This should be the region.
     // Seeds are in a sorted order by their key.
@@ -449,7 +449,7 @@ TEST(MinimizerIndexTest, TestBuild5) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -501,7 +501,7 @@ TEST(MinimizerIndexTest, TestBuild6) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -552,7 +552,7 @@ TEST(MinimizerIndexTest, TestBuild7) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -597,7 +597,7 @@ TEST(MinimizerIndexTest, TestBuild8) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -641,7 +641,7 @@ TEST(MinimizerIndexTest, TestBuild9) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -707,7 +707,7 @@ TEST(MinimizerIndexTest, TestBuild10) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // These are all seeds for a w = 1:
     // Sorted by key:
@@ -791,7 +791,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Define the query sequence.
     std::string query("");
@@ -822,7 +822,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Define the query sequence.
     std::string query("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
@@ -855,7 +855,7 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Define the query sequence.
     std::string query = seqs[0];
@@ -900,7 +900,7 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Define the query sequence.
     std::string query("AAAAAAAAAAAAAAAAAAAA");
@@ -947,7 +947,7 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Define the query sequence.
     //               ("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
@@ -1016,7 +1016,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
     index->AddSequences(seqs, headers);
 
     // Build the index from the added sequences.
-    index->Build();
+    index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -1054,7 +1054,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     // Add them to the index. This only adds the data, but does not build the index.
     index_hp->AddSequences(seqs_for_hp, headers_for_hp);
     // Build the index from the added sequences.
-    index_hp->Build();
+    index_hp->BuildIndex();
 
     // Index params for deactivated homopolymer suppression and reference sequences
     // which have no homopolymers. This should result in the same index as the above.
@@ -1077,7 +1077,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     // Add them to the index. This only adds the data, but does not build the index.
     index_no_hp->AddSequences(seqs_with_no_hp, headers_with_no_hp);
     // Build the index from the added sequences.
-    index_no_hp->Build();
+    index_no_hp->BuildIndex();
 
     // We need to manually compare the seed keys, because the positions will have changed.
     ASSERT_EQ(index_hp->seeds().size(), index_no_hp->seeds().size());

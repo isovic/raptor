@@ -64,7 +64,7 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
             }
 
             LOG_ALL("Building the index.\n");
-            index->Build();
+            index->BuildIndex();
 
             LOG_ALL("Number of sequences in the index: %ld\n", index->num_seqs());
             LOG_ALL("Finished building index.\n");
@@ -92,7 +92,7 @@ std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string
 
             LOG_ALL("Building the index.\n");
             index->SetSequenceFile(seq_file);
-            index->Build();
+            index->BuildIndex();
 
             LOG_ALL("Number of sequences in the index: %ld\n", index->num_seqs());
             LOG_ALL("Finished building index.\n");
