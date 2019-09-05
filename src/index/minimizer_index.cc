@@ -753,13 +753,12 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
     int32_t num_bases_in = 0;   // Number of bases added to the buffer.
-    // Keeps track of the start position of a k-mer.
-    std::deque<ind_t> kmer_starts;
-    // Define the new circular buffer for the window.
-    mindex::Minimizer win_buff[512];
+    mindex::Minimizer win_buff[512];    // Define the new circular buffer for the window.
     bool win_pos_set[512];
     int32_t win_buff_pos = 0;
     int32_t win_buff_min_pos = -1;
+    ind_t kmer_span = 0;
+    std::deque<ind_t> hp_events;
 
     for (size_t i = 0; i < 512; ++i) {
         win_pos_set[i] = false;
@@ -782,10 +781,21 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                         break;
                     }
                 }
+                hp_events.push_back(hp_len);
                 pos += hp_len - 1;
+                kmer_span += hp_len;
+                // We need to keep track of the length of each HP event. They contribute as a single
+                // base, but in reality, the span is larger. This deque keeps track of all hp events
+                // in the current k-mer.
+                while (hp_events.size() > k) {
+                    kmer_span -= hp_events.front();
+                    hp_events.pop_front();
+                }
                 if (hp_len >= max_homopolymer_len) {
                     continue;
                 }
+            } else {
+                kmer_span = std::min(num_bases_in + 1, k);
             }
 
             // Add the base to the buffer.
@@ -794,8 +804,6 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             // Calculate the seed key.
             minkey_t key = buffer & mask;
             minkey_t rev_key = buffer_rc & mask;
-            // Record the start position in a small deque (size of k).
-            kmer_starts.push_back(pos);
             // Skip symmetric k-mers.
             if (buffer == buffer_rc) {
                 continue;
@@ -811,9 +819,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             ++num_bases_in;
 
             if (num_bases_in >= k) {    // Minimap2 has another condition here: "kmer_span < 256". That's because it encodes the kmer span into the seed definition as 8 bits.
-                ind_t kmer_start = kmer_starts.front();
-                int32_t kmer_span = pos - kmer_start;   // Not used, just for show.
-                kmer_starts.pop_front();
+                int32_t kmer_start = (pos + 1) - kmer_span; // The 'pos' is the current position which is inclusive. We need to add a +1 to make it non-inclusive, so that the start position is calculated properly.
                 new_seed = mindex::Minimizer(key, seq_id, kmer_start + seq_offset, flag);
                 new_seed_set = true;
             }
@@ -826,7 +832,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             win_buff_min_pos = -1;
             buffer = 0;
             buffer_rc = 0;
-            kmer_starts.clear();
+            hp_events.clear();
             for (size_t i = 0; i < w; ++i) {
                 win_pos_set[i] = false;
                 win_buff[i] = mindex::Minimizer();
