@@ -768,6 +768,66 @@ TEST(MinimizerIndexTest, TestBuild10) {
     ASSERT_EQ(index->seeds(), expected);
 }
 
+TEST(MinimizerIndexTest, TestBuild11) {
+    /*
+     * Tests building on a small sequence with w > 1.
+    */
+    auto index_params = mindex::createIndexParams();
+
+    index_params->k = 5;
+    index_params->w = 4;
+    index_params->homopolymer_suppression = false;
+    index_params->max_homopolymer_len = 5;
+    index_params->freq_percentil = 0.0;
+    index_params->min_occ_cutoff = 0;
+    index_params->is_region_specified = false;
+    index_params->region_rname = "";
+    index_params->region_rstart = 0;
+    index_params->region_rend = 0;
+    index_params->index_only_fwd_strand = false;
+
+    auto index = mindex::createMinimizerIndex(index_params);
+
+    // Define the reference sequences and their headers.
+    std::vector<std::string> seqs = {
+                                    "AGCTTTTCATTCTGACTGCANNNACTNNNNNAGCTTTTCATTCTGACTGCA",
+                                    };
+    std::vector<std::string> headers = {
+                                    "ecoli",
+                                    };
+
+    // Add them to the index. This only adds the data, but does not build the index.
+    index->AddSequences(seqs, headers);
+
+    // Build the index from the added sequences.
+    index->BuildIndex();
+
+    // Seeds are in a sorted order by their key.
+    std::vector<mindex128_t> expected{
+                                        mindex::Minimizer::Encode(2, 0, 2, true),
+                                        mindex::Minimizer::Encode(2, 0, 33, true),
+                                        mindex::Minimizer::Encode(56, 0, 6, true),
+                                        mindex::Minimizer::Encode(56, 0, 37, true),
+                                        mindex::Minimizer::Encode(121, 0, 14, false),
+                                        mindex::Minimizer::Encode(121, 0, 45, false),
+                                        mindex::Minimizer::Encode(131, 0, 8, true),
+                                        mindex::Minimizer::Encode(131, 0, 39, true),
+                                        mindex::Minimizer::Encode(180, 0, 12, true),
+                                        mindex::Minimizer::Encode(180, 0, 43, true),
+                                    };
+
+    // for (int32_t i = 0; i < index->seeds().size(); i++) {
+    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(index->seeds()[i]).Verbose() << std::endl;
+    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
+    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(expected[i]).Verbose() << std::endl;
+    // }
+
+    VerboseSeeds(index->seeds(), expected);
+
+    ASSERT_EQ(index->seeds(), expected);
+}
+
 TEST(MinimizerIndexTest, TestCollectHits1) {
     /*
      * Test an empty query.
