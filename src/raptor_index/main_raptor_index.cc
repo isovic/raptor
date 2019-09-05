@@ -35,7 +35,7 @@ void RunRaptorIndex(std::shared_ptr<raptor::ParamsRaptorIndex> parameters) {
 					// Store the batch to disk.
 					LOG_ALL("Storing a batch index to disk.\n");
 				    index = mindex::createMinimizerIndex(parameters->index_params);
-					index->Build();
+					index->BuildIndex();
 					LOG_ALL("Reloaded an empty index.\n");
 				}
 				index->AddSequence(seq->data(), seq->header());
@@ -49,7 +49,7 @@ void RunRaptorIndex(std::shared_ptr<raptor::ParamsRaptorIndex> parameters) {
 
 	if (index != nullptr && index->total_len() > 0) {
 		// Store the batch to disk.
-		index->Build();
+		index->BuildIndex();
 		LOG_ALL("Storing the final batch index to disk.\n");
 	}
 
