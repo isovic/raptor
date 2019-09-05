@@ -181,7 +181,7 @@ int MinimizerIndex::BuildIndex() {
     spacing_ = (seeds_.size() > 0) ? (((double)seed_spacing_sum) / ((double)seeds_.size())) : 0.0;
     clock_t time_collect_minimizers_after = clock();
     double time_collect_minimizers = ((double)(time_collect_minimizers_after - time_collect_minimizers_before)) / CLOCKS_PER_SEC;
-    LOG_ALL("Collected %llu minimizers in %.2f seconds.\n", seeds_.size());
+    LOG_ALL("Collected %llu minimizers in %.2f seconds.\n", seeds_.size(), time_collect_minimizers);
 
     #ifdef RAPTOR_TESTING_MODE
         LOG_ALL("Average minimizer spacing: %lf\n", spacing_);
