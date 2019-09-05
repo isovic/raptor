@@ -49,10 +49,10 @@ MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::IndexParams> params)
     hashes_.resize(NUM_HASH_BUCKETS);
 
     for (auto& hash : hashes_) {
-#ifdef MINIMIZER_INDEX2_USING_DENSEHASH
-        hash.set_empty_key(
-            MINIMIZER_INDEX_EMPTY_HASH_KEY);  // Densehash requires this to be defined on top.
-#endif
+        #ifdef MINIMIZER_INDEX2_USING_DENSEHASH
+                hash.set_empty_key(
+                    MINIMIZER_INDEX_EMPTY_HASH_KEY);  // Densehash requires this to be defined on top.
+        #endif
     }
 
     bucket_shift_ = CalcBucketShift_();
@@ -108,15 +108,15 @@ int MinimizerIndex::Build() {
     // An empiric estimate to try to avoid reallocation.
     seeds_.reserve(total_len() * 2.3 / params_->w);
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-    LOG_ALL("Building the index.\n");
-    LOG_ALL("  - num_seqs() = %llu\n", num_seqs());
-    LOG_ALL("  - total_len() = %llu\n", total_len());
-    // LOG_ALL("  - data_.capacity() = %llu\n", data_.size() );
-    LOG_ALL("  - seeds_.size() = %llu\n", seeds_.size());
-    LOG_ALL("  - seeds_.capacity() = %llu\n", seeds_.capacity());
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+        LOG_ALL("Building the index.\n");
+        LOG_ALL("  - num_seqs() = %llu\n", num_seqs());
+        LOG_ALL("  - total_len() = %llu\n", total_len());
+        // LOG_ALL("  - data_.capacity() = %llu\n", data_.size() );
+        LOG_ALL("  - seeds_.size() = %llu\n", seeds_.size());
+        LOG_ALL("  - seeds_.capacity() = %llu\n", seeds_.capacity());
+    #endif
 
     int64_t seed_spacing_sum = 0;
     ind_t region_rstart = 0;
@@ -143,14 +143,14 @@ int MinimizerIndex::Build() {
             }
         }
 
-#ifdef RAPTOR_TESTING_MODE
-        if (seqs_->size() < 30 || (seqs_->size() >= 30 && (i % 1000) == 0)) {
-            LOG_ALL("[%llu] Generating minimizers for sequence '%s', len = %lld, abs_id = %lld\n", i, seq->header().c_str(), seq->len(), seq->abs_id());
-            LOG_ALL("    Indexing specific region: region_rname = '%s', region_rstart = %lld, region_rend = %lld\n", params_->region_rname.c_str(), region_rstart, region_rend);
-            LOG_ALL("    (before) seeds_.size() = %llu, seeds_.capacity() = %llu\n", seeds_.size(), seeds_.capacity());
-            LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-        }
-#endif
+        #ifdef RAPTOR_TESTING_MODE
+                if (seqs_->size() < 30 || (seqs_->size() >= 30 && (i % 1000) == 0)) {
+                    LOG_ALL("[%llu] Generating minimizers for sequence '%s', len = %lld, abs_id = %lld\n", i, seq->header().c_str(), seq->len(), seq->abs_id());
+                    LOG_ALL("    Indexing specific region: region_rname = '%s', region_rstart = %lld, region_rend = %lld\n", params_->region_rname.c_str(), region_rstart, region_rend);
+                    LOG_ALL("    (before) seeds_.size() = %llu, seeds_.capacity() = %llu\n", seeds_.size(), seeds_.capacity());
+                    LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+                }
+        #endif
 
         size_t num_seeds_before = seeds_.size();
         // GenerateMinimizersGeneric_(seeds_, &seq->data()[0], seq->len(), i, params_->k, params_->w,
@@ -173,85 +173,85 @@ int MinimizerIndex::Build() {
             prev_pos = pos;
         }
 
-#ifdef RAPTOR_TESTING_MODE
-        if (seqs_->size() < 30) {
-            LOG_ALL("    (after) seeds_.size() = %llu, seeds_.capacity() = %llu\n", seeds_.size(), seeds_.capacity());
-            LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-        }
-#endif
+        #ifdef RAPTOR_TESTING_MODE
+                if (seqs_->size() < 30) {
+                    LOG_ALL("    (after) seeds_.size() = %llu, seeds_.capacity() = %llu\n", seeds_.size(), seeds_.capacity());
+                    LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+                }
+        #endif
     }
 
     spacing_ = (seeds_.size() > 0) ? (((double)seed_spacing_sum) / ((double)seeds_.size())) : 0.0;
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Average minimizer spacing: %lld\n", spacing_);
-    LOG_ALL("Collected %llu minimizers.\n", seeds_.size());
-    LOG_ALL("Sorting minimizers.\n");
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Average minimizer spacing: %lld\n", spacing_);
+        LOG_ALL("Collected %llu minimizers.\n", seeds_.size());
+        LOG_ALL("Sorting minimizers.\n");
+    #endif
 
-#ifdef RAPTOR_TESTING_MODE
-    clock_t before_sort = clock();
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        clock_t before_sort = clock();
+    #endif
 
     // std::sort(seeds_.begin(), seeds_.end());
     kx::radix_sort(seeds_.begin(), seeds_.end());
 
-#ifdef RAPTOR_TESTING_MODE
-    clock_t after_sort = clock();
-    double sort_time = ((double)(after_sort - before_sort)) / CLOCKS_PER_SEC;
-    LOG_ALL("Sorted %llu minimizers in %.2f seconds.\n", seeds_.size(), sort_time);
-    LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        clock_t after_sort = clock();
+        double sort_time = ((double)(after_sort - before_sort)) / CLOCKS_PER_SEC;
+        LOG_ALL("Sorted %llu minimizers in %.2f seconds.\n", seeds_.size(), sort_time);
+        LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+    #endif
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Counting keys.\n");
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Counting keys.\n");
+    #endif
 
     num_keys_ = CountKeys_(seeds_);
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("There are %lld minimizer keys.\n", num_keys_);
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("There are %lld minimizer keys.\n", num_keys_);
+    #endif
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Calculating occurrence thresholds.\n");
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Calculating occurrence thresholds.\n");
+    #endif
 
     size_t occ_num_singletons = 0;
     CalcOccurrenceThreshold_(occ_max_, occ_cutoff_, occ_num_singletons, occ_avg_before_);
     occ_singletons_ = ((double)occ_num_singletons) / ((double)seeds_.size());
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("From CalcOccurrenceThreshold_: occ_max =  %lld, occ_cutoff = %lld, occ_num_singletons = %lld, occ_avg_before_ = %lld\n", occ_max_, occ_cutoff_, occ_num_singletons, occ_avg_before_);
-    LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("From CalcOccurrenceThreshold_: occ_max =  %lld, occ_cutoff = %lld, occ_num_singletons = %lld, occ_avg_before_ = %lld\n", occ_max_, occ_cutoff_, occ_num_singletons, occ_avg_before_);
+        LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+    #endif
 
-// #ifdef RAPTOR_TESTING_MODE
-//     LOG_ALL("Removing frequent minimizers.\n");
-// #endif
+    // #ifdef RAPTOR_TESTING_MODE
+    //     LOG_ALL("Removing frequent minimizers.\n");
+    // #endif
 
-//     RemoveFrequentMinimizers_(seeds_, occ_cutoff_);
+    //     RemoveFrequentMinimizers_(seeds_, occ_cutoff_);
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Constructing the hash.\n");
-    fflush(stderr);
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Constructing the hash.\n");
+        fflush(stderr);
+    #endif
 
     ConstructHash_(seeds_);
 
-#ifdef RAPTOR_TESTING_MODE
-    LOG_ALL("Finally, there are %lld keys, and %llu minimizer seeds.\n", num_keys_, seeds_.size());
-#endif
+    #ifdef RAPTOR_TESTING_MODE
+        LOG_ALL("Finally, there are %lld keys, and %llu minimizer seeds.\n", num_keys_, seeds_.size());
+    #endif
 
     {
         size_t occ_cutoff = 0, occ_singletons = 0;
 
         CalcOccurrenceThreshold_(occ_max_after_, occ_cutoff, occ_singletons, occ_avg_after_);
 
-#ifdef RAPTOR_TESTING_MODE
-        LOG_ALL("Finally, from CalcOccurrenceThreshold_: occ_max =  %lld, occ_cutoff = %lld, occ_num_singletons = %lld, occ_avg_before_ = %lld\n", occ_max_after_, occ_cutoff_, occ_num_singletons, occ_avg_after_);
-        LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-#endif
+        #ifdef RAPTOR_TESTING_MODE
+                LOG_ALL("Finally, from CalcOccurrenceThreshold_: occ_max =  %lld, occ_cutoff = %lld, occ_num_singletons = %lld, occ_avg_before_ = %lld\n", occ_max_after_, occ_cutoff_, occ_num_singletons, occ_avg_after_);
+                LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+        #endif
     }
 
     return 0;
@@ -319,11 +319,11 @@ void MinimizerIndex::ConstructHash_(const std::vector<mindex128_t>& minimizers) 
 
     // Reserve the space for hashes.
     for (size_t i = 0; i < hashes_.size(); ++i) {
-#if defined MINIMIZER_INDEX2_USING_SPARSEHASH or defined MINIMIZER_INDEX2_USING_DENSEHASH
-        hashes_[i].resize(bucket_precount[i]);
-#elif defined MINIMIZER_INDEX2_USING_UNORDERED_MAP
-        hashes_[i].reserve(bucket_precount[i]);
-#endif
+        #if defined MINIMIZER_INDEX2_USING_SPARSEHASH or defined MINIMIZER_INDEX2_USING_DENSEHASH
+                hashes_[i].resize(bucket_precount[i]);
+        #elif defined MINIMIZER_INDEX2_USING_UNORDERED_MAP
+                hashes_[i].reserve(bucket_precount[i]);
+        #endif
     }
     hash_ranges_.reserve(total_key_count);
 
@@ -448,45 +448,45 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
     occ_avg = ((double)sum_before) / ((double)hit_counts.size());
 }
 
-void MinimizerIndex::RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers,
-                                               size_t cutoff) const {
-    if (minimizers.size() == 0) {
-        return;
-    }
+// void MinimizerIndex::RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers,
+//                                                size_t cutoff) const {
+//     if (minimizers.size() == 0) {
+//         return;
+//     }
 
-    // Preload the first key. This is OK because we return
-    // if minimizers.size() == 0.
-    minkey_t prev_key = mindex::Minimizer::DecodeKey(minimizers[0]);
-    size_t prev_start = 0;
+//     // Preload the first key. This is OK because we return
+//     // if minimizers.size() == 0.
+//     minkey_t prev_key = mindex::Minimizer::DecodeKey(minimizers[0]);
+//     size_t prev_start = 0;
 
-    size_t dest_id = 0;
-    for (size_t source_id = 0; source_id < minimizers.size(); source_id++) {
-        minkey_t key = mindex::Minimizer::DecodeKey(minimizers[source_id]);
+//     size_t dest_id = 0;
+//     for (size_t source_id = 0; source_id < minimizers.size(); source_id++) {
+//         minkey_t key = mindex::Minimizer::DecodeKey(minimizers[source_id]);
 
-        // If above threshold, rewind.
-        if (key != prev_key) {
-            size_t dist = source_id - prev_start;
-            if (dist > cutoff) {
-                dest_id -= dist;
-            }
-            prev_start = source_id;
-        }
+//         // If above threshold, rewind.
+//         if (key != prev_key) {
+//             size_t dist = source_id - prev_start;
+//             if (dist > cutoff) {
+//                 dest_id -= dist;
+//             }
+//             prev_start = source_id;
+//         }
 
-        minimizers[dest_id] = minimizers[source_id];
-        ++dest_id;
+//         minimizers[dest_id] = minimizers[source_id];
+//         ++dest_id;
 
-        prev_key = key;
-    }
+//         prev_key = key;
+//     }
 
-    {
-        size_t dist = minimizers.size() - prev_start;
-        if (dist > cutoff) {
-            dest_id -= dist;
-        }
-    }
+//     {
+//         size_t dist = minimizers.size() - prev_start;
+//         if (dist > cutoff) {
+//             dest_id -= dist;
+//         }
+//     }
 
-    minimizers.resize(dest_id);
-}
+//     minimizers.resize(dest_id);
+// }
 
 int MinimizerIndex::Load(const std::string& index_path) { return 1; }
 
@@ -683,14 +683,14 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
         // It contains fields to mark whether the hit is a tandem repeat of a kmer,
         // or other interesting info which should impact the sorting order.
         int32_t query_mask = 0x0;
-#ifdef EXPERIMENTAL_QUERY_MASK
-        if (min_id > 0 && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id - 1]) >> 8)) {
-            query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
-        }
-        if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id + 1]) >> 8)) {
-            query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
-        }
-#endif
+        #ifdef EXPERIMENTAL_QUERY_MASK
+                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id - 1]) >> 8)) {
+                    query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
+                }
+                if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id + 1]) >> 8)) {
+                    query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
+                }
+        #endif
 
         // Find and add all the key hits.
         bool is_found = false;
@@ -729,181 +729,6 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
     return hits;
 }
 
-int MinimizerIndex::GenerateMinimizersWithQueue_(std::vector<mindex128_t>& minimizers,
-                                                 const int8_t* seq, ind_t seq_len, ind_t seq_offset,
-                                                 indid_t seq_id, int32_t k, int32_t w, bool use_rc,
-                                                 bool homopolymer_suppression,
-                                                 int32_t max_homopolymer_len) {
-    // Sanity check that the seq is not NULL;
-    if (!seq) {
-        return 1;
-    }
-
-    // Sanity check for the size of k. It can't
-    // be too large, or it won't fit the uint64_t buffer.
-    if (k <= 0 || k >= 31) {
-        return 2;
-    }
-
-    // Not technically an error if the seq_len is 0,
-    // but there's nothing to do, so return.
-    if (seq_len == 0) {
-        return 0;
-    }
-
-    // Preallocate local memory for the minimizers.
-    size_t num_minimizers = 0;
-    std::vector<mindex128_t> local_minimizers;
-    local_minimizers.reserve(seq_len);
-
-    // This will keep track of the keys which were already used and enable minimizer compression.
-    std::vector<bool> is_seed_used(seq_len, false);
-
-    const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;
-    minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
-    minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
-    int32_t shift = 0;         // We keep track of the amount to shift after each 'N' base.
-
-    auto mg = createMinimizerGenerator(w);
-
-    std::deque<ind_t> kmer_starts;
-
-    ind_t last_i = 0;
-    // Initialize the first k bases.
-    for (ind_t i = 0; i < seq_len; i++) {
-        int8_t b = seq[i];
-
-        // If enabled, skip same bases.
-        if (homopolymer_suppression) {
-            int32_t hp_len = 0;
-            if ((i + 1) < seq_len && seq[i + 1] == b) {
-                for (hp_len = 1; hp_len < max_homopolymer_len && (i + hp_len) < seq_len; ++hp_len) {
-                    if (seq[i + hp_len] != b) {
-                        break;
-                    }
-                }
-                i += hp_len - 1;
-                if (hp_len == max_homopolymer_len) {
-                    continue;
-                }
-            }
-        }
-
-        // Add the base to the buffer.
-        buffer = (buffer << 2) | ((((uint64_t)nuc_to_twobit[b])));
-        buffer_rc = (buffer_rc >> 2) | ((((uint64_t)nuc_to_twobit_complement[b])) << (k * 2 - 2));
-        kmer_starts.push_back(i);
-        last_i = i + 1;
-        ++shift;
-        if (shift >= (k - 1)) {
-            break;
-        }
-    }
-
-    // Place to store all the minimizers of a window.
-    std::vector<mindex::Minimizer> seeds_out;
-    mindex::Minimizer seed_out(0, 0, 0, false);
-
-    // std::cerr << "last_i = " << last_i << ", seq_len = " << seq_len << std::endl;
-
-    for (ind_t i = (last_i); i < seq_len; i++) {
-        int8_t b = seq[i];
-
-        // If enabled, skip same bases.
-        if (homopolymer_suppression) {
-            int32_t hp_len = 0;
-            if ((i + 1) < seq_len && seq[i + 1] == b) {
-                for (hp_len = 1; hp_len < max_homopolymer_len && (i + hp_len) < seq_len; ++hp_len) {
-                    if (seq[i + hp_len] != b) {
-                        break;
-                    }
-                }
-                i += hp_len - 1;
-                if (hp_len == max_homopolymer_len) {
-                    continue;
-                }
-            }
-        }
-
-        // Add the base to the buffer.
-        buffer = (buffer << 2) | ((((uint64_t)nuc_to_twobit[b])));
-        buffer_rc = (buffer_rc >> 2) | ((((uint64_t)nuc_to_twobit_complement[b])) << (k * 2 - 2));
-        kmer_starts.push_back(i);
-
-        // Calculate the seed key.
-        minkey_t key = buffer & mask;
-        minkey_t rev_key = buffer_rc & mask;
-
-        // key = InvertibleHash_(key);
-        // rev_key = InvertibleHash_(rev_key);
-
-        int8_t flag = MINIMIZER_FLAG_DEFAULT_FWD;
-
-        if (use_rc && rev_key < key) {
-            key = rev_key;
-            flag = MINIMIZER_FLAG_IS_REV;
-        }
-
-        // Get the minimizers.
-        ind_t kmer_start = kmer_starts.front();
-        kmer_starts.pop_front();
-        int ret_val_mg = mg->Yield(mindex::Minimizer(key, seq_id, kmer_start, flag), seeds_out);
-
-        // If something went wrong, skip adding the minimizers.
-        if (ret_val_mg) {
-            // std::cerr << "Warning: i = " << i << ", mg->Yield returned with value: " << ret_val_mg << std::endl;
-            continue;
-        }
-
-        // Add each minimizer of the window, but skip duplicates.
-        for (auto& seed_out : seeds_out) {
-            if (is_seed_used[seed_out.pos]) {
-                continue;
-            }
-
-            is_seed_used[seed_out.pos] = true;
-
-            seed_out.pos += seq_offset;
-            local_minimizers.emplace_back(seed_out.to_128t());
-            ++num_minimizers;
-        }
-    }
-
-    // Get the last key out. Separated outside the loop to save from
-    // another branching. The values to Yield are dummy in this cass,
-    // because we only need to get the seed_out
-    {
-        // Get the minimizers.
-        int ret_val_mg = mg->Yield(mindex::Minimizer(0, 0, 0, 0), seeds_out);
-
-        if (!ret_val_mg) {
-            // Add each minimizer of the window, but skip duplicates.
-            for (auto& seed_out : seeds_out) {
-                if (is_seed_used[seed_out.pos]) {
-                    continue;
-                }
-
-                is_seed_used[seed_out.pos] = true;
-
-                seed_out.pos += seq_offset;
-                local_minimizers.emplace_back(seed_out.to_128t());
-                ++num_minimizers;
-            }
-        }
-    }
-
-    // Manually reserve so that STL doesn't double.
-    if ((minimizers.size() + num_minimizers) > minimizers.capacity()) {
-        minimizers.reserve((minimizers.size() + num_minimizers) * 1.1);
-    }
-
-    // Insert the local copy of the minimizers.
-    minimizers.insert(minimizers.end(), local_minimizers.begin(),
-                      local_minimizers.begin() + num_minimizers);
-
-    return 0;
-}
-
 int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimizers,
                                                 const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
                                                 indid_t seq_id, int32_t k, int32_t w, bool use_rc,
@@ -935,14 +760,7 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
         return 4;
     }
 
-    // Preallocate local memory for the minimizers.
-    // size_t num_minimizers = 0;
-    // std::vector<mindex128_t> local_minimizers;
-    // local_minimizers.reserve(seq_len);
-    // This will keep track of the keys which were already used and enable minimizer compression.
-    // std::vector<bool> is_seed_used(seq_len, false);
-    // Mask the number of required bits for the k-mer.
-    const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;
+    const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;   // Mask the number of required bits for the k-mer.
     minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
     int32_t shift = 0;         // We keep track of the amount to shift after each 'N' base.
@@ -954,8 +772,6 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
     bool win_pos_set[512];
     int32_t win_buff_pos = 0;
     int32_t win_buff_min_pos = -1;
-    // // Minimum seed in the window.
-    // mindex::Minimizer min_seed(UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
 
     for (size_t i = 0; i < 512; ++i) {
         win_pos_set[i] = false;
@@ -1019,35 +835,6 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
             // buffer by more than
             num_bases_in = 0;
         }
-
-        // std::cerr << "win_buff_pos = " << win_buff_pos << "\n";
-        // std::cerr << "win_buff_min_pos = " << win_buff_min_pos << "\n";
-        // std::cerr << "num_bases_in = " << num_bases_in << "\n";
-        // std::cerr << "new_seed = (" << new_seed.Verbose() << ")\n";
-        // std::cerr << "new_seed_set = " << new_seed_set << "\n";
-        // std::cerr << "win_buff:\n";
-        // for (size_t i = 0; i < w; ++i) {
-        //     std::cerr << "(" << win_buff[i].Verbose() << "); ";
-        // }
-        // std::cerr << "\n";
-        // std::cerr << "win_pos_set:\n";
-        // for (size_t i = 0; i < w; ++i) {
-        //     std::cerr << win_pos_set[i] << " ";
-        // }
-        // std::cerr << "\n";
-        // std::cerr << "[pos = " << pos << "] after, kmer_starts (" << kmer_starts.size() << "):\n";
-        // for (const auto& val: kmer_starts) {
-        //     std::cerr << val << " ";
-        // }
-        // std::cerr << "\n";
-
-
-
-
-
-
-
-
 
         // The first time the buffer is filled, find and add the previous
         // distinct minimizer matches.
@@ -1123,82 +910,9 @@ int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimiz
             win_buff_pos = 0;
         }
 
-        // std::cerr << "minimizers:\n";
-        // for (const auto& val: minimizers) {
-        //     auto val2 = mindex::Minimizer(val);
-        //     std::cerr << "(" << val2.Verbose() << "); ";
-        // }
-        // std::cerr << "\n";
-        // std::cerr << "\n";
-
     }
     if (win_buff_min_pos >= 0) {
         minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
-    }
-
-    return 0;
-}
-
-int MinimizerIndex::GenerateMinimizersGeneric_(std::vector<mindex128_t>& minimizers,
-                                               const int8_t* seq, ind_t seq_len,
-                                               indid_t seq_id, int32_t k, int32_t w, bool use_rc,
-                                               bool homopolymer_suppression,
-                                               int32_t max_homopolymer_run,
-                                               ind_t seq_start, ind_t seq_end) {
-
-    // Sanity check that the seq is not NULL;
-    if (!seq) {
-        return 1;
-    }
-
-    // Sanity check for the size of k. It can't
-    // be too large, or it won't fit the uint64_t buffer.
-    if (k <= 0 || k >= 31) {
-        return 2;
-    }
-
-    // Not technically an error if the seq_len is 0,
-    // but there's nothing to do, so return.
-    if (seq_len == 0) {
-        return 0;
-    }
-
-    seq_start = (seq_start < 0) ? 0 : seq_start;
-    seq_end = (seq_end <= 0 || seq_end > seq_len) ? seq_len : seq_end;
-
-    if (seq_start >= seq_len) {
-        return 3;
-    }
-
-    if (seq_start >= seq_end) {
-        return 4;
-    }
-
-    // The seq will be split in parts separated by non-[ACTG] bases.
-    // Parts shorter than seed_len will be skipped.
-    std::vector<ind_t> split_start;
-    std::vector<ind_t> split_len;
-    ind_t start = seq_start;
-    for (ind_t i = seq_start; i < seq_end; ++i) {
-        if (!is_nuc[seq[i]]) {
-            ind_t curr_len = i - start;
-            if (curr_len >= k) {
-                split_start.emplace_back(start);
-                split_len.emplace_back(curr_len);
-            }
-            start = i + 1;
-        }
-    }
-    if (start < seq_end and (seq_end - start) >= k) {
-        split_start.emplace_back(start);
-        split_len.emplace_back(seq_end - start);
-    }
-
-    // Process each chunk separately, and give it the start offset.
-    for (size_t split_id = 0; split_id < split_start.size(); ++split_id) {
-        GenerateMinimizersWithQueue_(minimizers, seq + split_start[split_id], split_len[split_id],
-                                     split_start[split_id], seq_id, k, w, use_rc,
-                                     homopolymer_suppression, max_homopolymer_run);
     }
 
     return 0;
