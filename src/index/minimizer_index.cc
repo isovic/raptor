@@ -158,10 +158,10 @@ int MinimizerIndex::Build() {
         //                            params_->homopolymer_suppression, params_->max_homopolymer_len,
         //                            region_rstart, region_rend);
 
-        GenerateMinimizersNoQueue_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
-                                   !params_->index_only_fwd_strand,
-                                   params_->homopolymer_suppression, params_->max_homopolymer_len,
-                                   region_rstart, region_rend);
+        GenerateMinimizers_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
+                            !params_->index_only_fwd_strand,
+                            params_->homopolymer_suppression, params_->max_homopolymer_len,
+                            region_rstart, region_rend);
 
         // This part is used to calculate average seed spacing.
         // Useful info, not used for anything functionall atm.
@@ -637,7 +637,7 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
     //     minimizers, seq, seq_len, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
     //     params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
-    int ret_val = GenerateMinimizersNoQueue_(
+    int ret_val = GenerateMinimizers_(
         minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
@@ -729,12 +729,12 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
     return hits;
 }
 
-int MinimizerIndex::GenerateMinimizersNoQueue_(std::vector<mindex128_t>& minimizers,
-                                                const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
-                                                indid_t seq_id, int32_t k, int32_t w, bool use_rc,
-                                                bool homopolymer_suppression,
-                                                int32_t max_homopolymer_len,
-                                                ind_t seq_start, ind_t seq_end) {
+int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
+                                        const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
+                                        indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                        bool homopolymer_suppression,
+                                        int32_t max_homopolymer_len,
+                                        ind_t seq_start, ind_t seq_end) {
     // Sanity check that the seq is not NULL;
     if (!seq) {
         return 1;
