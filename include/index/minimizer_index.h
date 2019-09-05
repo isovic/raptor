@@ -174,18 +174,7 @@ class MinimizerIndex {
      * For a given sequence, generates and returns a set of minimizers.
      * The `minimizers` vector is never cleared but only inserted to, so minimizers
      * can be accumulated through multiple calls to this method.
-     * The GenerateMinimizersGeneric_ method also splits the `seq` at non-[ACTG] bases
-     * and generates minimizers only for the sequences which do not contain them.
-     * It calls either GenerateMinimizersWithRMQ_ or GenerateMinimizersWithQueue_ to
-     * actually generate the minimizers on those clean subsequences.
-     */
-    static int GenerateMinimizersGeneric_(std::vector<mindex128_t>& minimizers, const int8_t* seq,
-                                          ind_t seq_len, indid_t seq_id, int32_t k, int32_t w,
-                                          bool use_rc, bool homopolymer_suppression,
-                                          int32_t max_homopolymer_run, ind_t seq_start,
-                                          ind_t seq_end);
-
-    /*
+     * This method takes care to not generate the minimizers across the non-ACTG regions.
      * The seq_offset is the distance from the beginning of the sequence, used for the seed position.
      *
     */
@@ -195,16 +184,6 @@ class MinimizerIndex {
                                                 bool homopolymer_suppression,
                                                 int32_t max_homopolymer_run,
                                                 ind_t seq_start, ind_t seq_end);
-
-    /*
-     * Expects that seq contains only [ACTG] bases.
-     * Uses a deque to add/remove seeds and yield minimizers.
-     */
-    static int GenerateMinimizersWithQueue_(std::vector<mindex128_t>& minimizers, const int8_t* seq,
-                                            ind_t seq_len, ind_t seq_offset, indid_t seq_id,
-                                            int32_t k, int32_t w, bool use_rc,
-                                            bool homopolymer_suppression,
-                                            int32_t max_homopolymer_run);
 
     /*
      * Takes the vector of minimizers, initializes bucket for hashes, and constructs the hashes.
@@ -228,12 +207,12 @@ class MinimizerIndex {
     void CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutoff, size_t& occ_singletons,
                                   double& occ_avg) const;
 
-    /*
-     * This method linearly processes the minimizers by skipping those with occurrence
-     * count abouve the cutoff. It shifts the minimizers towards left as much as possible,
-     * and resizes the minimizers vector to fit.
-     */
-    void RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers, size_t cutoff) const;
+    // /*
+    //  * This method linearly processes the minimizers by skipping those with occurrence
+    //  * count abouve the cutoff. It shifts the minimizers towards left as much as possible,
+    //  * and resizes the minimizers vector to fit.
+    //  */
+    // void RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers, size_t cutoff) const;
 
     /*
      * Linear pass over minimizers to count the number of distinct keys
