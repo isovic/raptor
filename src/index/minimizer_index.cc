@@ -127,6 +127,7 @@ int MinimizerIndex::Build() {
     }
 
     // Generate minimizers for each separate seq.
+    clock_t time_collect_minimizers_before = clock();
     for (size_t i = 0; i < seqs_->size(); i++) {
         const mindex::SequencePtr& seq = seqs_->GetSeqByID(i);
         if (seq == nullptr) {
@@ -167,6 +168,7 @@ int MinimizerIndex::Build() {
         // Useful info, not used for anything functionall atm.
         ind_t prev_pos =
             (num_seeds_before > 0) ? (mindex::Minimizer::DecodePos(seeds_[num_seeds_before])) : 0;
+
         for (size_t seed_id = (num_seeds_before + 1); seed_id < seeds_.size(); ++seed_id) {
             ind_t pos = mindex::Minimizer::DecodePos(seeds_[seed_id]);
             seed_spacing_sum += (pos - prev_pos);
@@ -180,30 +182,25 @@ int MinimizerIndex::Build() {
                 }
         #endif
     }
-
     spacing_ = (seeds_.size() > 0) ? (((double)seed_spacing_sum) / ((double)seeds_.size())) : 0.0;
+    clock_t time_collect_minimizers_after = clock();
+    double time_collect_minimizers = ((double)(time_collect_minimizers_after - time_collect_minimizers_before)) / CLOCKS_PER_SEC;
+    LOG_ALL("Collected %llu minimizers in %.2f seconds.\n", seeds_.size());
 
     #ifdef RAPTOR_TESTING_MODE
         LOG_ALL("Average minimizer spacing: %lf\n", spacing_);
-        LOG_ALL("Collected %llu minimizers.\n", seeds_.size());
         LOG_ALL("Sorting minimizers.\n");
     #endif
 
-    #ifdef RAPTOR_TESTING_MODE
-        clock_t before_sort = clock();
-    #endif
-
+    clock_t before_sort = clock();
     // std::sort(seeds_.begin(), seeds_.end());
     kx::radix_sort(seeds_.begin(), seeds_.end());
+    clock_t after_sort = clock();
+    double sort_time = ((double)(after_sort - before_sort)) / CLOCKS_PER_SEC;
+    LOG_ALL("Sorted %llu minimizers in %.2f seconds.\n", seeds_.size(), sort_time);
 
     #ifdef RAPTOR_TESTING_MODE
-        clock_t after_sort = clock();
-        double sort_time = ((double)(after_sort - before_sort)) / CLOCKS_PER_SEC;
-        LOG_ALL("Sorted %llu minimizers in %.2f seconds.\n", seeds_.size(), sort_time);
         LOG_ALL("Memory usage: %.2f GB\n", ((double)raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
-    #endif
-
-    #ifdef RAPTOR_TESTING_MODE
         LOG_ALL("Counting keys.\n");
     #endif
 
