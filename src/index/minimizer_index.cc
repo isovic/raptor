@@ -824,9 +824,14 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                 new_seed_set = true;
             }
         } else {
-            // If we encountered a non-nucleotide base, this is enough to reset the minimizer
-            // coding. Simply setting the num_bases_in to 0 will disallow filling of the minimizer
-            // buffer by more than
+            // If we encountered a non-nucleotide base, this is enough to reset the minimizer coding.
+            // First, write out the current minimizer so it doesn't get lost in the void.
+            // We only need to write one and not loop through all of them, because when we encounter a seed
+            // with the same key then we write out the previous minimizer out. This means that we only need
+            // to write out the current minimizer.
+            if (num_bases_in >= (w + k) && win_buff_min_pos >= 0) {
+                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            }
             num_bases_in = 0;
             win_buff_pos = 0;
             win_buff_min_pos = -1;
@@ -861,6 +866,9 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             // No minimum has been set yet. Set the current buffer pos.
             win_buff_min_pos = win_buff_pos;
         } else if (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key) {
+            // In this case, even if we encountered the same minimal key, we will write
+            // out the previous occurence of this key, and then set the minimum to the current
+            // one. This ensures that all equal minimizers in a window are written.
             if (num_bases_in >= (w + k)) {
                 minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
             }
