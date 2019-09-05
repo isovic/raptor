@@ -99,7 +99,7 @@ void MinimizerIndex::SetSequenceFile(mindex::SequenceFilePtr seq_file) {
     seqs_ = seq_file;
 }
 
-int MinimizerIndex::Build() {
+int MinimizerIndex::BuildIndex() {
     seeds_.clear();
     if (seqs_ == nullptr) {
         return 1;

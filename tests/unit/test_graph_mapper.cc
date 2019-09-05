@@ -35,7 +35,7 @@
 //     index->AddSequences(seqs, headers);
 
 //     // Build the index from the added sequences.
-//     index->Build();
+//     index->BuildIndex();
 
 //     return index;
 // }
