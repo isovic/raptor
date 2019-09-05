@@ -154,10 +154,6 @@ int MinimizerIndex::BuildIndex() {
         #endif
 
         size_t num_seeds_before = seeds_.size();
-        // GenerateMinimizersGeneric_(seeds_, &seq->data()[0], seq->len(), i, params_->k, params_->w,
-        //                            !params_->index_only_fwd_strand,
-        //                            params_->homopolymer_suppression, params_->max_homopolymer_len,
-        //                            region_rstart, region_rend);
 
         GenerateMinimizers_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
                             !params_->index_only_fwd_strand,
@@ -629,10 +625,6 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
 
     // For lookup, don't index the reverse complement;
     std::vector<mindex128_t> minimizers;
-
-    // int ret_val = GenerateMinimizersGeneric_(
-    //     minimizers, seq, seq_len, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
-    //     params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     int ret_val = GenerateMinimizers_(
         minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
