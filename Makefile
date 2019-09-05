@@ -61,6 +61,9 @@ meson-time2:
 meson-debug:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=true -Dc_args=-O3"
+meson-debug2:
+	${MAKE} configure BDIR=$@ \
+		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -DWITH_PBBAM=true -Dc_args=-O3"
 meson-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
 		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
@@ -81,6 +84,8 @@ time2: | meson-time2
 	${MAKE} install BDIR=meson-time2
 debug: | meson-debug
 	${MAKE} install BDIR=meson-debug
+debug2: | meson-debug2
+	${MAKE} install BDIR=meson-debug2
 debug-gcc6: | meson-debug-gcc6
 	${MAKE} install BDIR=meson-debug-gcc6
 
