@@ -184,7 +184,7 @@ int MinimizerIndex::Build() {
     spacing_ = (seeds_.size() > 0) ? (((double)seed_spacing_sum) / ((double)seeds_.size())) : 0.0;
 
     #ifdef RAPTOR_TESTING_MODE
-        LOG_ALL("Average minimizer spacing: %lld\n", spacing_);
+        LOG_ALL("Average minimizer spacing: %lf\n", spacing_);
         LOG_ALL("Collected %llu minimizers.\n", seeds_.size());
         LOG_ALL("Sorting minimizers.\n");
     #endif
@@ -763,7 +763,6 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;   // Mask the number of required bits for the k-mer.
     minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
-    int32_t shift = 0;         // We keep track of the amount to shift after each 'N' base.
     int32_t num_bases_in = 0;   // Number of bases added to the buffer.
     // Keeps track of the start position of a k-mer.
     std::deque<ind_t> kmer_starts;
@@ -834,6 +833,15 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             // coding. Simply setting the num_bases_in to 0 will disallow filling of the minimizer
             // buffer by more than
             num_bases_in = 0;
+            win_buff_pos = 0;
+            win_buff_min_pos = -1;
+            buffer = 0;
+            buffer_rc = 0;
+            kmer_starts.clear();
+            for (size_t i = 0; i < w; ++i) {
+                win_pos_set[i] = false;
+                win_buff[i] = mindex::Minimizer();
+            }
         }
 
         // The first time the buffer is filled, find and add the previous
