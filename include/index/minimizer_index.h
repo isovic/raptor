@@ -90,7 +90,7 @@ class MinimizerIndex {
 
     const int8_t* FetchRawSeq(size_t seq_id) const;
 
-    int Build();
+    int BuildIndex();
 
     std::vector<mindex::MinimizerHitPacked> CollectHits(const int8_t* seq, size_t seq_len,
                                                     indid_t seq_id = 0);
