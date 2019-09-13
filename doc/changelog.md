@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.17.0 -> 0.18.0
+- MinimizerIndex was revamped, and is now faster than before (~30% on a 1GB reference).
+- Makefile now has a 'debug2' rule which compiles with debug symbols but witohut ASAN.
+
 ## 0.16.5 -> 0.17.0
 - Added unit tests for the new ScoreCigarAlignment.
 - Added a feature ("--no-gm") which allows to skip graph-mapping. This can add a little bit of speed for some contexts, e.g. overlapping. Hasn't yet been thoroughly tested.
