@@ -40,13 +40,13 @@ void RaptorResultsWriterBAM::WriteHeader(const mindex::HeaderGroupType header_gr
     std::ostringstream sam_header;
     sam_header << "@HD\tVN:1.5" << std::endl;
     for (const auto& it_field: header_groups) {
-        sam_header << "@" << it_field.first;
         for (const auto& it_ids: it_field.second) {
+            sam_header << "@" << it_field.first;
             for (const auto& it_tags: it_ids.second) {
                 sam_header << "\t" << it_tags.name << ":" << it_tags.val;
             }
+            sam_header << "\n";
         }
-        sam_header << "\n";
     }
     for (size_t i = 0; i < index_->seqs()->size(); ++i) {
         std::string qname = TrimToFirstSpace(index_->header(i));

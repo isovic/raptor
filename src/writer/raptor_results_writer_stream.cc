@@ -34,13 +34,13 @@ void RaptorResultsWriterStream::WriteHeader(const mindex::HeaderGroupType header
         *oss_ptr_ << "@HD\tVN:1.5" << std::endl;
 
         for (const auto& it_field: header_groups) {
-            *oss_ptr_ << "@" << it_field.first;
             for (const auto& it_ids: it_field.second) {
+                *oss_ptr_ << "@" << it_field.first;
                 for (const auto& it_tags: it_ids.second) {
                     *oss_ptr_ << "\t" << it_tags.name << ":" << it_tags.val;
                 }
+                *oss_ptr_ << "\n";
             }
-            *oss_ptr_ << "\n";
         }
 
         if (index_->seqs() != nullptr) {

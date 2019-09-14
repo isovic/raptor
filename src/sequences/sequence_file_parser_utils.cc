@@ -38,7 +38,7 @@ HeaderGroupType ParseReadGroupAndProgramGroupFromSAMHeader(const std::string& he
                 std::string tag_val = tokens[tid].substr(3);
                 tags.emplace_back(HeaderTag{tag_name, tag_val});
                 if (tag_name == "ID") {
-                    field_id = tag_name;
+                    field_id = tag_val;
                     is_ok = true;
                 }
             }
