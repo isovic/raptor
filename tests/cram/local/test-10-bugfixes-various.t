@@ -10,3 +10,25 @@ Removing the identity filter exposed the problem with calculating the Alignment 
   @HD	VN:1.5
   @SQ	SN:ctg.s1.000000F:95000-115000	LN:20001
   m54081_181221_163846/11666180/49398_49554	0	ctg.s1.000000F:95000-115000	13308	47	1=1I70=1X54=2X1I1=1I1=1I1=3X18S	*	0	0	TTCATCTGCGCGGGAATGACGATTCAGAAGTTACACGAAACTCAAAAAAAACGAAACCGAACGAACCGGATTTCCGCTTTTACGGGAATGACGGCGCATAAGTTCCCGTGCGGACAGACCTAGATTCGAGAACACAAAAAAAACCAAAAAGGGGGT	*	NM:i:10	AS:i:216	QS:i:0	QE:i:138	QL:i:156	TS:i:13307	TE:i:13441	TL:i:20001	pi:i:0	pj:i:0	pn:i:1	ps:i:0
+
+Testing multiple read groups in the input BAM file and using SAM output.
+  $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/bugfixes/multiple_rg/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/bugfixes/multiple_rg/test_multi_rg.bam --out-fmt sam -v 0 | samtools view -H | sort
+  @HD	VN:1.5
+  @PG	ID:baz2bam	PN:baz2bam	VN:5.0.0.6236	CL:/opt/pacbio/ppa-5.0.0/bin/baz2bam /data/pa/m54110_171115_145004.baz -o /data/pa/m54110_171115_145004 --metadata /data/pa/.m54110_171115_145004.metadata.xml -j 12 -b 12 --progress --silent --minSubLength 50 --minSnr 3.750000 --adapters /data/pa/m54110_171115_145004.adapters.fasta
+  @PG	ID:bazFormat	PN:bazformat	VN:1.3.0
+  @PG	ID:bazwriter	PN:bazwriter	VN:5.0.0.6236
+  @PG	ID:lima	VN:1.0.0 (commit de983e0)
+  @RG	ID:6b04dbdd	PL:PACBIO	DS:READTYPE=SUBREAD;Ipd:CodecV1=ip;PulseWidth:CodecV1=pw;BINDINGKIT=100-862-200;SEQUENCINGKIT=101-309-500;BASECALLERVERSION=5.0.0.6236;FRAMERATEHZ=80.000000;BarcodeFile=/pbi/dept/secondary/siv/smrtlink/smrtlink-beta/smrtsuite_166987/install/smrtlink-release_5.1.0.25817/bundles/smrtinub/current/private/pacbio/barcodes/Sequel_RSII_384_barcodes_v1/Sequel_RSII_384_barcodes_v1.barcodeset.xml;BarcodeHash=979b171f27a290d53f63edf9969c14cc;BarcodeCount=384;BarcodeMode=Symmetric;BarcodeQuality=Score	PU:m54110_171116_010407	PM:SEQUEL
+  @RG	ID:8268f187	PL:PACBIO	DS:READTYPE=SUBREAD;Ipd:CodecV1=ip;PulseWidth:CodecV1=pw;BINDINGKIT=100-862-200;SEQUENCINGKIT=101-309-500;BASECALLERVERSION=5.0.0.6236;FRAMERATEHZ=80.000000;BarcodeFile=/pbi/dept/secondary/siv/smrtlink/smrtlink-beta/smrtsuite_166987/install/smrtlink-release_5.1.0.25817/bundles/smrtinub/current/private/pacbio/barcodes/Sequel_RSII_384_barcodes_v1/Sequel_RSII_384_barcodes_v1.barcodeset.xml;BarcodeHash=979b171f27a290d53f63edf9969c14cc;BarcodeCount=384;BarcodeMode=Symmetric;BarcodeQuality=Score	PU:m54110_171115_145004	PM:SEQUEL
+  @SQ	SN:gi|545778205|gb|U00096.3|	LN:100000
+
+Testing multiple read groups in the input BAM file and using BAM output.
+  $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/bugfixes/multiple_rg/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/bugfixes/multiple_rg/test_multi_rg.bam --out-fmt bam -v 0 | samtools view -H | sort
+  @HD	VN:1.5	SO:unknown	pb:3.0.7
+  @PG	ID:baz2bam	PN:baz2bam	VN:5.0.0.6236	CL:/opt/pacbio/ppa-5.0.0/bin/baz2bam /data/pa/m54110_171115_145004.baz -o /data/pa/m54110_171115_145004 --metadata /data/pa/.m54110_171115_145004.metadata.xml -j 12 -b 12 --progress --silent --minSubLength 50 --minSnr 3.750000 --adapters /data/pa/m54110_171115_145004.adapters.fasta
+  @PG	ID:bazFormat	PN:bazformat	VN:1.3.0
+  @PG	ID:bazwriter	PN:bazwriter	VN:5.0.0.6236
+  @PG	ID:lima	VN:1.0.0 (commit de983e0)
+  @RG	ID:6b04dbdd	PL:PACBIO	DS:READTYPE=SUBREAD;Ipd:CodecV1=ip;PulseWidth:CodecV1=pw;BINDINGKIT=100-862-200;SEQUENCINGKIT=101-309-500;BASECALLERVERSION=5.0.0.6236;FRAMERATEHZ=80.000000;BarcodeFile=/pbi/dept/secondary/siv/smrtlink/smrtlink-beta/smrtsuite_166987/install/smrtlink-release_5.1.0.25817/bundles/smrtinub/current/private/pacbio/barcodes/Sequel_RSII_384_barcodes_v1/Sequel_RSII_384_barcodes_v1.barcodeset.xml;BarcodeHash=979b171f27a290d53f63edf9969c14cc;BarcodeCount=384;BarcodeMode=Symmetric;BarcodeQuality=Score	PU:m54110_171116_010407	PM:SEQUEL
+  @RG	ID:8268f187	PL:PACBIO	DS:READTYPE=SUBREAD;Ipd:CodecV1=ip;PulseWidth:CodecV1=pw;BINDINGKIT=100-862-200;SEQUENCINGKIT=101-309-500;BASECALLERVERSION=5.0.0.6236;FRAMERATEHZ=80.000000;BarcodeFile=/pbi/dept/secondary/siv/smrtlink/smrtlink-beta/smrtsuite_166987/install/smrtlink-release_5.1.0.25817/bundles/smrtinub/current/private/pacbio/barcodes/Sequel_RSII_384_barcodes_v1/Sequel_RSII_384_barcodes_v1.barcodeset.xml;BarcodeHash=979b171f27a290d53f63edf9969c14cc;BarcodeCount=384;BarcodeMode=Symmetric;BarcodeQuality=Score	PU:m54110_171115_145004	PM:SEQUEL
+  @SQ	SN:gi|545778205|gb|U00096.3|	LN:100000
