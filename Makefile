@@ -22,6 +22,8 @@ export PATH LD_LIBRARY_PATH
 MESON_FLAGS?="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -Dc_args=-O3"
 BDIR?=meson-release
 
+LIB_TYPE?=static
+
 # Most rules will create BDIR only if it does not already exist.
 # ("|" means  "order-only" rule, useful for directory creation.)
 
@@ -42,31 +44,31 @@ configure:
 # For convenience, you can set "BDIR" to one of these in your shell.
 meson-release:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=false -Dc_args=-O3"
 meson-release-pb:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dc_args=-O3"
 meson-release-pb-no-tests:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dtests=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=false -DWITH_PBBAM=true -Dtests=false -Dc_args=-O3"
 meson-testing:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-time:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=true -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-time2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=release -DRAPTOR_TESTING_MODE=false -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=release -DRAPTOR_TESTING_MODE=false -DRAPTOR_DEBUG_TIMINGS=true -DWITH_PBBAM=false -Dc_args=-O3"
 meson-debug:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=true -Dc_args=-O3"
 meson-debug2:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -DWITH_PBBAM=true -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=debug -DWITH_PBBAM=true -Dc_args=-O3"
 meson-debug-gcc6:
 	${MAKE} configure BDIR=$@ \
-		MESON_FLAGS="--prefix=${PREFIX} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
+		MESON_FLAGS="--prefix=${PREFIX} --default-library ${LIB_TYPE} --buildtype=debug -Db_sanitize=address -DWITH_PBBAM=false -Dc_args=-O3"
 
 # These rules ignore your current BDIR setting, but they rely on $PREFIX via $MESON_FLAGS.
 # They all reconfigure, rebuild, and install.
