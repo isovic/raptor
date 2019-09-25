@@ -5,6 +5,7 @@
 - Makefile now has a 'debug2' rule which compiles with debug symbols but witohut ASAN.
 
 ## 0.16.5 -> 0.17.0
+- Fixed a bug which truncated the read groups from the header, and kept only one read group which propagated into the output. Added Cram tests to verify the solution.
 - Added unit tests for the new ScoreCigarAlignment.
 - Added a feature ("--no-gm") which allows to skip graph-mapping. This can add a little bit of speed for some contexts, e.g. overlapping. Hasn't yet been thoroughly tested.
 - Updated the GraphSim and added a simple error-rate model.
