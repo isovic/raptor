@@ -24,45 +24,6 @@
 
 namespace mindex {
 
-struct SeedSpan {
-    SeedSpan() : start(0), end(0) {}
-    SeedSpan(size_t _start, ind_t _end) : start(_start), end(_end) {}
-    size_t start = 0;
-    ind_t end = 0;
-};
-
-}  // namespace mindex
-
-/*
- * Experimental code test performance with different hash maps.
- */
-#define MINIMIZER_INDEX2_USING_DENSEHASH
-// #define MINIMIZER_INDEX2_USING_SPARSEHASH
-// #define MINIMIZER_INDEX2_USING_UNORDERED_MAP
-
-#ifdef MINIMIZER_INDEX2_USING_UNORDERED_MAP
-#include <unordered_map>
-typedef std::unordered_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-#ifdef MINIMIZER_INDEX2_USING_DENSEHASH
-#include "sparsehash/dense_hash_map"
-using google::dense_hash_map;  // namespace where class lives by default
-typedef dense_hash_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-#ifdef MINIMIZER_INDEX2_USING_SPARSEHASH
-#include "sparsehash/sparse_hash_map"
-using google::sparse_hash_map;  // namespace where class lives by default
-typedef sparse_hash_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-const minkey_t MINIMIZER_INDEX_EMPTY_HASH_KEY = (minkey_t)0xFFFFFFFFFFFFFFFF;
-
-
-
-namespace mindex {
-
 class MinimizerIndex;
 
 typedef std::shared_ptr<mindex::MinimizerIndex> IndexPtr;
