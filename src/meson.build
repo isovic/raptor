@@ -50,6 +50,7 @@ raptor_cpp_sources = files([
   'log/log_tools.cc',
   'log/log_system.cc',
 
+  'index/index_factory.cc',
   'index/index_params.cc',
   'index/index_util.cc',
   'index/minimizer_index.cc',

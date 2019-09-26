@@ -26,13 +26,11 @@ namespace mindex {
 
 class MinimizerIndex;
 
-typedef std::shared_ptr<mindex::MinimizerIndex> IndexPtr;
-
-std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
+std::unique_ptr<mindex::IndexBase> createMinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
 
 class MinimizerIndex : mindex::IndexBase {
    public:
-    friend std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(
+    friend std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
         std::shared_ptr<mindex::IndexParams> params);
 
     ~MinimizerIndex();
@@ -90,6 +88,8 @@ class MinimizerIndex : mindex::IndexBase {
         }
         return seq->len();
     }
+
+    void seqs(mindex::SequenceFilePtr val) override { seqs_ = std::move(val); }
 
     const mindex::SequenceFilePtr& seqs() const override { return (seqs_ == nullptr) ? dummy_nullptr_seqs_ : seqs_; }
 

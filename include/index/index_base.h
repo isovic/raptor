@@ -15,7 +15,12 @@
 #include <index/seed_hit.hpp>
 #include <index/index_types.h>
 
+
 namespace mindex {
+
+class IndexBase;
+
+typedef std::shared_ptr<mindex::IndexBase> IndexPtr;
 
 class IndexBase {
    public:
@@ -43,6 +48,8 @@ class IndexBase {
     virtual int64_t total_len() const = 0;
     virtual int64_t num_seqs() const = 0;
     virtual const std::vector<mindex128_t>& seeds() const = 0;
+
+    virtual void seqs(mindex::SequenceFilePtr val) = 0;
 };
 
 }  // namespace mindex
