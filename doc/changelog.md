@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.18.0 -> 0.18.1
+- Refactored the index, and abstracted the index interface. Created a factory for the index (which currently only has a MinimizerIndex option).
+- Static library linking now.
+
 ## 0.17.0 -> 0.18.0
 - MinimizerIndex was revamped, and is now faster than before (~30% on a 1GB reference).
 - Makefile now has a 'debug2' rule which compiles with debug symbols but witohut ASAN.
