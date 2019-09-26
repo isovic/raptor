@@ -94,13 +94,13 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
             th->hits().front().QueryPos();  // TODO: Removed this on 13.12.2017. when I
                                                         // added homopolymer suppression and
                                                         // accurate handing of hits! " -
-                                                        // (index_->k() - 1);"  // Minimizer pos is
+                                                        // (index_->k() - 1);"  // Seed pos is
                                                         // the last base of the seed.
         ind_t qend = th->hits().back().QueryPos() + 1;  // Again, the last base of the seed. Add 1 to make the end position non-inclusive.
         ind_t rstart = th->hits().front().TargetPos();  // TODO: Removed this on 13.12.2017. when I
                                                          // added homopolymer suppression and
                                                          // accurate handing of hits! "-
-                                                         // (index_->k() - 1);"  // Minimizer pos is
+                                                         // (index_->k() - 1);"  // Seed pos is
                                                          // the last base of the seed.
         ind_t rend = th->hits().back().TargetPos() + 1;  // Again, the last base of the seed. Add 1 to make the end position non-inclusive.
         int32_t cov_bases_q = th->cov_bases_q();

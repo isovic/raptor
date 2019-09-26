@@ -12,7 +12,7 @@
 
 typedef unsigned __int128 mindex128_t;
 
-// Minimizer index int. 32 bit for now, but in case we decide to switch to 64 bits.
+// Seed index int. 32 bit for now, but in case we decide to switch to 64 bits.
 // We want to keep it low by default to reduce memory usage, and for larger seqs,
 // we'll just block.
 typedef int32_t ind_t;
@@ -20,7 +20,7 @@ typedef int32_t ind_t;
 // Type used for the ID of a particular sequence in the index.
 typedef int32_t indid_t;
 
-// Minimizer key type.
+// Seed key type.
 typedef uint64_t minkey_t;
 
 static const mindex128_t MINIMIZER_64bit_MASK = (((mindex128_t)0x0FFFFFFFFFFFFFFFF));
