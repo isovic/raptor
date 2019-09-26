@@ -50,8 +50,9 @@ raptor_cpp_sources = files([
   'log/log_tools.cc',
   'log/log_system.cc',
 
+  'index/index_factory.cc',
   'index/index_params.cc',
-  'index/minimizer_index_util.cc',
+  'index/index_util.cc',
   'index/minimizer_index.cc',
 
   'params/params_aligner.cc',
@@ -64,7 +65,7 @@ raptor_cpp_sources = files([
   'raptor/dp_chain.cc',
   'raptor/graph_mapper.cc',
   'raptor/graph_mapper_tools.cc',
-  'raptor/index_factory.cc',
+  'raptor/yield_index.cc',
   'raptor/interval_tree_builder.cc',
   'raptor/mapper.cc',
   'raptor/mapper_tools.cc',

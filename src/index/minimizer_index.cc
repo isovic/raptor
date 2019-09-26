@@ -24,10 +24,10 @@ static const int32_t NUM_HASH_BUCKETS = pow(2, NUM_HASH_BUCKET_BITS);
 
 namespace mindex {
 
-std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(
+std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
     std::shared_ptr<mindex::IndexParams> params) {
-    auto ret = std::unique_ptr<mindex::MinimizerIndex>(new MinimizerIndex(params));
-    ret->seqs_ = mindex::createSequenceFile();
+    auto ret = std::unique_ptr<mindex::IndexBase>(new MinimizerIndex(params));
+    ret->seqs(mindex::createSequenceFile());
     return std::move(ret);
 }
 
@@ -163,10 +163,10 @@ int MinimizerIndex::BuildIndex() {
         // This part is used to calculate average seed spacing.
         // Useful info, not used for anything functionall atm.
         ind_t prev_pos =
-            (num_seeds_before > 0) ? (mindex::Minimizer::DecodePos(seeds_[num_seeds_before])) : 0;
+            (num_seeds_before > 0) ? (mindex::Seed::DecodePos(seeds_[num_seeds_before])) : 0;
 
         for (size_t seed_id = (num_seeds_before + 1); seed_id < seeds_.size(); ++seed_id) {
-            ind_t pos = mindex::Minimizer::DecodePos(seeds_[seed_id]);
+            ind_t pos = mindex::Seed::DecodePos(seeds_[seed_id]);
             seed_spacing_sum += (pos - prev_pos);
             prev_pos = pos;
         }
@@ -247,6 +247,9 @@ int MinimizerIndex::BuildIndex() {
         #endif
     }
 
+	LOG_ALL("Seed statistics: avg = %.2f, max_before = %lu, max_after = %lu, cutoff = %lu, singletons = %.2f%%, spacing = %.2f\n",
+                occ_avg_before(), occ_max(), occ_max_after(), occ_cutoff(), 100.0 * occ_singletons(), spacing());
+
     return 0;
 }
 
@@ -266,10 +269,10 @@ std::vector<int64_t> MinimizerIndex::BucketPrecount_(const std::vector<mindex128
 
     // Preload the first key. This is OK because we return
     // if minimizers.size() == 0.
-    minkey_t prev_key = (uint64_t) mindex::Minimizer::DecodeKey(minimizers[0]);
+    minkey_t prev_key = (uint64_t) mindex::Seed::DecodeKey(minimizers[0]);
 
     for (size_t i = 0; i < minimizers.size(); i++) {
-        minkey_t key = (uint64_t) mindex::Minimizer::DecodeKey(minimizers[i]);
+        minkey_t key = (uint64_t) mindex::Seed::DecodeKey(minimizers[i]);
         if (key < prev_key) {
             std::cerr << "prev: " << prev_key << std::endl;
             std::cerr << "key: " << key << std::endl;
@@ -329,15 +332,15 @@ void MinimizerIndex::ConstructHash_(const std::vector<mindex128_t>& minimizers) 
 
     // Preload the first key. This is OK because we return
     // if minimizers.size() == 0.
-    Minimizer mm = mindex::Minimizer(minimizers[0]);
+    Seed mm = mindex::Seed(minimizers[0]);
     minkey_t prev_key = mm.key;
-    // minkey_t prev_key = mindex::Minimizer::DecodeKey(minimizers[0]);
+    // minkey_t prev_key = mindex::Seed::DecodeKey(minimizers[0]);
 
     // Initialize the hash.
     for (size_t i = 0; i < minimizers.size(); i++) {
-        mm = mindex::Minimizer(minimizers[i]);
+        mm = mindex::Seed(minimizers[i]);
         minkey_t key = mm.key;
-        // minkey_t key = mindex::Minimizer::DecodeKey(minimizers[i]);
+        // minkey_t key = mindex::Seed::DecodeKey(minimizers[i]);
 
         if (key == prev_key) {
             new_hash_val.end = i + 1;
@@ -370,10 +373,10 @@ size_t MinimizerIndex::CountKeys_(const std::vector<mindex128_t>& minimizers) co
 
     // Preload the first key. This is OK because we return
     // if minimizers.size() == 0.
-    minkey_t prev_key = mindex::Minimizer::DecodeKey(minimizers[0]);
+    minkey_t prev_key = mindex::Seed::DecodeKey(minimizers[0]);
 
     for (size_t i = 0; i < seeds_.size(); i++) {
-        minkey_t key = mindex::Minimizer::DecodeKey(minimizers[i]);
+        minkey_t key = mindex::Seed::DecodeKey(minimizers[i]);
         if (key != prev_key) {
             key_count += 1;
         }
@@ -401,12 +404,12 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
 
     // Preload the first key. This is OK because we return
     // if minimizers.size() == 0.
-    minkey_t prev_key = mindex::Minimizer::DecodeKey(seeds_[0]);
+    minkey_t prev_key = mindex::Seed::DecodeKey(seeds_[0]);
     size_t curr_key_id = 0;
     size_t prev_start = 0;
     // Initialize the hash.
     for (size_t i = 0; i < seeds_.size(); i++) {
-        minkey_t key = mindex::Minimizer::DecodeKey(seeds_[i]);
+        minkey_t key = mindex::Seed::DecodeKey(seeds_[i]);
         if (key != prev_key) {
             size_t dist = i - prev_start;
             hit_counts[curr_key_id] = dist;
@@ -449,12 +452,12 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
 
 //     // Preload the first key. This is OK because we return
 //     // if minimizers.size() == 0.
-//     minkey_t prev_key = mindex::Minimizer::DecodeKey(minimizers[0]);
+//     minkey_t prev_key = mindex::Seed::DecodeKey(minimizers[0]);
 //     size_t prev_start = 0;
 
 //     size_t dest_id = 0;
 //     for (size_t source_id = 0; source_id < minimizers.size(); source_id++) {
-//         minkey_t key = mindex::Minimizer::DecodeKey(minimizers[source_id]);
+//         minkey_t key = mindex::Seed::DecodeKey(minimizers[source_id]);
 
 //         // If above threshold, rewind.
 //         if (key != prev_key) {
@@ -485,7 +488,7 @@ int MinimizerIndex::Load(const std::string& index_path) { return 1; }
 
 int MinimizerIndex::Store(const std::string& index_path) { return 1; }
 
-std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const std::string& seq) {
+std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const std::string& seq) {
     return CollectHits((const int8_t*)&seq[0], seq.size(), 0);
 }
 
@@ -571,7 +574,7 @@ std::vector<int32_t> MinimizerIndex::CalcHPSpan_(const int8_t* seq, size_t seq_l
 }
 
 void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
-    minkey_t prev_key = mindex::Minimizer::DecodeKey(seeds_[0]);
+    minkey_t prev_key = mindex::Seed::DecodeKey(seeds_[0]);
     size_t curr_key_id = 0;
     size_t prev_start = 0;
 
@@ -579,9 +582,9 @@ void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
 
     // Initialize the hash.
     for (size_t i = 0; i < seeds_.size(); i++) {
-        // minkey_t key = mindex::Minimizer::DecodeKey(seeds_[i]);
+        // minkey_t key = mindex::Seed::DecodeKey(seeds_[i]);
 
-        Minimizer mm(seeds_[i]);
+        Seed mm(seeds_[i]);
         int32_t bucket = (mm.key >> bucket_shift_) & bucket_mask_;
         os << "[" << i << "] seq_id = " << mm.seq_id << ", pos = " << mm.pos << ", flag = " << mm.flag << ", key = " << mm.key << ", bucket = " << bucket << ", hashes_[bucket].size() = " << hashes_[bucket].size() << std::endl;
 
@@ -607,10 +610,10 @@ void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
 
 
 // #define EXPERIMENTAL_QUERY_MASK
-std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t* seq,
+std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq,
                                                                     size_t seq_len,
                                                                     indid_t seq_id) {
-    std::vector<mindex::MinimizerHitPacked> hits;
+    std::vector<mindex::SeedHitPacked> hits;
 
     if (seq == NULL || seq_len == 0) {
         return hits;
@@ -665,7 +668,7 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
 
     for (size_t min_id = 0; min_id < minimizers.size(); ++min_id) {
         // Decode the minimizer.
-        mindex::Minimizer minimizer(minimizers[min_id]);
+        mindex::Seed minimizer(minimizers[min_id]);
         bool minimizer_is_rev = minimizer.is_rev();
 
         // Query mask is an additional filter which will be encoded in the seed hit.
@@ -673,10 +676,10 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
         // or other interesting info which should impact the sorting order.
         int32_t query_mask = 0x0;
         #ifdef EXPERIMENTAL_QUERY_MASK
-                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id - 1]) >> 8)) {
+                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id - 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
-                if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Minimizer::DecodeKey(minimizers[min_id + 1]) >> 8)) {
+                if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id + 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
         #endif
@@ -690,7 +693,7 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
             // Skip very frequent seeds.
             if ((seed_range.end - seed_range.start) <= occ_cutoff_) {
                 for (ind_t seed_id = seed_range.start; seed_id < seed_range.end; seed_id++) {
-                    mindex::Minimizer hit(seeds_[seed_id]);
+                    mindex::Seed hit(seeds_[seed_id]);
                     bool indexed_minimizer_is_rev = hit.is_rev();
                     ind_t pos = minimizer.pos;
                     bool hit_is_rev = false;
@@ -706,7 +709,7 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
                         pos += hp_span[pos] - 1;
                     }
 
-                    hits.emplace_back(mindex::MinimizerHitPacked(hit.seq_id, hit_is_rev, hit.pos, query_mask, pos));
+                    hits.emplace_back(mindex::SeedHitPacked(hit.seq_id, hit_is_rev, hit.pos, query_mask, pos));
                 }
             }
         }
@@ -753,7 +756,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
     int32_t num_bases_in = 0;   // Number of bases added to the buffer.
-    mindex::Minimizer win_buff[512];    // Define the new circular buffer for the window.
+    mindex::Seed win_buff[512];    // Define the new circular buffer for the window.
     bool win_pos_set[512];
     int32_t win_buff_pos = 0;
     int32_t win_buff_min_pos = -1;
@@ -766,7 +769,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
 
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
         int8_t b = seq[pos];
-        mindex::Minimizer new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
+        mindex::Seed new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
         bool new_seed_set = false;
 
         if (is_nuc[b]) {
@@ -820,7 +823,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
 
             if (num_bases_in >= k) {    // Minimap2 has another condition here: "kmer_span < 256". That's because it encodes the kmer span into the seed definition as 8 bits.
                 int32_t kmer_start = (pos + 1) - kmer_span; // The 'pos' is the current position which is inclusive. We need to add a +1 to make it non-inclusive, so that the start position is calculated properly.
-                new_seed = mindex::Minimizer(key, seq_id, kmer_start + seq_offset, flag);
+                new_seed = mindex::Seed(key, seq_id, kmer_start + seq_offset, flag);
                 new_seed_set = true;
             }
         } else {
@@ -840,7 +843,7 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             hp_events.clear();
             for (size_t i = 0; i < w; ++i) {
                 win_pos_set[i] = false;
-                win_buff[i] = mindex::Minimizer();
+                win_buff[i] = mindex::Seed();
             }
         }
 

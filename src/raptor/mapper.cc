@@ -95,7 +95,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
 
     TicToc tt_collect_hits;
     tt_collect_hits.start();
-    std::vector<mindex::MinimizerHitPacked> seed_hits = index_->CollectHits(
+    std::vector<mindex::SeedHitPacked> seed_hits = index_->CollectHits(
         (const int8_t*) &(qseq->data()[0]), qseq->data().size(), qseq->abs_id());
     tt_collect_hits.stop();
 
@@ -126,7 +126,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_, qseq, seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->k());
+    auto filtered_hits = raptor::ChainHits(index_, qseq, seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->params()->k);
     tt_chain.stop();
 #else
     ////////////////////////////////////
@@ -137,7 +137,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     auto filtered_hits_1 = LISFilterAndGroupByTarget_(
         seed_hits, qseq->abs_id(), qseq->data().size(),
         params_->diag_margin, params_->min_cov_bases, params_->min_num_seeds);
-    std::vector<mindex::MinimizerHitPacked> new_seed_hits;
+    std::vector<mindex::SeedHitPacked> new_seed_hits;
     for (auto& th : filtered_hits_1) {
         new_seed_hits.insert(new_seed_hits.end(), th->hits().begin(), th->hits().end());
     }
@@ -148,7 +148,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_, qseq, new_seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->k());
+    auto filtered_hits = raptor::ChainHits(index_, qseq, new_seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->params()->k);
     tt_chain.stop();
     ///////////////////////////
 #endif
@@ -156,7 +156,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     TicToc tt_filter_overlap;
     tt_filter_overlap.start();
     if (params_->ref_and_reads_path_same && (params_->overlap_skip_self_hits || params_->overlap_single_arc)) {
-        filtered_hits = FilterForOverlapping_<mindex::MinimizerHitPacked>(
+        filtered_hits = FilterForOverlapping_<mindex::SeedHitPacked>(
             filtered_hits, qseq);
     }
     tt_filter_overlap.stop();
@@ -204,14 +204,14 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
         params_->debug_qname == std::string(qseq->header())) {
         LOG_ALL("Showing debug info for read %d: %s\n", qseq->id(), qseq->header().c_str());
 
-        raptor::WriteSeedHits("temp/debug/mapping-0-seed_hits.csv", seed_hits, index_->k(),
+        raptor::WriteSeedHits("temp/debug/mapping-0-seed_hits.csv", seed_hits, index_->params()->k,
                       qseq->header(), qseq->data().size(), std::string("ref"), 0);
-        // raptor::WriteSeedHits("temp/debug/mapping-1-filtered_hits_by_target.csv", new_seed_hits, index_->k(),
+        // raptor::WriteSeedHits("temp/debug/mapping-1-filtered_hits_by_target.csv", new_seed_hits, index_->params()->k,
         //               qseq.get_header(), qseq.get_sequence_length(), std::string("ref"), 0);
         // raptor::WriteTargetHits("temp/debug/mapping-1-filtered_hits_by_target.csv", filtered_hits_1,
-        //                 index_->k(), qseq.get_header(), qseq.get_sequence_length(),
+        //                 index_->params()->k, qseq.get_header(), qseq.get_sequence_length(),
         //                 std::string("ref"), 0);
-        raptor::WriteTargetHits("temp/debug/mapping-2-chained_hits.csv", filtered_hits, index_->k(),
+        raptor::WriteTargetHits("temp/debug/mapping-2-chained_hits.csv", filtered_hits, index_->params()->k,
                         qseq->header(), qseq->data().size(), std::string("ref"), 0);
 
         LOG_ALL("Collected seed hits: %ld\n", seed_hits.size());
@@ -252,17 +252,17 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
 
 #ifdef USE_LIS_FILTER
 // #define DETAILED_FILTER_DEBUG_
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>>
-raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::MinimizerHitPacked>& seed_hits, indid_t q_id,
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>
+raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::SeedHitPacked>& seed_hits, indid_t q_id,
                                     ind_t q_len, ind_t diag_margin, ind_t min_cov_bases,
                                     int32_t min_num_hits) {
     auto& index = index_;
-    int32_t seed_len = index->k();
+    int32_t seed_len = index->params()->k;
 
     std::sort(seed_hits.begin(), seed_hits.end());
 
     // Each vector element corresponds to one target ID.
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> ret_target_hits;
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ret_target_hits;
 
     // Relation from target ID to the ordinal number of the vector element where the target is.
     std::unordered_map<indid_t, size_t> t_id_to_ret;
@@ -274,16 +274,16 @@ raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::MinimizerHitPacke
     size_t n_hits = seed_hits.size();
 
     // Comparison function to sort the seed hits for LIS.
-    std::function<bool(const mindex::MinimizerHitPacked& a, const mindex::MinimizerHitPacked& b)>
-        comp_packed_sort = [](const mindex::MinimizerHitPacked& a, const mindex::MinimizerHitPacked& b) {
+    std::function<bool(const mindex::SeedHitPacked& a, const mindex::SeedHitPacked& b)>
+        comp_packed_sort = [](const mindex::SeedHitPacked& a, const mindex::SeedHitPacked& b) {
             auto a_qpos = a.QueryPos();
             auto a_tpos = a.TargetPos();
             auto b_qpos = b.QueryPos();
             auto b_tpos = b.TargetPos();
             return (a_qpos < b_qpos || (a_qpos == b_qpos && a_tpos < b_tpos));
         };
-    std::function<bool(const mindex::MinimizerHitPacked& a, const mindex::MinimizerHitPacked& b)>
-        comp_packed_lis = [](const mindex::MinimizerHitPacked& a, const mindex::MinimizerHitPacked& b) {
+    std::function<bool(const mindex::SeedHitPacked& a, const mindex::SeedHitPacked& b)>
+        comp_packed_lis = [](const mindex::SeedHitPacked& a, const mindex::SeedHitPacked& b) {
             auto a_qpos = a.QueryPos();
             auto a_tpos = a.TargetPos();
             auto b_qpos = b.QueryPos();
@@ -385,8 +385,8 @@ raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::MinimizerHitPacke
                         auto new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev,
                                                             q_id, q_len, false);
                         auto new_target_hits =
-                            std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>(
-                                new raptor::TargetHits<mindex::MinimizerHitPacked>(new_env));
+                            std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(
+                                new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
                         ret_target_hits.emplace_back(new_target_hits);
                         it_loc = t_id_to_ret.find(prev_t_id_rev_packed);
                     }

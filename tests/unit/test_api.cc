@@ -11,7 +11,7 @@
 #include <writer/raptor_results_writer_stream.h>
 #include <graph/segment_graph_parser.h>
 
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <params/params_raptor.h>
 #include <raptor/raptor.h>
 #include <raptor/mapper.h>
@@ -19,6 +19,8 @@
 
 #include <raptor/raptor_aligner.h>
 #include <raptor/path_aligner.h>
+
+#include <index/index_factory.h>
 
 #include <log/log_system.h>
 
@@ -51,7 +53,7 @@ TEST(APIExamples, APITest1) {
     index_params->w = 1;
 
     // Create the index.
-    mindex::IndexPtr index = std::move(mindex::createMinimizerIndex(index_params));
+    mindex::IndexPtr index = std::move(mindex::createIndex(mindex::IndexType::Minimizer, index_params));
     index->AddSequences(refs_1, rnames_1);
     index->BuildIndex();
 
@@ -119,7 +121,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
     index_params->k = 5;
     index_params->w = 1;
     // Create the index.
-    mindex::IndexPtr index = std::move(mindex::createMinimizerIndex(index_params));
+    mindex::IndexPtr index = std::move(mindex::createIndex(mindex::IndexType::Minimizer, index_params));
     index->AddSequences(refs_1, rnames_1);
     index->BuildIndex();
 

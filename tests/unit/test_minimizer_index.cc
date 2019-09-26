@@ -2,7 +2,7 @@
 
 #include <index/index_params.h>
 #include <index/minimizer_index.h>
-#include <index/minimizer.hpp>
+#include <index/seed.hpp>
 
 #include <cstdint>
 #include <cstring>
@@ -16,15 +16,15 @@ void VerboseSeeds(const std::vector<mindex128_t>& results, const std::vector<min
 #ifdef TEST_DEBUG_VERBOSE_
     std::cerr << "Result:" << std::endl;
     for (int32_t i = 0; i < results.size(); i++) {
-        auto minimizer = mindex::Minimizer(results[i]);
-        std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+        auto minimizer = mindex::Seed(results[i]);
+        std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     }
     std::cerr << std::endl;
 
     std::cerr << "Expected:" << std::endl;
     for (int32_t i = 0; i < expected.size(); i++) {
-        auto minimizer = mindex::Minimizer(expected[i]);
-        std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+        auto minimizer = mindex::Seed(expected[i]);
+        std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     }
     std::cerr << std::endl;
 #endif
@@ -242,12 +242,12 @@ TEST(MinimizerIndexTest, TestBuild1) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(0, 0, 0, false),
-                                        mindex::Minimizer::Encode(0, 0, 1, false),
-                                        mindex::Minimizer::Encode(0, 0, 2, false),
-                                        mindex::Minimizer::Encode(0, 0, 3, false),
-                                        mindex::Minimizer::Encode(0, 0, 4, false),
-                                        mindex::Minimizer::Encode(0, 0, 5, false),
+                                        mindex::Seed::Encode(0, 0, 0, false),
+                                        mindex::Seed::Encode(0, 0, 1, false),
+                                        mindex::Seed::Encode(0, 0, 2, false),
+                                        mindex::Seed::Encode(0, 0, 3, false),
+                                        mindex::Seed::Encode(0, 0, 4, false),
+                                        mindex::Seed::Encode(0, 0, 5, false),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -292,12 +292,12 @@ TEST(MinimizerIndexTest, TestBuild2) {
     index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
-    std::vector<mindex128_t> expected{   mindex::Minimizer::Encode(0, 0, 1, false),
-                                        mindex::Minimizer::Encode(0, 0, 2, false),
-                                        mindex::Minimizer::Encode(0, 0, 3, false),
-                                        mindex::Minimizer::Encode(0, 0, 4, false),
-                                        mindex::Minimizer::Encode(0, 0, 5, false),
-                                        mindex::Minimizer::Encode(256, 0, 0, false)
+    std::vector<mindex128_t> expected{   mindex::Seed::Encode(0, 0, 1, false),
+                                        mindex::Seed::Encode(0, 0, 2, false),
+                                        mindex::Seed::Encode(0, 0, 3, false),
+                                        mindex::Seed::Encode(0, 0, 4, false),
+                                        mindex::Seed::Encode(0, 0, 5, false),
+                                        mindex::Seed::Encode(256, 0, 0, false)
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -341,22 +341,22 @@ TEST(MinimizerIndexTest, TestBuild3) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(2, 0, 2, true),
-                                        mindex::Minimizer::Encode(9, 0, 1, true),
-                                        mindex::Minimizer::Encode(39, 0, 0, true),
-                                        mindex::Minimizer::Encode(56, 0, 6, true),
-                                        mindex::Minimizer::Encode(121, 0, 14, false),
-                                        mindex::Minimizer::Encode(131, 0, 8, true),
-                                        mindex::Minimizer::Encode(180, 0, 12, true),
-                                        mindex::Minimizer::Encode(224, 0, 5, true),
-                                        mindex::Minimizer::Encode(288, 0, 9, true),
-                                        mindex::Minimizer::Encode(301, 0, 13, true),
-                                        mindex::Minimizer::Encode(317, 0, 7, false),
-                                        mindex::Minimizer::Encode(481, 0, 11, false),
-                                        mindex::Minimizer::Encode(484, 0, 15, false),
-                                        mindex::Minimizer::Encode(512, 0, 3, true),
-                                        mindex::Minimizer::Encode(840, 0, 10, true),
-                                        mindex::Minimizer::Encode(896, 0, 4, true),
+                                        mindex::Seed::Encode(2, 0, 2, true),
+                                        mindex::Seed::Encode(9, 0, 1, true),
+                                        mindex::Seed::Encode(39, 0, 0, true),
+                                        mindex::Seed::Encode(56, 0, 6, true),
+                                        mindex::Seed::Encode(121, 0, 14, false),
+                                        mindex::Seed::Encode(131, 0, 8, true),
+                                        mindex::Seed::Encode(180, 0, 12, true),
+                                        mindex::Seed::Encode(224, 0, 5, true),
+                                        mindex::Seed::Encode(288, 0, 9, true),
+                                        mindex::Seed::Encode(301, 0, 13, true),
+                                        mindex::Seed::Encode(317, 0, 7, false),
+                                        mindex::Seed::Encode(481, 0, 11, false),
+                                        mindex::Seed::Encode(484, 0, 15, false),
+                                        mindex::Seed::Encode(512, 0, 3, true),
+                                        mindex::Seed::Encode(840, 0, 10, true),
+                                        mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -401,12 +401,12 @@ TEST(MinimizerIndexTest, TestBuild4) {
     // "TCTGACTGCA" This should be the region.
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(121, 0, 14, false),
-                                        mindex::Minimizer::Encode(180, 0, 12, true),
-                                        mindex::Minimizer::Encode(301, 0, 13, true),
-                                        mindex::Minimizer::Encode(481, 0, 11, false),
-                                        mindex::Minimizer::Encode(484, 0, 15, false),
-                                        mindex::Minimizer::Encode(840, 0, 10, true),
+                                        mindex::Seed::Encode(121, 0, 14, false),
+                                        mindex::Seed::Encode(180, 0, 12, true),
+                                        mindex::Seed::Encode(301, 0, 13, true),
+                                        mindex::Seed::Encode(481, 0, 11, false),
+                                        mindex::Seed::Encode(484, 0, 15, false),
+                                        mindex::Seed::Encode(840, 0, 10, true),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -453,12 +453,12 @@ TEST(MinimizerIndexTest, TestBuild5) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(146, 0, 64, false),
-                                        mindex::Minimizer::Encode(201, 0, 62, false),
-                                        mindex::Minimizer::Encode(461, 0, 61, true),
-                                        mindex::Minimizer::Encode(585, 0, 65, false),
-                                        mindex::Minimizer::Encode(804, 0, 63, false),
-                                        mindex::Minimizer::Encode(820, 0, 60, true),
+                                        mindex::Seed::Encode(146, 0, 64, false),
+                                        mindex::Seed::Encode(201, 0, 62, false),
+                                        mindex::Seed::Encode(461, 0, 61, true),
+                                        mindex::Seed::Encode(585, 0, 65, false),
+                                        mindex::Seed::Encode(804, 0, 63, false),
+                                        mindex::Seed::Encode(820, 0, 60, true),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -505,12 +505,12 @@ TEST(MinimizerIndexTest, TestBuild6) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(2, 0, 2, true),
-                                        mindex::Minimizer::Encode(9, 0, 1, true),
-                                        mindex::Minimizer::Encode(39, 0, 0, true),
-                                        mindex::Minimizer::Encode(224, 0, 5, true),
-                                        mindex::Minimizer::Encode(512, 0, 3, true),
-                                        mindex::Minimizer::Encode(896, 0, 4, true),
+                                        mindex::Seed::Encode(2, 0, 2, true),
+                                        mindex::Seed::Encode(9, 0, 1, true),
+                                        mindex::Seed::Encode(39, 0, 0, true),
+                                        mindex::Seed::Encode(224, 0, 5, true),
+                                        mindex::Seed::Encode(512, 0, 3, true),
+                                        mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -645,29 +645,29 @@ TEST(MinimizerIndexTest, TestBuild9) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(35767, 0, 46, false),
-                                        mindex::Minimizer::Encode(143070, 0, 47, false),
-                                        mindex::Minimizer::Encode(572280, 0, 48, false),
-                                        mindex::Minimizer::Encode(2289123, 0, 49, false),
-                                        mindex::Minimizer::Encode(9156492, 0, 50, false),
-                                        mindex::Minimizer::Encode(27856109, 0, 19, false),
-                                        mindex::Minimizer::Encode(36625970, 0, 51, false),
-                                        mindex::Minimizer::Encode(54228923, 0, 26, false),
-                                        mindex::Minimizer::Encode(55644705, 0, 31, true),
-                                        mindex::Minimizer::Encode(74973168, 0, 44, true),
-                                        mindex::Minimizer::Encode(76041465, 0, 24, true),
-                                        mindex::Minimizer::Encode(80713150, 0, 18, true),
-                                        mindex::Minimizer::Encode(125828877, 0, 42, true),
-                                        mindex::Minimizer::Encode(126904899, 0, 14, false),
-                                        mindex::Minimizer::Encode(167726968, 0, 0, false),
-                                        mindex::Minimizer::Encode(189282306, 0, 2, true),
-                                        mindex::Minimizer::Encode(259553542, 0, 8, false),
-                                        mindex::Minimizer::Encode(315756032, 0, 3, true),
-                                        mindex::Minimizer::Encode(364792648, 0, 10, true),
-                                        mindex::Minimizer::Encode(502196464, 0, 33, false),
-                                        mindex::Minimizer::Encode(503315509, 0, 41, true),
-                                        mindex::Minimizer::Encode(518950656, 0, 35, false),
-                                        mindex::Minimizer::Encode(536855377, 0, 39, true),
+                                        mindex::Seed::Encode(35767, 0, 46, false),
+                                        mindex::Seed::Encode(143070, 0, 47, false),
+                                        mindex::Seed::Encode(572280, 0, 48, false),
+                                        mindex::Seed::Encode(2289123, 0, 49, false),
+                                        mindex::Seed::Encode(9156492, 0, 50, false),
+                                        mindex::Seed::Encode(27856109, 0, 19, false),
+                                        mindex::Seed::Encode(36625970, 0, 51, false),
+                                        mindex::Seed::Encode(54228923, 0, 26, false),
+                                        mindex::Seed::Encode(55644705, 0, 31, true),
+                                        mindex::Seed::Encode(74973168, 0, 44, true),
+                                        mindex::Seed::Encode(76041465, 0, 24, true),
+                                        mindex::Seed::Encode(80713150, 0, 18, true),
+                                        mindex::Seed::Encode(125828877, 0, 42, true),
+                                        mindex::Seed::Encode(126904899, 0, 14, false),
+                                        mindex::Seed::Encode(167726968, 0, 0, false),
+                                        mindex::Seed::Encode(189282306, 0, 2, true),
+                                        mindex::Seed::Encode(259553542, 0, 8, false),
+                                        mindex::Seed::Encode(315756032, 0, 3, true),
+                                        mindex::Seed::Encode(364792648, 0, 10, true),
+                                        mindex::Seed::Encode(502196464, 0, 33, false),
+                                        mindex::Seed::Encode(503315509, 0, 41, true),
+                                        mindex::Seed::Encode(518950656, 0, 35, false),
+                                        mindex::Seed::Encode(536855377, 0, 39, true),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -711,56 +711,56 @@ TEST(MinimizerIndexTest, TestBuild10) {
 
     // These are all seeds for a w = 1:
     // Sorted by key:
-        // mindex::Minimizer::Encode(2, 0, 6, true),
-        // mindex::Minimizer::Encode(9, 0, 5, true),
-        // mindex::Minimizer::Encode(39, 0, 4, true),
-        // mindex::Minimizer::Encode(56, 0, 10, true),
-        // mindex::Minimizer::Encode(121, 0, 18, false),
-        // mindex::Minimizer::Encode(131, 0, 12, true),
-        // mindex::Minimizer::Encode(180, 0, 16, true),
-        // mindex::Minimizer::Encode(224, 0, 9, true),
-        // mindex::Minimizer::Encode(288, 0, 13, true),
-        // mindex::Minimizer::Encode(301, 0, 17, true),
-        // mindex::Minimizer::Encode(317, 0, 11, false),
-        // mindex::Minimizer::Encode(481, 0, 15, false),
-        // mindex::Minimizer::Encode(484, 0, 19, false),
-        // mindex::Minimizer::Encode(512, 0, 7, true),
-        // mindex::Minimizer::Encode(840, 0, 14, true),
-        // mindex::Minimizer::Encode(896, 0, 8, true),
+        // mindex::Seed::Encode(2, 0, 6, true),
+        // mindex::Seed::Encode(9, 0, 5, true),
+        // mindex::Seed::Encode(39, 0, 4, true),
+        // mindex::Seed::Encode(56, 0, 10, true),
+        // mindex::Seed::Encode(121, 0, 18, false),
+        // mindex::Seed::Encode(131, 0, 12, true),
+        // mindex::Seed::Encode(180, 0, 16, true),
+        // mindex::Seed::Encode(224, 0, 9, true),
+        // mindex::Seed::Encode(288, 0, 13, true),
+        // mindex::Seed::Encode(301, 0, 17, true),
+        // mindex::Seed::Encode(317, 0, 11, false),
+        // mindex::Seed::Encode(481, 0, 15, false),
+        // mindex::Seed::Encode(484, 0, 19, false),
+        // mindex::Seed::Encode(512, 0, 7, true),
+        // mindex::Seed::Encode(840, 0, 14, true),
+        // mindex::Seed::Encode(896, 0, 8, true),
 
     // Sorted by start position. Numbers on the right are the
     // IDs of the windows in which the particular seed is a minimizer.
-        // mindex::Minimizer::Encode(39, 0, 4, true),
-        // mindex::Minimizer::Encode(9, 0, 5, true),
-        // mindex::Minimizer::Encode(2, 0, 6, true),        (0, 1, 2)
-        // mindex::Minimizer::Encode(512, 0, 7, true),
-        // mindex::Minimizer::Encode(896, 0, 8, true),
-        // mindex::Minimizer::Encode(224, 0, 9, true),
-        // mindex::Minimizer::Encode(56, 0, 10, true),      (3, 4, 5, 6)
-        // mindex::Minimizer::Encode(317, 0, 11, false),
-        // mindex::Minimizer::Encode(131, 0, 12, true),     (7, 8)
-        // mindex::Minimizer::Encode(288, 0, 13, true),
-        // mindex::Minimizer::Encode(840, 0, 14, true),
-        // mindex::Minimizer::Encode(481, 0, 15, false),
-        // mindex::Minimizer::Encode(180, 0, 16, true),     (9, 10)
-        // mindex::Minimizer::Encode(301, 0, 17, true),
-        // mindex::Minimizer::Encode(121, 0, 18, false),    (11, 12)
-        // mindex::Minimizer::Encode(484, 0, 19, false),
+        // mindex::Seed::Encode(39, 0, 4, true),
+        // mindex::Seed::Encode(9, 0, 5, true),
+        // mindex::Seed::Encode(2, 0, 6, true),        (0, 1, 2)
+        // mindex::Seed::Encode(512, 0, 7, true),
+        // mindex::Seed::Encode(896, 0, 8, true),
+        // mindex::Seed::Encode(224, 0, 9, true),
+        // mindex::Seed::Encode(56, 0, 10, true),      (3, 4, 5, 6)
+        // mindex::Seed::Encode(317, 0, 11, false),
+        // mindex::Seed::Encode(131, 0, 12, true),     (7, 8)
+        // mindex::Seed::Encode(288, 0, 13, true),
+        // mindex::Seed::Encode(840, 0, 14, true),
+        // mindex::Seed::Encode(481, 0, 15, false),
+        // mindex::Seed::Encode(180, 0, 16, true),     (9, 10)
+        // mindex::Seed::Encode(301, 0, 17, true),
+        // mindex::Seed::Encode(121, 0, 18, false),    (11, 12)
+        // mindex::Seed::Encode(484, 0, 19, false),
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(2, 0, 2, true),
-                                        mindex::Minimizer::Encode(56, 0, 6, true),
-                                        mindex::Minimizer::Encode(121, 0, 14, false),
-                                        mindex::Minimizer::Encode(131, 0, 8, true),
-                                        mindex::Minimizer::Encode(180, 0, 12, true),
+                                        mindex::Seed::Encode(2, 0, 2, true),
+                                        mindex::Seed::Encode(56, 0, 6, true),
+                                        mindex::Seed::Encode(121, 0, 14, false),
+                                        mindex::Seed::Encode(131, 0, 8, true),
+                                        mindex::Seed::Encode(180, 0, 12, true),
                                     };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
-    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(index->seeds()[i]).Verbose() << std::endl;
-    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
-    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
-    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(expected[i]).Verbose() << std::endl;
+    //     // std::cerr << "[" << i << "] " << mindex::Seed(index->seeds()[i]).Verbose() << std::endl;
+    //     auto minimizer = mindex::Seed(index->seeds()[i]);
+    //     std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
     VerboseSeeds(index->seeds(), expected);
@@ -804,23 +804,23 @@ TEST(MinimizerIndexTest, TestBuild11) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Minimizer::Encode(2, 0, 2, true),
-                                        mindex::Minimizer::Encode(2, 0, 33, true),
-                                        mindex::Minimizer::Encode(56, 0, 6, true),
-                                        mindex::Minimizer::Encode(56, 0, 37, true),
-                                        mindex::Minimizer::Encode(121, 0, 14, false),
-                                        mindex::Minimizer::Encode(121, 0, 45, false),
-                                        mindex::Minimizer::Encode(131, 0, 8, true),
-                                        mindex::Minimizer::Encode(131, 0, 39, true),
-                                        mindex::Minimizer::Encode(180, 0, 12, true),
-                                        mindex::Minimizer::Encode(180, 0, 43, true),
+                                        mindex::Seed::Encode(2, 0, 2, true),
+                                        mindex::Seed::Encode(2, 0, 33, true),
+                                        mindex::Seed::Encode(56, 0, 6, true),
+                                        mindex::Seed::Encode(56, 0, 37, true),
+                                        mindex::Seed::Encode(121, 0, 14, false),
+                                        mindex::Seed::Encode(121, 0, 45, false),
+                                        mindex::Seed::Encode(131, 0, 8, true),
+                                        mindex::Seed::Encode(131, 0, 39, true),
+                                        mindex::Seed::Encode(180, 0, 12, true),
+                                        mindex::Seed::Encode(180, 0, 43, true),
                                     };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
-    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(index->seeds()[i]).Verbose() << std::endl;
-    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
-    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
-    //     // std::cerr << "[" << i << "] " << mindex::Minimizer(expected[i]).Verbose() << std::endl;
+    //     // std::cerr << "[" << i << "] " << mindex::Seed(index->seeds()[i]).Verbose() << std::endl;
+    //     auto minimizer = mindex::Seed(index->seeds()[i]);
+    //     std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
     VerboseSeeds(index->seeds(), expected);
@@ -856,7 +856,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     // Define the query sequence.
     std::string query("");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 }
@@ -887,7 +887,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     // Define the query sequence.
     std::string query("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 }
@@ -921,11 +921,11 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
     std::string query = seqs[0];
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
-    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
-    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     auto minimizer = mindex::Seed(index->seeds()[i]);
+    //     std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     // }
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), index->seeds().size());
 
@@ -966,11 +966,11 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
     std::string query("AAAAAAAAAAAAAAAAAAAA");
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
-    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
-    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     auto minimizer = mindex::Seed(index->seeds()[i]);
+    //     std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     // }
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 
@@ -1015,30 +1015,30 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     //               ("AGCTTTTCATTCTGACTGCAACGGGCGATATGTCTCTGTGTGG-TTAAAAAAAGAGTGTCTGATAGCAGC");
     std::string query("AGCTTTTCATTCTGACTGCAACGGGCGATATGTCTCTGTGTGGTTAAAAAAAGAGTGTCTGATAGCAGC");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
-    std::vector<mindex::MinimizerHitPacked> expected {
-                                                mindex::MinimizerHitPacked(0, false, 0, 0, 0),
-                                                mindex::MinimizerHitPacked(0, false, 2, 0, 2),
-                                                mindex::MinimizerHitPacked(0, false, 3, 0, 3),
-                                                mindex::MinimizerHitPacked(0, false, 8, 0, 8),
-                                                mindex::MinimizerHitPacked(0, false, 10, 0, 10),
-                                                mindex::MinimizerHitPacked(0, false, 44, 0, 43),
-                                                mindex::MinimizerHitPacked(0, false, 46, 0, 45),
-                                                mindex::MinimizerHitPacked(0, false, 47, 0, 46),
-                                                mindex::MinimizerHitPacked(0, false, 48, 0, 47),
-                                                mindex::MinimizerHitPacked(0, false, 49, 0, 48),
-                                                mindex::MinimizerHitPacked(0, false, 50, 0, 49),
-                                                mindex::MinimizerHitPacked(0, false, 51, 0, 50),
+    std::vector<mindex::SeedHitPacked> expected {
+                                                mindex::SeedHitPacked(0, false, 0, 0, 0),
+                                                mindex::SeedHitPacked(0, false, 2, 0, 2),
+                                                mindex::SeedHitPacked(0, false, 3, 0, 3),
+                                                mindex::SeedHitPacked(0, false, 8, 0, 8),
+                                                mindex::SeedHitPacked(0, false, 10, 0, 10),
+                                                mindex::SeedHitPacked(0, false, 44, 0, 43),
+                                                mindex::SeedHitPacked(0, false, 46, 0, 45),
+                                                mindex::SeedHitPacked(0, false, 47, 0, 46),
+                                                mindex::SeedHitPacked(0, false, 48, 0, 47),
+                                                mindex::SeedHitPacked(0, false, 49, 0, 48),
+                                                mindex::SeedHitPacked(0, false, 50, 0, 49),
+                                                mindex::SeedHitPacked(0, false, 51, 0, 50),
                                                        };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
-    //     auto minimizer = mindex::Minimizer(index->seeds()[i]);
-    //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
+    //     auto minimizer = mindex::Seed(index->seeds()[i]);
+    //     std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     // }
     // for (size_t i = 0; i < hits.size(); i++) {
     //     auto& hit = hits[i];
-    //     std::cerr << "mindex::MinimizerHitPacked::PackTo128t(" << hit.TargetId() << ", " << hit.TargetPos() << ", " << hit.QueryPos() << ")," << std::endl;
+    //     std::cerr << "mindex::SeedHitPacked::PackTo128t(" << hit.TargetId() << ", " << hit.TargetPos() << ", " << hit.QueryPos() << ")," << std::endl;
     // }
 
     ASSERT_EQ(hits, expected);
@@ -1080,7 +1080,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                    mindex::Minimizer::Encode(110, 0, 0, false),
+                                    mindex::Seed::Encode(110, 0, 0, false),
                                     };
 
     VerboseSeeds(index->seeds(), expected);
@@ -1145,8 +1145,8 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     VerboseSeeds(index_hp->seeds(), index_no_hp->seeds());
 
     for (int32_t i = 0; i < index_hp->seeds().size(); i++) {
-        auto minimizer_hp = mindex::Minimizer(index_hp->seeds()[i]);
-        auto minimizer_no_hp = mindex::Minimizer(index_no_hp->seeds()[i]);
+        auto minimizer_hp = mindex::Seed(index_hp->seeds()[i]);
+        auto minimizer_no_hp = mindex::Seed(index_no_hp->seeds()[i]);
         ASSERT_EQ(minimizer_hp.key, minimizer_no_hp.key);
         ASSERT_EQ(minimizer_hp.flag, minimizer_no_hp.flag);
     }

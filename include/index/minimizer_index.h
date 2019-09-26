@@ -9,106 +9,67 @@
 #define SRC_MINIMIZER_INDEX_2_H_
 
 #include <cstdint>
+#include <deque>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <memory>
 
+#include <index/index_base.h>
 #include <index/index_params.h>
-#include <index/minimizer_index_types.h>
-#include <index/minimizer.hpp>
-#include <index/minimizer_hit.hpp>
+#include <index/index_types.h>
+#include <index/seed.hpp>
+#include <index/seed_hit.hpp>
 #include <sequences/sequence_file.h>
-
-namespace mindex {
-
-struct SeedSpan {
-    SeedSpan() : start(0), end(0) {}
-    SeedSpan(size_t _start, ind_t _end) : start(_start), end(_end) {}
-    size_t start = 0;
-    ind_t end = 0;
-};
-
-}  // namespace mindex
-
-/*
- * Experimental code test performance with different hash maps.
- */
-#define MINIMIZER_INDEX2_USING_DENSEHASH
-// #define MINIMIZER_INDEX2_USING_SPARSEHASH
-// #define MINIMIZER_INDEX2_USING_UNORDERED_MAP
-
-#ifdef MINIMIZER_INDEX2_USING_UNORDERED_MAP
-#include <unordered_map>
-typedef std::unordered_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-#ifdef MINIMIZER_INDEX2_USING_DENSEHASH
-#include "sparsehash/dense_hash_map"
-using google::dense_hash_map;  // namespace where class lives by default
-typedef dense_hash_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-#ifdef MINIMIZER_INDEX2_USING_SPARSEHASH
-#include "sparsehash/sparse_hash_map"
-using google::sparse_hash_map;  // namespace where class lives by default
-typedef sparse_hash_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
-#endif
-
-const minkey_t MINIMIZER_INDEX_EMPTY_HASH_KEY = (minkey_t)0xFFFFFFFFFFFFFFFF;
-
-
 
 namespace mindex {
 
 class MinimizerIndex;
 
-typedef std::shared_ptr<mindex::MinimizerIndex> IndexPtr;
+std::unique_ptr<mindex::IndexBase> createMinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
 
-std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
-
-class MinimizerIndex {
+class MinimizerIndex : mindex::IndexBase {
    public:
-    friend std::unique_ptr<mindex::MinimizerIndex> createMinimizerIndex(
+    friend std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
         std::shared_ptr<mindex::IndexParams> params);
 
     ~MinimizerIndex();
 
-    void AddSequence(const std::string& seq, const std::string& header);
+    void AddSequence(const std::string& seq, const std::string& header) override;
 
-    void AddSequence(const std::vector<int8_t>& seq, const std::string& header);
+    void AddSequence(const std::vector<int8_t>& seq, const std::string& header) override;
 
-    void AddSequence(const int8_t* seq, size_t seq_len, const char* header, size_t header_len);
+    void AddSequence(const int8_t* seq, size_t seq_len, const char* header, size_t header_len) override;
 
-    bool AddSequences(const std::vector<std::string>& seqs, const std::vector<std::string>& headers);
+    bool AddSequences(const std::vector<std::string>& seqs, const std::vector<std::string>& headers) override;
 
-    void SetSequenceFile(mindex::SequenceFilePtr seq_file);
+    void SetSequenceFile(mindex::SequenceFilePtr seq_file) override;
 
-    std::string FetchSeqAsString(size_t seq_id, bool rev_cmp) const;
+    std::string FetchSeqAsString(size_t seq_id, bool rev_cmp) const override;
 
-    std::string FetchSeqAsString(size_t seq_id, size_t start, size_t end, bool rev_cmp) const;
+    std::string FetchSeqAsString(size_t seq_id, size_t start, size_t end, bool rev_cmp) const override;
 
-    const int8_t* FetchRawSeq(size_t seq_id) const;
+    const int8_t* FetchRawSeq(size_t seq_id) const override;
 
-    int BuildIndex();
+    int BuildIndex() override;
 
-    std::vector<mindex::MinimizerHitPacked> CollectHits(const int8_t* seq, size_t seq_len,
-                                                    indid_t seq_id = 0);
+    std::vector<mindex::SeedHitPacked> CollectHits(const int8_t* seq, size_t seq_len,
+                                                    indid_t seq_id = 0) override;
 
-    std::vector<mindex::MinimizerHitPacked> CollectHits(const std::string& seq);
+    std::vector<mindex::SeedHitPacked> CollectHits(const std::string& seq) override;
 
-    int Load(const std::string& index_path);
+    int Load(const std::string& index_path) override;
 
-    int Store(const std::string& index_path);
+    int Store(const std::string& index_path) override;
 
     /*
      * Getters.
     */
-    const std::shared_ptr<mindex::IndexParams> params() const { return params_; }
+    const std::shared_ptr<mindex::IndexParams> params() const override { return params_; }
 
     // const std::vector<int8_t>& data() const { return data_; }
 
-    std::string header(size_t seq_id) const {
+    std::string header(size_t seq_id) const override {
         const mindex::SequencePtr& seq = seqs()->GetSeqByID(seq_id);
         if (seq == nullptr) {
             std::cerr << "[MinimizerIndex::header] Warning: seq_id does not match a sequence in index! Returning empty.";
@@ -119,7 +80,7 @@ class MinimizerIndex {
 
     // const std::vector<int64_t>& starts() const { return starts_; }
 
-    ind_t len(size_t seq_id) const {
+    ind_t len(size_t seq_id) const override {
         const mindex::SequencePtr& seq = seqs()->GetSeqByID(seq_id);
         if (seq == nullptr) {
             std::cerr << "[MinimizerIndex::len] Warning: seq_id does not match a sequence in index! Returning empty.";
@@ -128,13 +89,15 @@ class MinimizerIndex {
         return seq->len();
     }
 
-    const mindex::SequenceFilePtr& seqs() const { return (seqs_ == nullptr) ? dummy_nullptr_seqs_ : seqs_; }
+    void seqs(mindex::SequenceFilePtr val) override { seqs_ = std::move(val); }
 
-    int64_t total_len() const { return (seqs_ == nullptr) ? 0 : seqs_->total_size(); }
+    const mindex::SequenceFilePtr& seqs() const override { return (seqs_ == nullptr) ? dummy_nullptr_seqs_ : seqs_; }
 
-    int64_t num_seqs() const { return (seqs_ == nullptr) ? 0 : seqs_->size(); }
+    int64_t total_len() const override { return (seqs_ == nullptr) ? 0 : seqs_->total_size(); }
 
-    const std::vector<mindex128_t>& seeds() const { return seeds_; }
+    int64_t num_seqs() const override { return (seqs_ == nullptr) ? 0 : seqs_->size(); }
+
+    const std::vector<mindex128_t>& seeds() const override { return seeds_; }
 
     int32_t k() const {
         if (params_ != nullptr) {

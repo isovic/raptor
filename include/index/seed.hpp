@@ -1,5 +1,5 @@
 /*
- * minimizer.hpp
+ * seed.hpp
  *
  *  Created on: Oct 04, 2017
  *      Author: Ivan Sovic
@@ -8,7 +8,7 @@
 #ifndef SRC_MINIMIZER_INDEX2_MINIMIZER_H_
 #define SRC_MINIMIZER_INDEX2_MINIMIZER_H_
 
-#include <index/minimizer_index_types.h>
+#include <index/index_types.h>
 #include <sstream>
 
 namespace mindex {
@@ -18,16 +18,16 @@ static const int8_t MINIMIZER_FLAG_IS_REV = 0x01;
 
 static const mindex128_t MINIMIZER_CODED_REV_BIT = (((mindex128_t)1) << 32);
 
-class Minimizer {
+class Seed {
    public:
-    Minimizer() : key(0), seq_id(0), pos(0), flag(0) {}
+    Seed() : key(0), seq_id(0), pos(0), flag(0) {}
 
-    Minimizer(minkey_t _key, indid_t _seq_id, ind_t _pos, bool _is_rev)
+    Seed(minkey_t _key, indid_t _seq_id, ind_t _pos, bool _is_rev)
         : key(_key),
           seq_id(_seq_id),
           pos(_pos),
           flag((_is_rev) ? MINIMIZER_FLAG_IS_REV : MINIMIZER_FLAG_DEFAULT_FWD) {}
-    Minimizer(const mindex128_t& coded_keypos)
+    Seed(const mindex128_t& coded_keypos)
         : key(DecodeKey(coded_keypos)),
           seq_id(DecodeSeqId(coded_keypos)),
           pos(DecodePos(coded_keypos)),
@@ -85,7 +85,7 @@ class Minimizer {
         return ss.str();
     }
 
-    inline int32_t Compare(const Minimizer& other) const {
+    inline int32_t Compare(const Seed& other) const {
         if (key == other.key && seq_id == other.seq_id && pos == other.pos && flag == other.flag) {
             // Exact seed match.
             return 0;

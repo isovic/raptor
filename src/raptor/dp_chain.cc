@@ -15,14 +15,14 @@ namespace raptor {
 
 // #define DEBUG_DP_VERBOSE_
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> ChainHits(
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
     const mindex::IndexPtr index,
     const mindex::SequencePtr& qseq,
-    const std::vector<mindex::MinimizerHitPacked>& hits,
+    const std::vector<mindex::SeedHitPacked>& hits,
     const std::shared_ptr<raptor::ParamsMapper> params,
     int32_t min_cov_bases, int32_t min_dp_score, int32_t k) {
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> chains;
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> chains;
 
     if (hits.size() == 0) {
         return chains;
@@ -207,7 +207,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Cha
             new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq->abs_id(), qseq->data().size(), false);
         }
 
-        auto chain = std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>(new raptor::TargetHits<mindex::MinimizerHitPacked>(new_env));
+        auto chain = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
 
         for (auto& node : nodes) {
             chain->hits().emplace_back(hits[node]);

@@ -1,11 +1,11 @@
 /*
- * index_factory.cc
+ * yield_index.cc
  *
  *  Created on: May 30, 2017
  *      Author: Ivan Sovic
  */
 
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 // #include <utility/utility_general.h>
 #include <sequences/sequence_file.h>
 #include <log/log_tools.h>
@@ -13,15 +13,17 @@
 #include <utility/files.hpp>
 #include <sequences/random_access_sequence_file.h>
 #include <sequences/sequence_file_composite_factory.h>
+#include <index/index_factory.h>
 
 namespace raptor {
 
-std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string>& ref_paths, mindex::SequenceFormat ref_fmt,
+std::shared_ptr<mindex::IndexBase> YieldIndex(const std::vector<std::string>& ref_paths, mindex::SequenceFormat ref_fmt,
                                                 const std::string& index_path, bool rebuild_index,
                                                 bool index_on_the_fly, bool auto_rebuild_index,
                                                 int64_t rdb_block_id,
                                                 std::shared_ptr<mindex::IndexParams> index_params) {
-    auto index = mindex::createMinimizerIndex(index_params);
+
+    auto index = mindex::createIndex(mindex::IndexType::Minimizer, index_params);
 
     bool load = !rebuild_index && raptor::FileExists(index_path);
     bool store = false;

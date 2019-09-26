@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <containers/target_hits.hpp>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <graph/anchor_graph.h>
 #include <graph/local_path.h>
@@ -104,7 +104,7 @@ public:
         paths_ = new_paths;
         // Ensure that the paths are sorted. This is the only place where paths can be set.
         std::sort(paths_.begin(), paths_.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
-        all_similar_scores_ = CountSimilarMappings_(paths_, index_->k() * 3);
+        all_similar_scores_ = CountSimilarMappings_(paths_, index_->params()->k * 3);
         fraction_query_covered_ = CalcBestFractionQueryCovered_(paths_, qseq_len_);
     }
 

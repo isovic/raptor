@@ -1,5 +1,5 @@
 /*
- * index_factory.h
+ * yield_index.h
  *
  *  Created on: May 30, 2017
  *      Author: isovic
@@ -15,7 +15,7 @@
 
 namespace raptor {
 
-std::shared_ptr<mindex::MinimizerIndex> YieldIndex(const std::vector<std::string>& ref_paths, mindex::SequenceFormat ref_fmt,
+std::shared_ptr<mindex::IndexBase> YieldIndex(const std::vector<std::string>& ref_paths, mindex::SequenceFormat ref_fmt,
                                                 const std::string &index_path, bool rebuild_index,
                                                 bool index_on_the_fly, bool auto_rebuild_index,
                                                 int64_t rdb_block_id,

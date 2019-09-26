@@ -77,7 +77,7 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(const mindex::Seque
     std::shared_ptr<raptor::LinearMappingResult> final_linear_mapping = raptor::graphmapper::BreakAnchors(
                                     graph_,
                                     input_mapping_result,
-                                    index_->k());
+                                    index_->params()->k);
     tt_break_anchors.stop();
 
     TicToc tt_align_anchors;
@@ -218,7 +218,7 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::MapBetter(const mindex:
     std::shared_ptr<raptor::LinearMappingResult> final_linear_mapping = raptor::graphmapper::BreakAnchors(
                                     graph_,
                                     input_mapping_result,
-                                    index_->k());
+                                    index_->params()->k);
     tt_break_anchors.stop();
 
     TicToc tt_align_anchors;

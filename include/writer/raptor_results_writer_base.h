@@ -9,7 +9,7 @@
 #define SRC_RAPTOR_RESULTS_WRITER_BASE_H_
 
 #include <containers/raptor_results.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <params/params_raptor.h>
 #include <sequences/sequence_file.h>
 
