@@ -1,5 +1,5 @@
 /*
- * minimizer_hit.hpp
+ * seed_hit.hpp
  *
  *  Created on: Oct 04, 2017
  *      Author: Ivan Sovic
