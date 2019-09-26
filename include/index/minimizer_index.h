@@ -19,7 +19,7 @@
 #include <index/index_params.h>
 #include <index/minimizer_index_types.h>
 #include <index/minimizer.hpp>
-#include <index/minimizer_hit.hpp>
+#include <index/seed_hit.hpp>
 #include <sequences/sequence_file.h>
 
 namespace mindex {
