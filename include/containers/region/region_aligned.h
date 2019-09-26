@@ -159,12 +159,18 @@ class RegionAligned : public raptor::RegionBase {
     bool GetRegionIsSupplementary() const {
         return region_is_supplementary_;
     }
-    // raptor::RegionType GetRegionType() const {
-    //     return region_type_;
-    // }
-    // void SetRegionType(const raptor::RegionType& val) {
-    //     region_type_ = val;
-    // }
+    raptor::RegionType GetRegionType() const {
+        if (region_priority_ == 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Primary;
+        } else if (region_priority_ == 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::PrimarySupplementary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Secondary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::SecondarySupplementary;
+        }
+        return raptor::RegionType::Undefined;
+    }
 
     ////////////////
     /// Setters. ///
@@ -236,7 +242,6 @@ class RegionAligned : public raptor::RegionBase {
 
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
-    // raptor::RegionType region_type_;    // Primary or supplementary. Primary in this context refers to the non-supplementary
 
     // int32_t region_group_id_;           // Ordinal ID of the region, e.g. after sorting by score. Primary and SupplementaryPrimary
     //                                     // would have region_group_id_ == 0, and other secondary ones an increasing number.

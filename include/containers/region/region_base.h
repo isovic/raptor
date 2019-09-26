@@ -62,7 +62,7 @@ public:
     virtual int32_t SegmentId() const = 0;      // ID of the supplementary alignment.
     virtual int32_t SegmentsNum() const = 0;    // Number of supplementary alignments for the path.
 
-    // virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (primary, secondary, supplementary).
+    virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (Primary, PrimarySupplementary, Secondary, SecondarySupplementary, Undefined).
     virtual int32_t GetRegionPriority() const = 0;
     virtual bool GetRegionIsSupplementary() const = 0;
     virtual void SetRegionPriority(int32_t val) = 0;

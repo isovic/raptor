@@ -158,6 +158,18 @@ public:
     bool GetRegionIsSupplementary() const {
         return region_is_supplementary_;
     }
+    raptor::RegionType GetRegionType() const {
+        if (region_priority_ == 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Primary;
+        } else if (region_priority_ == 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::PrimarySupplementary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Secondary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::SecondarySupplementary;
+        }
+        return raptor::RegionType::Undefined;
+    }
 
     /*
     * Returns the score if it was initialized e.g. via alignment,
@@ -261,8 +273,6 @@ private:
 
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
-
-    // raptor::RegionType region_type_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
