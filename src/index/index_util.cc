@@ -1,4 +1,4 @@
-#include <index/minimizer_index_util.h>
+#include <index/index_util.h>
 
 #include <algorithm>
 #include <sstream>
