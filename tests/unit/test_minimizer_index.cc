@@ -2,7 +2,7 @@
 
 #include <index/index_params.h>
 #include <index/minimizer_index.h>
-#include <index/minimizer.hpp>
+#include <index/seed.hpp>
 
 #include <cstdint>
 #include <cstring>

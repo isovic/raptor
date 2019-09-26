@@ -1,5 +1,5 @@
 /*
- * minimizer.hpp
+ * seed.hpp
  *
  *  Created on: Oct 04, 2017
  *      Author: Ivan Sovic
