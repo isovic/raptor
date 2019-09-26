@@ -13,7 +13,7 @@
 #include <vector>
 #include <sequences/sequence_file.h>
 #include <index/seed_hit.hpp>
-#include <index/minimizer_index_types.h>
+#include <index/index_types.h>
 
 namespace mindex {
 

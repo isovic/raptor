@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
-#include <index/minimizer_index_types.h>
+#include <index/index_types.h>
 
 namespace mindex {
 

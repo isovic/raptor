@@ -1,5 +1,5 @@
 /*
- * minimizer_index_types.h
+ * index_types.h
  *
  *  Created on: Oct 04, 2017
  *      Author: Ivan Sovic
