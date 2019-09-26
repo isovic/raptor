@@ -12,7 +12,9 @@ namespace raptor {
 
 enum class RegionType {
     Primary,
-    Supplementary,
+    PrimarySupplementary,
+    Secondary,
+    SecondarySupplementary,
     Undefined
 };
 
