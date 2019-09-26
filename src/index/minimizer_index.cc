@@ -247,6 +247,9 @@ int MinimizerIndex::BuildIndex() {
         #endif
     }
 
+	LOG_ALL("Seed statistics: avg = %.2f, max_before = %lu, max_after = %lu, cutoff = %lu, singletons = %.2f%%, spacing = %.2f\n",
+                occ_avg_before(), occ_max(), occ_max_after(), occ_cutoff(), 100.0 * occ_singletons(), spacing());
+
     return 0;
 }
 
