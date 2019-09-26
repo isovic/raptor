@@ -1,5 +1,5 @@
 /*
- * index_factory.h
+ * yield_index.h
  *
  *  Created on: May 30, 2017
  *      Author: isovic

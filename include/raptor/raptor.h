@@ -14,7 +14,7 @@
 #include <containers/range.h>
 #include <params/params_raptor.h>
 #include <containers/raptor_results.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <graph/split_segment_graph.h>
 
 namespace raptor {

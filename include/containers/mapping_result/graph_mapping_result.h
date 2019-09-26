@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <containers/target_hits.hpp>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <graph/anchor_graph.h>
 #include <graph/local_path.h>
