@@ -8,7 +8,7 @@
 #ifndef SRC_MINIMIZER_INDEX2_MINIMIZER_H_
 #define SRC_MINIMIZER_INDEX2_MINIMIZER_H_
 
-#include <index/minimizer_index_types.h>
+#include <index/index_types.h>
 #include <sstream>
 
 namespace mindex {
