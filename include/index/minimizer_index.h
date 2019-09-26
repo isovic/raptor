@@ -9,6 +9,7 @@
 #define SRC_MINIMIZER_INDEX_2_H_
 
 #include <cstdint>
+#include <deque>
 #include <iostream>
 #include <vector>
 #include <string>
