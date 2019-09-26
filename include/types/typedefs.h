@@ -14,7 +14,7 @@
 #include <containers/region/region_mapped.h>
 #include <aligner/aligner_base.h>
 // #include <index/minimizer_index.h>
-#include <index/minimizer_hit.hpp>
+#include <index/seed_hit.hpp>
 #include <graph/segment_graph.h>
 
 typedef __int128 int128_t;
