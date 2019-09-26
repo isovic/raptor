@@ -63,4 +63,13 @@ using SeedHashType2 = sparse_hash_map<minkey_t, int64_t, std::hash<minkey_t>>;
 
 const minkey_t MINIMIZER_INDEX_EMPTY_HASH_KEY = (minkey_t)0xFFFFFFFFFFFFFFFF;
 
+namespace mindex {
+
+enum class IndexType {
+    Minimizer,
+    Undefined
+};
+
+}
+
 #endif

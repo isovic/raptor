@@ -266,7 +266,7 @@ std::shared_ptr<raptor::LinearMappingResult> BreakAnchors(
     //     params->debug_qname == std::string(qseq->header())) {
     //     LOG_ALL("Showing debug info for read %d: %s\n", qseq->id(), qseq->header().c_str());
 
-    //     raptor::WriteTargetHits("temp/debug/mapping-3-broken_anchors.csv", filtered_hits, index_->k(),
+    //     raptor::WriteTargetHits("temp/debug/mapping-3-broken_anchors.csv", filtered_hits, index_->params()->k,
     //                     qseq.get_header(), qseq.get_sequence_length(), std::string("ref"), 0);
     // }
 #endif

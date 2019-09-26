@@ -126,7 +126,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_, qseq, seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->k());
+    auto filtered_hits = raptor::ChainHits(index_, qseq, seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->params()->k);
     tt_chain.stop();
 #else
     ////////////////////////////////////
@@ -148,7 +148,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_, qseq, new_seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->k());
+    auto filtered_hits = raptor::ChainHits(index_, qseq, new_seed_hits, params_, params_->min_cov_bases, params_->min_dp_score, index_->params()->k);
     tt_chain.stop();
     ///////////////////////////
 #endif
@@ -204,14 +204,14 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
         params_->debug_qname == std::string(qseq->header())) {
         LOG_ALL("Showing debug info for read %d: %s\n", qseq->id(), qseq->header().c_str());
 
-        raptor::WriteSeedHits("temp/debug/mapping-0-seed_hits.csv", seed_hits, index_->k(),
+        raptor::WriteSeedHits("temp/debug/mapping-0-seed_hits.csv", seed_hits, index_->params()->k,
                       qseq->header(), qseq->data().size(), std::string("ref"), 0);
-        // raptor::WriteSeedHits("temp/debug/mapping-1-filtered_hits_by_target.csv", new_seed_hits, index_->k(),
+        // raptor::WriteSeedHits("temp/debug/mapping-1-filtered_hits_by_target.csv", new_seed_hits, index_->params()->k,
         //               qseq.get_header(), qseq.get_sequence_length(), std::string("ref"), 0);
         // raptor::WriteTargetHits("temp/debug/mapping-1-filtered_hits_by_target.csv", filtered_hits_1,
-        //                 index_->k(), qseq.get_header(), qseq.get_sequence_length(),
+        //                 index_->params()->k, qseq.get_header(), qseq.get_sequence_length(),
         //                 std::string("ref"), 0);
-        raptor::WriteTargetHits("temp/debug/mapping-2-chained_hits.csv", filtered_hits, index_->k(),
+        raptor::WriteTargetHits("temp/debug/mapping-2-chained_hits.csv", filtered_hits, index_->params()->k,
                         qseq->header(), qseq->data().size(), std::string("ref"), 0);
 
         LOG_ALL("Collected seed hits: %ld\n", seed_hits.size());
@@ -257,7 +257,7 @@ raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::SeedHitPacked>& s
                                     ind_t q_len, ind_t diag_margin, ind_t min_cov_bases,
                                     int32_t min_num_hits) {
     auto& index = index_;
-    int32_t seed_len = index->k();
+    int32_t seed_len = index->params()->k;
 
     std::sort(seed_hits.begin(), seed_hits.end());
 
