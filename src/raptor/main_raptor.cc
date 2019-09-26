@@ -85,7 +85,6 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 								parameters->rdb_block_ref,
 								parameters->index_params);
 
-	LOG_ALL("Seed statistics: avg = %.2f, max_before = %lu, max_after = %lu, cutoff = %lu, singletons = %.2f%%, spacing = %.2f\n", index->occ_avg_before(), index->occ_max(), index->occ_max_after(), index->occ_cutoff(), 100.0 * index->occ_singletons(), index->spacing());
 	LOG_ALL("Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
 
 	/*
