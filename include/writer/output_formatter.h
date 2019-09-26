@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 #include <containers/region/region_base.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <utility/revcmp.hpp>
 #include <aligner/aligner_util.hpp>

@@ -1,11 +1,11 @@
 /*
- * index_factory.cc
+ * yield_index.cc
  *
  *  Created on: May 30, 2017
  *      Author: Ivan Sovic
  */
 
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 // #include <utility/utility_general.h>
 #include <sequences/sequence_file.h>
 #include <log/log_tools.h>

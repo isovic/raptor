@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 #include <containers/region/region_base.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 
 namespace raptor {
 

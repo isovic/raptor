@@ -16,7 +16,7 @@
 #include <containers/target_hits.hpp>
 #include <containers/region/region_mapped.h>
 #include <containers/mapping_result/linear_mapping_result.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <params/params_mapper.h>
 

@@ -5,7 +5,7 @@
 
 #include <raptor/raptor.h>
 #include <params/params_raptor.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <log/log_tools.h>
 #include <sequences/sequence_file.h>
 #include <sequences/sequence_file_composite_fofn.h>
