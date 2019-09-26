@@ -16,7 +16,7 @@
 namespace raptor {
 namespace mapper {
 
-void CalcHitCoverage(const std::vector<mindex::MinimizerHitPacked>& hits, int32_t seed_len,
+void CalcHitCoverage(const std::vector<mindex::SeedHitPacked>& hits, int32_t seed_len,
                                   int32_t hits_begin, int32_t hits_end, int32_t& cov_bases_q,
                                   int32_t& cov_bases_r) {
     /*
@@ -52,7 +52,7 @@ void CalcHitCoverage(const std::vector<mindex::MinimizerHitPacked>& hits, int32_
  * A single TargetHits<raptor::RegionMapped> ".hits" entry represents one colinear range of seed hits.
  */
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
-    const std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>>& target_hits) {
+    const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits) {
     // Each target ID is one vector element. Each raptor::TargetHits has a .hits
     // vector with anchors.
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> target_anchors;
@@ -125,19 +125,19 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
     return target_anchors;
 }
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> GroupTargetSeedHits(
-            std::vector<mindex::MinimizerHitPacked> seed_hits,  // Copy.
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> GroupTargetSeedHits(
+            std::vector<mindex::SeedHitPacked> seed_hits,  // Copy.
             int32_t k,
             int32_t qid,
             int32_t qlen) {
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> all_target_hits;
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> all_target_hits;
 
-    // There is an "operator<" defined in the MinimizerHitPacked.
+    // There is an "operator<" defined in the SeedHitPacked.
     std::sort(seed_hits.begin(), seed_hits.end());
 
-    std::vector<std::pair<size_t, size_t>> ranges = istl::FindRanges<mindex::MinimizerHitPacked>(seed_hits,
-                        [](const mindex::MinimizerHitPacked& a, const mindex::MinimizerHitPacked& b) {
+    std::vector<std::pair<size_t, size_t>> ranges = istl::FindRanges<mindex::SeedHitPacked>(seed_hits,
+                        [](const mindex::SeedHitPacked& a, const mindex::SeedHitPacked& b) {
                                 return a.TargetId() == b.TargetId(); });
 
     for (const auto& range_pair: ranges) {
@@ -155,8 +155,8 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Gro
         std::shared_ptr<raptor::MappingEnv> new_env = raptor::createMappingEnv(
                 t_id, 0, t_len, t_rev, qid, qlen, false);
 
-        auto single_target_hits = std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>(
-                            new raptor::TargetHits<mindex::MinimizerHitPacked>(new_env));
+        auto single_target_hits = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(
+                            new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
 
         for (size_t seed_id = range_start; seed_id < range_end; ++seed_id) {
             single_target_hits->hits().emplace_back(seed_hits[seed_id]);

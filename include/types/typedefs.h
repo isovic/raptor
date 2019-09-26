@@ -29,8 +29,8 @@ typedef raptor::TargetHits<raptor::AnchorPtr> TargetAnchorType;
 typedef std::shared_ptr<raptor::TargetHits<raptor::AnchorPtr>> TargetAnchorPtr;
 typedef std::vector<TargetAnchorPtr> TargetAnchorPtrVector;
 
-typedef raptor::TargetHits<mindex::MinimizerHitPacked> ChainType;
-typedef std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>> ChainPtr;
+typedef raptor::TargetHits<mindex::SeedHitPacked> ChainType;
+typedef std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>> ChainPtr;
 
 }
 

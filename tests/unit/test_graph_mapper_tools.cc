@@ -21,19 +21,19 @@ namespace unit {
 
 bool VERBOSE_DEBUG_QID_GM_TOOLS = false;
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> WrapGroupTargetSeedHits(
-            std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>> seed_hits,  // Copy.
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> WrapGroupTargetSeedHits(
+            std::vector<std::pair<int32_t, mindex::SeedHitPacked>> seed_hits,  // Copy.
             int32_t k,
             int32_t qid,
             int32_t qlen) {
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> all_target_hits;
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> all_target_hits;
 
-    // There is an "operator<" defined in the MinimizerHitPacked.
+    // There is an "operator<" defined in the SeedHitPacked.
     std::sort(seed_hits.begin(), seed_hits.end());
 
-    std::vector<std::pair<size_t, size_t>> ranges = istl::FindRanges<std::pair<int32_t, mindex::MinimizerHitPacked>>(seed_hits,
-                        [](const std::pair<int32_t, mindex::MinimizerHitPacked>& a, const std::pair<int32_t, mindex::MinimizerHitPacked>& b) {
+    std::vector<std::pair<size_t, size_t>> ranges = istl::FindRanges<std::pair<int32_t, mindex::SeedHitPacked>>(seed_hits,
+                        [](const std::pair<int32_t, mindex::SeedHitPacked>& a, const std::pair<int32_t, mindex::SeedHitPacked>& b) {
                                 return std::get<0>(a) == std::get<0>(b); });
 
     for (const auto& range_pair: ranges) {
@@ -53,8 +53,8 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Wra
         std::shared_ptr<raptor::MappingEnv> new_env = raptor::createMappingEnv(
                 t_id, 0, t_len, t_rev, qid, qlen, false);
 
-        auto single_target_hits = std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>(
-                            new raptor::TargetHits<mindex::MinimizerHitPacked>(new_env));
+        auto single_target_hits = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(
+                            new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
 
         for (size_t seed_id = range_start; seed_id < range_end; ++seed_id) {
             const auto& seed_hit = std::get<1>(seed_hits[seed_id]);
@@ -90,13 +90,13 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> Wra
 std::shared_ptr<raptor::LinearMappingResult> UtilCreateLinearMappingResult(
                             mindex::IndexPtr index, int32_t k, const std::string& qname,
                             int32_t qlen, int32_t qid,
-                            const std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>>& seed_hits) {
+                            const std::vector<std::pair<int32_t, mindex::SeedHitPacked>>& seed_hits) {
 
     // Create an empty container.
     std::shared_ptr<raptor::LinearMappingResult> result = raptor::createMappingResult(qid, qlen, qname, index);
 
     // Take the plain flat list of seeds and group them by target.
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> hits = raptor::unit::WrapGroupTargetSeedHits(seed_hits, k, qid, qlen);
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> hits = raptor::unit::WrapGroupTargetSeedHits(seed_hits, k, qid, qlen);
 
     // Anchors will be formed automatically from hits.
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> anchors = raptor::mapper::MakeAnchors(hits);
@@ -129,7 +129,7 @@ TEST(GraphMapperTools, BreakAnchors1) {
     // raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
     // Ther first element in pair is the target group, and the second is the MinimizerHit.
-    std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>> seed_hits {
+    std::vector<std::pair<int32_t, mindex::SeedHitPacked>> seed_hits {
     };
 
     mindex::IndexPtr index = nullptr;
@@ -175,7 +175,7 @@ TEST(GraphMapperTools, BreakAnchors2) {
     // raptor::SplitSegmentGraphPtr ssg = raptor::createSplitSegmentGraph(seg_graph);
 
     // Ther first element in pair is the target group, and the second is the MinimizerHit.
-    std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>> seed_hits {
+    std::vector<std::pair<int32_t, mindex::SeedHitPacked>> seed_hits {
             {0, {0,0,2,0,2}},
             {0, {0,0,12,0,12}},
             {0, {0,0,25,0,25}},
@@ -344,7 +344,7 @@ TEST(GraphMapperTools, BreakAnchors3) {
     // std::cerr << "Testing JSON output, ssg:\n" << ssg->ToJSON() << "\n";
 
     // Ther first element in pair is the target group, and the second is the MinimizerHit.
-    std::vector<std::pair<int32_t, mindex::MinimizerHitPacked>> seed_hits {
+    std::vector<std::pair<int32_t, mindex::SeedHitPacked>> seed_hits {
             {0, {0,0,2,0,2}},
             {0, {0,0,12,0,12}},
             {0, {0,0,25,0,25}},
