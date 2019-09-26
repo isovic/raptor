@@ -261,7 +261,7 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMappingResult::GenerateFilt
 }
 
 void GraphMappingResult::Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, bool just_sort) {
-  paths_ = GenerateFiltered(paths_, bestn, max_fraction_diff, min_map_len, min_mapq, index_->k() * 3, just_sort);
+  paths_ = GenerateFiltered(paths_, bestn, max_fraction_diff, min_map_len, min_mapq, index_->params()->k * 3, just_sort);
 }
 
 
