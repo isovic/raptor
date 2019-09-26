@@ -43,14 +43,6 @@ class IndexBase {
     virtual int64_t total_len() const = 0;
     virtual int64_t num_seqs() const = 0;
     virtual const std::vector<mindex128_t>& seeds() const = 0;
-
-    // size_t occ_max() const { return occ_max_; }
-    // size_t occ_max_after() const { return occ_max_after_; }
-    // size_t occ_cutoff() const { return occ_cutoff_; }
-    // double occ_singletons() const { return occ_singletons_; }
-    // double occ_avg_before() const { return occ_avg_before_; }
-    // double occ_avg_after() const { return occ_avg_after_; }
-    // double spacing() const { return spacing_; }
 };
 
 }  // namespace mindex
