@@ -13,6 +13,7 @@
 #include <utility/files.hpp>
 #include <sequences/random_access_sequence_file.h>
 #include <sequences/sequence_file_composite_factory.h>
+#include <index/index_factory.h>
 
 namespace raptor {
 
@@ -21,7 +22,8 @@ std::shared_ptr<mindex::IndexBase> YieldIndex(const std::vector<std::string>& re
                                                 bool index_on_the_fly, bool auto_rebuild_index,
                                                 int64_t rdb_block_id,
                                                 std::shared_ptr<mindex::IndexParams> index_params) {
-    auto index = mindex::createMinimizerIndex(index_params);
+
+    auto index = mindex::createIndex(mindex::IndexType::Minimizer, index_params);
 
     bool load = !rebuild_index && raptor::FileExists(index_path);
     bool store = false;
