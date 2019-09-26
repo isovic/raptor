@@ -94,10 +94,10 @@ class MinimizerIndex : mindex::IndexBase {
 
     int BuildIndex() override;
 
-    std::vector<mindex::MinimizerHitPacked> CollectHits(const int8_t* seq, size_t seq_len,
+    std::vector<mindex::SeedHitPacked> CollectHits(const int8_t* seq, size_t seq_len,
                                                     indid_t seq_id = 0) override;
 
-    std::vector<mindex::MinimizerHitPacked> CollectHits(const std::string& seq) override;
+    std::vector<mindex::SeedHitPacked> CollectHits(const std::string& seq) override;
 
     int Load(const std::string& index_path) override;
 

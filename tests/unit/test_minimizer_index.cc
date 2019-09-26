@@ -856,7 +856,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     // Define the query sequence.
     std::string query("");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 }
@@ -887,7 +887,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     // Define the query sequence.
     std::string query("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 }
@@ -925,7 +925,7 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
     //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     // }
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), index->seeds().size());
 
@@ -970,7 +970,7 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
     //     std::cerr << "mindex::Minimizer::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
     // }
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
     ASSERT_EQ(hits.size(), 0);
 
@@ -1015,21 +1015,21 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     //               ("AGCTTTTCATTCTGACTGCAACGGGCGATATGTCTCTGTGTGG-TTAAAAAAAGAGTGTCTGATAGCAGC");
     std::string query("AGCTTTTCATTCTGACTGCAACGGGCGATATGTCTCTGTGTGGTTAAAAAAAGAGTGTCTGATAGCAGC");
 
-    std::vector<mindex::MinimizerHitPacked> hits = index->CollectHits(query);
+    std::vector<mindex::SeedHitPacked> hits = index->CollectHits(query);
 
-    std::vector<mindex::MinimizerHitPacked> expected {
-                                                mindex::MinimizerHitPacked(0, false, 0, 0, 0),
-                                                mindex::MinimizerHitPacked(0, false, 2, 0, 2),
-                                                mindex::MinimizerHitPacked(0, false, 3, 0, 3),
-                                                mindex::MinimizerHitPacked(0, false, 8, 0, 8),
-                                                mindex::MinimizerHitPacked(0, false, 10, 0, 10),
-                                                mindex::MinimizerHitPacked(0, false, 44, 0, 43),
-                                                mindex::MinimizerHitPacked(0, false, 46, 0, 45),
-                                                mindex::MinimizerHitPacked(0, false, 47, 0, 46),
-                                                mindex::MinimizerHitPacked(0, false, 48, 0, 47),
-                                                mindex::MinimizerHitPacked(0, false, 49, 0, 48),
-                                                mindex::MinimizerHitPacked(0, false, 50, 0, 49),
-                                                mindex::MinimizerHitPacked(0, false, 51, 0, 50),
+    std::vector<mindex::SeedHitPacked> expected {
+                                                mindex::SeedHitPacked(0, false, 0, 0, 0),
+                                                mindex::SeedHitPacked(0, false, 2, 0, 2),
+                                                mindex::SeedHitPacked(0, false, 3, 0, 3),
+                                                mindex::SeedHitPacked(0, false, 8, 0, 8),
+                                                mindex::SeedHitPacked(0, false, 10, 0, 10),
+                                                mindex::SeedHitPacked(0, false, 44, 0, 43),
+                                                mindex::SeedHitPacked(0, false, 46, 0, 45),
+                                                mindex::SeedHitPacked(0, false, 47, 0, 46),
+                                                mindex::SeedHitPacked(0, false, 48, 0, 47),
+                                                mindex::SeedHitPacked(0, false, 49, 0, 48),
+                                                mindex::SeedHitPacked(0, false, 50, 0, 49),
+                                                mindex::SeedHitPacked(0, false, 51, 0, 50),
                                                        };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
@@ -1038,7 +1038,7 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     // }
     // for (size_t i = 0; i < hits.size(); i++) {
     //     auto& hit = hits[i];
-    //     std::cerr << "mindex::MinimizerHitPacked::PackTo128t(" << hit.TargetId() << ", " << hit.TargetPos() << ", " << hit.QueryPos() << ")," << std::endl;
+    //     std::cerr << "mindex::SeedHitPacked::PackTo128t(" << hit.TargetId() << ", " << hit.TargetPos() << ", " << hit.QueryPos() << ")," << std::endl;
     // }
 
     ASSERT_EQ(hits, expected);
