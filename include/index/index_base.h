@@ -49,6 +49,9 @@ class IndexBase {
     virtual int64_t num_seqs() const = 0;
     virtual const std::vector<mindex128_t>& seeds() const = 0;
 
+    /*
+     * Setters.
+    */
     virtual void seqs(mindex::SequenceFilePtr val) = 0;
 };
 
