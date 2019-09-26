@@ -19,16 +19,16 @@
 
 namespace raptor {
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> ChainHits(
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
     const mindex::IndexPtr index,
     const mindex::SequencePtr& qseq,
-    const std::vector<mindex::MinimizerHitPacked>& hits,
+    const std::vector<mindex::SeedHitPacked>& hits,
     const std::shared_ptr<raptor::ParamsMapper> params,
     int32_t min_cov_bases, int32_t min_dp_score, int32_t k);
 
-// std::vector<mindex::MinimizerHitPacked> ChainTargetHits2(
+// std::vector<mindex::SeedHitPacked> ChainTargetHits2(
 //     const SingleSequence& qseq,
-//     const std::vector<mindex::MinimizerHitPacked>& hits,
+//     const std::vector<mindex::SeedHitPacked>& hits,
 //     const std::shared_ptr<raptor::ParamsMapper> params, int32_t k);
 
 } /* namespace raptor */

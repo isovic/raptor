@@ -18,29 +18,29 @@ namespace mindex {
 #define MINIMIZER_HIT_TANDEM_FLAG   (0x01)
 constexpr mindex128_t MINIMIZER_HIT_TARGET_REV = ((mindex128_t) (0x01)) << 96;
 
-class MinimizerHitPacked;
-class MinimizerHitUnpacked;
+class SeedHitPacked;
+class SeedHitUnpacked;
 
-class MinimizerHitPacked {
+class SeedHitPacked {
    public:
-    MinimizerHitPacked()
+    SeedHitPacked()
             : data_(0x0) {
     }
 
-    MinimizerHitPacked(indid_t _t_id, bool _t_rev, ind_t _t_pos,
+    SeedHitPacked(indid_t _t_id, bool _t_rev, ind_t _t_pos,
                         ind_t _q_mask, ind_t _q_pos)
             : data_(PackTo128t(_t_id, _t_rev, _t_pos, _q_mask, _q_pos)) {
     }
 
-    MinimizerHitPacked(mindex128_t _data)
+    SeedHitPacked(mindex128_t _data)
         : data_(_data) {
     }
 
-    MinimizerHitPacked(const MinimizerHitPacked& op)
+    SeedHitPacked(const SeedHitPacked& op)
         : data_(op.data()) {
     }
 
-    bool operator==(const MinimizerHitPacked& op) const {
+    bool operator==(const SeedHitPacked& op) const {
         return this->data_ == op.data_;
     }
 
@@ -58,11 +58,11 @@ class MinimizerHitPacked {
         return ss.str();
     }
 
-    bool operator<(const mindex::MinimizerHitPacked& op) const {
+    bool operator<(const mindex::SeedHitPacked& op) const {
         return this->data_ < op.data_;
     }
 
-    bool operator>(const mindex::MinimizerHitPacked& op) const {
+    bool operator>(const mindex::SeedHitPacked& op) const {
         return this->data_ > op.data_;
     }
 
@@ -132,14 +132,14 @@ class MinimizerHitPacked {
     mindex128_t data_;
 };
 
-class MinimizerHitUnpacked {
+class SeedHitUnpacked {
    public:
-    MinimizerHitUnpacked()
+    SeedHitUnpacked()
         : t_id_(0), t_rev_(false), t_pos_(0),
           q_mask_(0), q_pos_(0) {
     }
 
-    MinimizerHitUnpacked(indid_t _t_id, bool _t_rev, ind_t _t_pos, ind_t _q_pos)
+    SeedHitUnpacked(indid_t _t_id, bool _t_rev, ind_t _t_pos, ind_t _q_pos)
         : t_id_(_t_id),
           t_rev_(_t_rev),
           t_pos_(_t_pos),
@@ -147,15 +147,15 @@ class MinimizerHitUnpacked {
           q_pos_(_q_pos) {
     }
 
-    MinimizerHitUnpacked(const mindex128_t& packed)
-        : t_id_(MinimizerHitPacked::DecodeTargetId(packed)),
-          t_rev_(MinimizerHitPacked::DecodeTargetRev(packed)),
-          t_pos_(MinimizerHitPacked::DecodeTargetPos(packed)),
-          q_mask_(MinimizerHitPacked::DecodeQueryMask(packed)),
-          q_pos_(MinimizerHitPacked::DecodeQueryPos(packed)) {
+    SeedHitUnpacked(const mindex128_t& packed)
+        : t_id_(SeedHitPacked::DecodeTargetId(packed)),
+          t_rev_(SeedHitPacked::DecodeTargetRev(packed)),
+          t_pos_(SeedHitPacked::DecodeTargetPos(packed)),
+          q_mask_(SeedHitPacked::DecodeQueryMask(packed)),
+          q_pos_(SeedHitPacked::DecodeQueryPos(packed)) {
     }
 
-    MinimizerHitUnpacked(const MinimizerHitPacked& packed)
+    SeedHitUnpacked(const SeedHitPacked& packed)
         : t_id_(packed.TargetId()),
           t_rev_(packed.TargetRev()),
           t_pos_(packed.TargetPos()),
@@ -163,10 +163,10 @@ class MinimizerHitUnpacked {
           q_pos_(packed.QueryPos()) {
     }
 
-    ~MinimizerHitUnpacked() = default;
+    ~SeedHitUnpacked() = default;
 
     inline mindex128_t to_128t() {
-        return MinimizerHitPacked::PackTo128t(t_id_, t_rev_, t_pos_, q_mask_, q_pos_);
+        return SeedHitPacked::PackTo128t(t_id_, t_rev_, t_pos_, q_mask_, q_pos_);
     }
 
     inline indid_t TargetId() const {
@@ -197,11 +197,11 @@ class MinimizerHitUnpacked {
     ind_t q_pos_;
 };
 
-inline std::vector<MinimizerHitUnpacked> UnpackMinimizerHitVector(const std::vector<MinimizerHitPacked>& packed) {
-    std::vector<MinimizerHitUnpacked> unpacked;
+inline std::vector<SeedHitUnpacked> UnpackMinimizerHitVector(const std::vector<SeedHitPacked>& packed) {
+    std::vector<SeedHitUnpacked> unpacked;
     unpacked.reserve(packed.size());
     for (auto& hit: packed) {
-        unpacked.emplace_back(MinimizerHitUnpacked(hit));
+        unpacked.emplace_back(SeedHitUnpacked(hit));
     }
     return unpacked;
 }

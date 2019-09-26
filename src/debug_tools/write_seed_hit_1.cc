@@ -5,7 +5,7 @@
 namespace raptor {
 
 void WriteSeedHits(const std::string& out_path,
-                   const std::vector<mindex::MinimizerHitPacked>& seed_hits, int32_t seed_len,
+                   const std::vector<mindex::SeedHitPacked>& seed_hits, int32_t seed_len,
                    const std::string& qname, int64_t qlen,
                    const std::string& rname, int64_t rlen) {
 
@@ -27,7 +27,7 @@ void WriteSeedHits(const std::string& out_path,
 }
 
 void WriteTargetHits(const std::string& out_path,
-                     const std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>>& target_hits,
+                     const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits,
                      int32_t seed_len,
                      const std::string& qname, int64_t qlen,
                      const std::string& rname, int64_t rlen) {

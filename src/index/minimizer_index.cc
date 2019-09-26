@@ -485,7 +485,7 @@ int MinimizerIndex::Load(const std::string& index_path) { return 1; }
 
 int MinimizerIndex::Store(const std::string& index_path) { return 1; }
 
-std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const std::string& seq) {
+std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const std::string& seq) {
     return CollectHits((const int8_t*)&seq[0], seq.size(), 0);
 }
 
@@ -607,10 +607,10 @@ void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
 
 
 // #define EXPERIMENTAL_QUERY_MASK
-std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t* seq,
+std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq,
                                                                     size_t seq_len,
                                                                     indid_t seq_id) {
-    std::vector<mindex::MinimizerHitPacked> hits;
+    std::vector<mindex::SeedHitPacked> hits;
 
     if (seq == NULL || seq_len == 0) {
         return hits;
@@ -706,7 +706,7 @@ std::vector<mindex::MinimizerHitPacked> MinimizerIndex::CollectHits(const int8_t
                         pos += hp_span[pos] - 1;
                     }
 
-                    hits.emplace_back(mindex::MinimizerHitPacked(hit.seq_id, hit_is_rev, hit.pos, query_mask, pos));
+                    hits.emplace_back(mindex::SeedHitPacked(hit.seq_id, hit_is_rev, hit.pos, query_mask, pos));
                 }
             }
         }

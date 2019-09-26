@@ -51,8 +51,8 @@ class Mapper {
         double max_allowed_overlap_frac);
 
 #ifdef USE_LIS_FILTER
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::MinimizerHitPacked>>> LISFilterAndGroupByTarget_(
-        std::vector<mindex::MinimizerHitPacked>& seed_hits, indid_t q_id, ind_t q_len,
+    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> LISFilterAndGroupByTarget_(
+        std::vector<mindex::SeedHitPacked>& seed_hits, indid_t q_id, ind_t q_len,
         ind_t diag_margin, ind_t min_cov_bases, int32_t min_num_hits);
 #endif
 

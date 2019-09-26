@@ -28,8 +28,8 @@ class IndexBase {
     virtual std::string FetchSeqAsString(size_t seq_id, size_t start, size_t end, bool rev_cmp) const = 0;
     virtual const int8_t* FetchRawSeq(size_t seq_id) const = 0;
     virtual int BuildIndex() = 0;
-    virtual std::vector<mindex::MinimizerHitPacked> CollectHits(const int8_t* seq, size_t seq_len, indid_t seq_id = 0) = 0;
-    virtual std::vector<mindex::MinimizerHitPacked> CollectHits(const std::string& seq) = 0;
+    virtual std::vector<mindex::SeedHitPacked> CollectHits(const int8_t* seq, size_t seq_len, indid_t seq_id = 0) = 0;
+    virtual std::vector<mindex::SeedHitPacked> CollectHits(const std::string& seq) = 0;
     virtual int Load(const std::string& index_path) = 0;
     virtual int Store(const std::string& index_path) = 0;
 
