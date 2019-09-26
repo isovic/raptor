@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <index/minimizer_hit.hpp>
+#include <index/seed_hit.hpp>
 #include <containers/target_hits.hpp>
 
 namespace raptor {

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include <sequences/sequence_file.h>
-#include <index/minimizer_hit.hpp>
+#include <index/seed_hit.hpp>
 #include <index/minimizer_index_types.h>
 
 namespace mindex {
