@@ -18,7 +18,7 @@
 #include <index/index_base.h>
 #include <index/index_params.h>
 #include <index/minimizer_index_types.h>
-#include <index/minimizer.hpp>
+#include <index/seed.hpp>
 #include <index/seed_hit.hpp>
 #include <sequences/sequence_file.h>
 
