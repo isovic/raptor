@@ -11,7 +11,7 @@
 #include <writer/raptor_results_writer_stream.h>
 #include <graph/segment_graph_parser.h>
 
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <params/params_raptor.h>
 #include <raptor/raptor.h>
 #include <raptor/mapper.h>

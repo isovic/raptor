@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <containers/target_hits.hpp>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <containers/mapping_result/mapping_result_base.h>
 

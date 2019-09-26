@@ -65,7 +65,7 @@ raptor_cpp_sources = files([
   'raptor/dp_chain.cc',
   'raptor/graph_mapper.cc',
   'raptor/graph_mapper_tools.cc',
-  'raptor/index_factory.cc',
+  'raptor/yield_index.cc',
   'raptor/interval_tree_builder.cc',
   'raptor/mapper.cc',
   'raptor/mapper_tools.cc',

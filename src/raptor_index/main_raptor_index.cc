@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <params/params_raptor_index.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <log/log_tools.h>
 #include <lib/argparser.h>
 #include <version.h>

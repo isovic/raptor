@@ -13,7 +13,7 @@
 #include <sequences/sequence_file.h>
 #include <aligner/aligner_base.h>
 #include <containers/mapping_result/aligned_mapping_result.h>
-#include <raptor/index_factory.h>
+#include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <graph/local_path.h>
 #include <params/params_aligner.h>
