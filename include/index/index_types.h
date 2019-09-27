@@ -67,6 +67,7 @@ namespace mindex {
 
 enum class IndexType {
     Minimizer,
+    Dense,
     Undefined
 };
 
