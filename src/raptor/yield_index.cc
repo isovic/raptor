@@ -21,9 +21,10 @@ std::shared_ptr<mindex::IndexBase> YieldIndex(const std::vector<std::string>& re
                                                 const std::string& index_path, bool rebuild_index,
                                                 bool index_on_the_fly, bool auto_rebuild_index,
                                                 int64_t rdb_block_id,
+                                                mindex::IndexType index_type,
                                                 std::shared_ptr<mindex::IndexParams> index_params) {
 
-    auto index = mindex::createIndex(mindex::IndexType::Minimizer, index_params);
+    auto index = mindex::createIndex(index_type, index_params);
 
     bool load = !rebuild_index && raptor::FileExists(index_path);
     bool store = false;
