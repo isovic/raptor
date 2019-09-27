@@ -17,6 +17,7 @@
 #include <iostream>
 #include <utility/files.hpp>
 #include <utility/fofn.h>
+#include <index/index_types.h>
 
 namespace raptor {
 
@@ -133,6 +134,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     ArgumentParser argparser;
 
     std::string infmt, ref_fmt, graph_fmt, outfmt;
+    std::string index_type_string;
     std::string index_region_string;
     std::string batch_size_str("0");
 
@@ -251,6 +253,12 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     //                       "specified, index will automatically be built if it does not exist, or "
     //                       "loaded from file otherwise.",
     //                       0, "Index options");
+    argparser.AddArgument(&(index_type_string), VALUE_TYPE_STRING, "", "index-type", "minimizer",
+                          "Type of index to use:"
+                          "\n  minimizer"
+                          "\n  dense"
+                          "\n ",
+                          0, "Index options");
     argparser.AddArgument(&(index_region_string), VALUE_TYPE_STRING, "", "region", "",
                           "Indexes only the specified region. Region format: chr:start-end. Start "
                           "is 0-based, and end is not inclusive. If end is <= 0, the entire suffix "
@@ -263,8 +271,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "Length of the seeds used for hashing and lookup.", 0, "Index options");
     argparser.AddArgument(&(parameters->index_params->w), VALUE_TYPE_INT32, "w", "minimizer-window",
                           "5",
-                          "Length of the window to select a minimizer from. If equal to 1, "
-                          "minimizers will be turned off.",
+                          "Length of the window to select a minimizer from if index type is 'minimizer'. Step size if index type is 'dense'.",
                           0, "Index options");
     argparser.AddArgument(&(parameters->index_params->freq_percentil), VALUE_TYPE_DOUBLE, "",
                           "freq-percentile", "0.0002",
@@ -717,6 +724,17 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
             parameters->index_params->region_rend =
                 atoi(index_region_string.substr((dash_pos + 1)).c_str());
         }
+    }
+
+    // Decode the index type.
+    if (index_type_string == "minimizer") {
+        parameters->index_type = mindex::IndexType::Minimizer;
+    } else if (index_type_string == "dense") {
+        parameters->index_type = mindex::IndexType::Dense;
+    } else {
+        parameters->index_type = mindex::IndexType::Undefined;
+        fprintf(stderr, "Unknown index type.\n");
+        VerboseShortHelpAndExit(argc, argv);
     }
 
     if (parameters->do_align && parameters->do_diff) {
