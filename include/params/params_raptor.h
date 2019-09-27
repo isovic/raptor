@@ -15,6 +15,7 @@
 #include <graph/segment_graph_parser_enums.h>
 #include <writer/output_formatter_enums.h>
 #include <index/index_params.h>
+#include <index/index_types.h>
 #include <params/params_mapper.h>
 #include <params/params_aligner.h>
 
@@ -42,6 +43,8 @@ struct ParamsRaptor {
 
     double batch_size = 100.0;
     mindex::BatchLoadType batch_type = mindex::BatchLoadType::MB;
+
+    mindex::IndexType index_type = mindex::IndexType::Undefined;
 
     bool keep_lowercase = false;
 
