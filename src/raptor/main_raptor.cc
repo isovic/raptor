@@ -32,7 +32,7 @@ void APIExample() {
     // Create an index.
     auto index_params = mindex::createIndexParams();
     auto index = raptor::YieldIndex(ref_paths, mindex::SequenceFormat::Auto, std::string("temp.rai"), true,
-                                true, true, -1, index_params);
+                                true, true, -1, mindex::IndexType::Minimizer, index_params);
 
     // Create a mapper.
     auto mapper_params = raptor::createParamsMapper();
@@ -85,6 +85,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 								parameters->index_on_the_fly,
 								parameters->auto_rebuild_index,
 								parameters->rdb_block_ref,
+								parameters->index_type,
 								parameters->index_params);
 
 	LOG_ALL("Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));

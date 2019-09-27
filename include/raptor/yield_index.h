@@ -19,6 +19,7 @@ std::shared_ptr<mindex::IndexBase> YieldIndex(const std::vector<std::string>& re
                                                 const std::string &index_path, bool rebuild_index,
                                                 bool index_on_the_fly, bool auto_rebuild_index,
                                                 int64_t rdb_block_id,
+                                                mindex::IndexType index_type,
                                                 std::shared_ptr<mindex::IndexParams> index_params);
 
 }  // namespace raptor
