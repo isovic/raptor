@@ -230,7 +230,11 @@ int DenseIndex::BuildIndex() {
         fflush(stderr);
     #endif
 
+    clock_t before_hash = clock();
     ConstructHash_(seeds_);
+    clock_t after_hash = clock();
+    double hash_time = ((double)(after_hash - before_hash)) / CLOCKS_PER_SEC;
+    LOG_ALL("Constructed the hash in %.2f seconds.\n", hash_time);
 
     #ifdef RAPTOR_TESTING_MODE
         LOG_ALL("Finally, there are %lld keys, and %llu minimizer seeds.\n", num_keys_, seeds_.size());
