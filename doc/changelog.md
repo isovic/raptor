@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.18.1 -> 0.18.2.
+- Much lower memory consumption. Previously, the seed hits were never released after mapping was performed, which means that for a batch of sequences they would accumulate until the batch was done. The seed hits are no longer required after all mapping and alignment stages are complete, so the MappingWorker_ now clears the target hits vector. This is optional, in case the API user wants to retain the hits.
+
 ## 0.18.0 -> 0.18.1
 - Refactored the index, and abstracted the index interface. Created a factory for the index (which currently only has a MinimizerIndex option).
 - Static library linking now.
