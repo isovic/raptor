@@ -80,6 +80,10 @@ public:
         return target_hits_;
     }
 
+    void ClearTargetHits() {
+        target_hits_.clear();
+    }
+
     void return_value(MapperReturnValueBase _return_value) {
         return_value_ = _return_value;
     }

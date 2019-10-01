@@ -23,7 +23,8 @@ class Raptor;
 
 std::unique_ptr<Raptor> createRaptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
                                      const raptor::SplitSegmentGraphPtr ssg,
-                                     const std::shared_ptr<ParamsRaptor> params);
+                                     const std::shared_ptr<ParamsRaptor> params,
+                                     bool cleanup_target_hits);
 
 enum class RaptorReturnValue {
     OK,
@@ -47,7 +48,8 @@ class Raptor {
    public:
     friend std::unique_ptr<Raptor> createRaptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
                                                 const raptor::SplitSegmentGraphPtr ssg,
-                                                const std::shared_ptr<ParamsRaptor> params);
+                                                const std::shared_ptr<ParamsRaptor> params,
+                                                bool cleanup_target_hits);
     ~Raptor();
 
     void Clear();
@@ -58,18 +60,22 @@ class Raptor {
    private:
     Raptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
            const raptor::SplitSegmentGraphPtr ssg,
-           const std::shared_ptr<ParamsRaptor> params);
+           const std::shared_ptr<ParamsRaptor> params,
+           bool cleanup_target_hits);
     Raptor(const Raptor&) = delete;
     Raptor& operator=(const Raptor&) = delete;
 
-    RaptorReturnValue PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results) const;
+    RaptorReturnValue PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results, bool cleanup_target_hits) const;
 
     static int MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::IndexPtr index,
                               const raptor::GraphPtr graph, const raptor::SplitSegmentGraphPtr ssg,
                               const std::shared_ptr<ParamsRaptor> params,
-                              const MappingJob& mapping_job, std::vector<RaptorResults>& results);
+                              const MappingJob& mapping_job, std::vector<RaptorResults>& results,
+                              bool cleanup_target_hits // If true, target_hits will be cleared to reduce memory consumption.
+                              );
 
     const std::shared_ptr<ParamsRaptor> params_;
+    bool cleanup_target_hits_;
     const mindex::IndexPtr index_;
     const raptor::GraphPtr graph_;
     const raptor::SplitSegmentGraphPtr ssg_;
