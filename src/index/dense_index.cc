@@ -155,7 +155,7 @@ int DenseIndex::BuildIndex() {
 
         size_t num_seeds_before = seeds_.size();
 
-        GenerateMinimizers_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
+        GenerateSeeds_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
                             !params_->index_only_fwd_strand,
                             params_->homopolymer_suppression, params_->max_homopolymer_len,
                             region_rstart, region_rend);
@@ -627,18 +627,18 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
     hits.reserve(seq_len);
 
     // For lookup, don't index the reverse complement;
-    std::vector<mindex128_t> minimizers;
+    std::vector<mindex128_t> seeds;
 
     // We must enforce w = 1 in the query sequence because these are not minimizers.
-    int ret_val = GenerateMinimizers_(
-        minimizers, seq, seq_len, 0, seq_id, params_->k, 1, !params_->index_only_fwd_strand,
+    int ret_val = GenerateSeeds_(
+        seeds, seq, seq_len, 0, seq_id, params_->k, 1, !params_->index_only_fwd_strand,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     // tt1.stop();
     // std::cerr << "Time for GenerateMinimizers: " << tt1.get_msecs() << std::endl;
 
 #ifdef EXPERIMENTAL_QUERY_MASK
-    kx::radix_sort(minimizers.begin(), minimizers.end());
+    kx::radix_sort(seeds.begin(), seeds.end());
 #endif
 
     if (ret_val) {
@@ -652,7 +652,7 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
 
     // To properly handle the reverse complement hit coordinates, the reverse minimizer
     // position _end_ location needs to be known. One way would be to store that with
-    // the minimizer when generating minimizers.
+    // the minimizer when generating seeds.
     // Instead, we calculate the end position on the fly, so that the number of bits
     // in a minimizes's position is not reduced.
     std::vector<int32_t> hp_span = (params_->homopolymer_suppression == false)
@@ -667,9 +667,9 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
 
     // VerboseSeeds_(std::cerr);
 
-    for (size_t min_id = 0; min_id < minimizers.size(); ++min_id) {
+    for (size_t min_id = 0; min_id < seeds.size(); ++min_id) {
         // Decode the minimizer.
-        mindex::Seed minimizer(minimizers[min_id]);
+        mindex::Seed minimizer(seeds[min_id]);
         bool minimizer_is_rev = minimizer.is_rev();
 
         // Query mask is an additional filter which will be encoded in the seed hit.
@@ -677,10 +677,10 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
         // or other interesting info which should impact the sorting order.
         int32_t query_mask = 0x0;
         #ifdef EXPERIMENTAL_QUERY_MASK
-                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id - 1]) >> 8)) {
+                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(seeds[min_id - 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
-                if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id + 1]) >> 8)) {
+                if ((min_id + 1) < seeds.size() && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id + 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
         #endif
@@ -722,7 +722,7 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
     return hits;
 }
 
-int DenseIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
+int DenseIndex::GenerateSeeds_(std::vector<mindex128_t>& minimizers,
                                         const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
                                         indid_t seq_id, int32_t k, int32_t w, bool use_rc,
                                         bool homopolymer_suppression,
