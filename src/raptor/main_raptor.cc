@@ -122,7 +122,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	int64_t total_processed = 0;
 
 	LOG_ALL("Creating the Raptor object.\n");
-	auto raptor = raptor::createRaptor(index, graph, ssg, parameters);
+	auto raptor = raptor::createRaptor(index, graph, ssg, parameters, true);
 
 	if (parameters->infmt == mindex::SequenceFormat::RaptorDB) {
 

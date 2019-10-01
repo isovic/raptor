@@ -24,14 +24,17 @@ namespace raptor {
 
 std::unique_ptr<Raptor> createRaptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
                                      const raptor::SplitSegmentGraphPtr ssg,
-                                     const std::shared_ptr<ParamsRaptor> params) {
-    return std::unique_ptr<Raptor>(new Raptor(index, graph, ssg, params));
+                                     const std::shared_ptr<ParamsRaptor> params,
+                                     bool cleanup_target_hits) {
+    return std::unique_ptr<Raptor>(new Raptor(index, graph, ssg, params, cleanup_target_hits));
 }
 
 Raptor::Raptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
                const raptor::SplitSegmentGraphPtr ssg,
-               const std::shared_ptr<ParamsRaptor> params)
+               const std::shared_ptr<ParamsRaptor> params,
+               bool cleanup_target_hits)
     : params_(params),
+      cleanup_target_hits_(cleanup_target_hits),
       index_(index),
       graph_(graph),
       ssg_(ssg),
@@ -62,14 +65,14 @@ RaptorReturnValue Raptor::Align(const mindex::SequenceFilePtr reads) {
         LOG_ALL("Pairwise aligning reads to the reference.\n");
 #endif
 
-    auto pairwise_ret = PairwiseAlign_(reads, results_);
+    auto pairwise_ret = PairwiseAlign_(reads, results_, cleanup_target_hits_);
 
     mapping_status_ = RaptorReturnValue::OK;
 
     return RaptorReturnValue::OK;
 }
 
-RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results) const {
+RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results, bool cleanup_target_hits) const {
 
     results.clear();
     results.resize(reads->seqs().size());
@@ -199,7 +202,7 @@ RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, st
     for (int i = 0; i < mapping_jobs.size(); i++) {
         thread_futures.emplace_back(
             thread_pool->submit_task(MappingWorker_, reads, index_, graph_, ssg_, params_,
-                                     std::cref(mapping_jobs[i]), std::ref(results)));
+                                     std::cref(mapping_jobs[i]), std::ref(results), cleanup_target_hits));
     }
 
     // Wait for threads to finish.
@@ -213,7 +216,9 @@ RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, st
 int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::IndexPtr index,
                            const raptor::GraphPtr graph, const raptor::SplitSegmentGraphPtr ssg,
                            const std::shared_ptr<ParamsRaptor> params,
-                           const MappingJob& mapping_job, std::vector<RaptorResults>& results) {
+                           const MappingJob& mapping_job, std::vector<RaptorResults>& results,
+                           bool cleanup_target_hits // If true, target_hits will be cleared to reduce memory consumption.
+                           ) {
     // The results vector needs to be large enough to store results for a particular range.
     if (results.size() < mapping_job.read_range.end) {
         return 1;
@@ -365,6 +370,9 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
         }
 
+        if (cleanup_target_hits) {
+            results[i].mapping_result->ClearTargetHits();
+        }
     }
 
     return 0;
