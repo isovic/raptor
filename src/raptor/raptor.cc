@@ -234,6 +234,10 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
     auto graph_mapper = createGraphMapper(index, graph, ssg, params->mapper_params);
     auto raptor_aligner = createRaptorAligner(index, params->aligner_params, aligner, aligner, aligner_ext);
 
+    std::shared_ptr<raptor::LinearMappingResult> mapping_result;
+    std::shared_ptr<raptor::GraphMappingResult> graph_mapping_result;
+    std::shared_ptr<raptor::AlignedMappingResult> aln_result;
+
     for (int64_t i = mapping_job.read_range.start; i < mapping_job.read_range.end; i++) {
 #ifdef RAPTOR_TESTING_MODE
         if (params->verbose_level >= 9) {
@@ -249,12 +253,10 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
         const auto& qseq = reads->seqs()[i];
         results[i].q_id_in_batch = qseq->id();   // It's important that this is not the absolute ID, but the local batch ID.
-        results[i].mapping_result = mapper->Map(qseq);
+        mapping_result = mapper->Map(qseq);
 
         if (graph != nullptr && params->mapper_params->no_graph_mapping == false) {
-            auto graph_mapping_result =
-                graph_mapper->Map(qseq, results[i].mapping_result);
-            results[i].graph_mapping_result = graph_mapping_result;
+            graph_mapping_result = graph_mapper->Map(qseq, mapping_result);
 
         } else {
             // Map to a dummy graph, where each path will be (almost) equal to a single chain,
@@ -262,9 +264,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             // results[i].mapping_result->Filter(params->bestn, params->bestn_threshold,
             // params->min_map_len, false);
-            auto graph_mapping_result =
-                graph_mapper->DummyMap(qseq, results[i].mapping_result);
-            results[i].graph_mapping_result = graph_mapping_result;
+            graph_mapping_result = graph_mapper->DummyMap(qseq, mapping_result);
         }
 
         if (params->do_align) {
@@ -273,7 +273,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             DEBUG_QSEQ(params, qseq, LOG_ALL("Filtering mappings...\n"));
 
             // Filter mappings, but leave room for error and mapq calculation.
-            results[i].graph_mapping_result->Filter(-1,
+            graph_mapping_result->Filter(-1,
                                                     std::max(0.20, params->bestn_threshold),
                                                     params->min_map_len,
                                                     0,
@@ -284,11 +284,11 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             #ifdef RAPTOR_TESTING_MODE
                 if (params->debug_qid == qseq->abs_id() ||
                     params->debug_qname == std::string(qseq->header())) {
-                    if (results[i].graph_mapping_result == nullptr) {
-                        LOG_ALL("Warning, results[i].graph_mapping_result == nullptr! q_id = %ld, q_len = %ld, qname = '%s'. Skipping.\n", i, qseq->data().size(), qseq->header().c_str());
+                    if (graph_mapping_result == nullptr) {
+                        LOG_ALL("Warning, graph_mapping_result == nullptr! q_id = %ld, q_len = %ld, qname = '%s'. Skipping.\n", i, qseq->data().size(), qseq->header().c_str());
                         continue;
                     }
-                    const std::vector<std::shared_ptr<raptor::LocalPath>>& paths = results[i].graph_mapping_result->paths();
+                    const std::vector<std::shared_ptr<raptor::LocalPath>>& paths = graph_mapping_result->paths();
                     LOG_NOHEADER("Filtered paths before alignment:\n");
                     for (size_t path_id = 0; path_id < paths.size(); ++path_id) {
                         const auto path = paths[path_id];
@@ -304,26 +304,26 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Aligning paths...\n"));
 
-            results[i].aln_result = raptor_aligner->AlignPaths(
-                (reads->seqs()[i]), results[i].graph_mapping_result->paths());
+            aln_result = raptor_aligner->AlignPaths(
+                (reads->seqs()[i]), graph_mapping_result->paths());
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Finished AlignPaths. Now on to filtering.\n"));
 
-            results[i].aln_result->Filter(params->bestn, params->bestn_threshold,
+            aln_result->Filter(params->bestn, params->bestn_threshold,
                                           params->min_map_len,
                                           params->min_mapq,
                                           params->min_identity, false);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
-            results[i].regions = results[i].aln_result->CollectRegions(params->one_hit_per_target);
+            results[i].regions = aln_result->CollectRegions(params->one_hit_per_target);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
 
         } else {
             DEBUG_QSEQ(params, qseq, LOG_ALL("Not aligning the paths because params->do_align == false.\n"));
 
-            results[i].graph_mapping_result->Filter(params->bestn,
+            graph_mapping_result->Filter(params->bestn,
                                                     params->bestn_threshold,
                                                     params->min_map_len,
                                                     (params->do_align) ? 0 : params->min_mapq,
@@ -332,7 +332,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             if (params->mapper_params->flank_ext_len != 0) {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Extending flanks up to length %ld.\n", params->mapper_params->flank_ext_len));
-                const std::vector<std::shared_ptr<raptor::LocalPath>>& paths = results[i].graph_mapping_result->paths();
+                const std::vector<std::shared_ptr<raptor::LocalPath>>& paths = graph_mapping_result->paths();
                 std::vector<std::shared_ptr<raptor::LocalPath>> new_paths;
                 for (size_t path_id = 0; path_id < paths.size(); ++path_id) {
                     auto path = paths[path_id];
@@ -342,7 +342,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                     auto new_path = raptor::PathAligner::FlankExtend(index, qseq, aligner_ext, params->mapper_params->flank_ext_len, path);
                     new_paths.emplace_back(new_path);
                 }
-                results[i].graph_mapping_result->paths(new_paths);
+                graph_mapping_result->paths(new_paths);
 
             } else {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Not extending the flanks because flank_ext_len == 0."));
@@ -350,7 +350,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
-            results[i].regions = results[i].graph_mapping_result->CollectRegions(params->one_hit_per_target);
+            results[i].regions = graph_mapping_result->CollectRegions(params->one_hit_per_target);
 
             if (params->do_diff) {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Performing diff alignment without traceback."));
@@ -370,8 +370,21 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
         }
 
-        if (cleanup_target_hits) {
-            results[i].mapping_result->ClearTargetHits();
+        // Accumulate all timing results.
+        if (mapping_result != nullptr) {
+            const auto& other_timings = mapping_result->Timings();
+            results[i].timings.insert(other_timings.begin(), other_timings.end());
+            results[i].mapq = 0;
+        }
+        if (graph_mapping_result != nullptr) {
+            const auto& other_timings = graph_mapping_result->Timings();
+            results[i].timings.insert(other_timings.begin(), other_timings.end());
+            results[i].mapq = graph_mapping_result->CalcMapq();
+        }
+        if (aln_result != nullptr) {
+            const auto& other_timings = aln_result->Timings();
+            results[i].timings.insert(other_timings.begin(), other_timings.end());
+            results[i].mapq = aln_result->CalcMapq();
         }
     }
 

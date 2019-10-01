@@ -73,31 +73,10 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Output BAM file not opened. Ensure that WriteHeader is called first.");
     }
 
-    int32_t mapq = 0;
-    std::string timings_all;
-    bool do_output = false;
+    bool do_output = !result.regions.empty();
+    std::string timings_all = OutputFormatter::TimingMapToString(result.timings);
+    int32_t mapq = result.mapq;
     const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
-
-    // Collect the results to write.
-    // Branching is because the output can either be aligned or unaligned.
-    if (is_alignment_applied) {
-        do_output = (result.aln_result != nullptr && result.aln_result->path_alignments().empty() == false);
-        if (do_output) {
-            mapq = result.aln_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
-
-    } else {
-        do_output = (result.graph_mapping_result != nullptr && result.graph_mapping_result->paths().empty() == false);
-        if (do_output) {
-            mapq = result.graph_mapping_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
-    }
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {

@@ -57,12 +57,14 @@ void APIExample() {
     for (auto& seq: reads->seqs()) {
         raptor::RaptorResults results;
 
-        results.mapping_result = mapper->Map((seq));
+        auto mapping_result = mapper->Map((seq));
 
         // Mapping results can at this point be used downstream. However,
         // to pull them through the writer, we need to first run graph mapping
         // (otherwise, the writter will not generate output).
-        results.graph_mapping_result = graph_mapper->Map((seq), results.mapping_result);
+        auto graph_mapping_result = graph_mapper->Map((seq), mapping_result);
+
+		results.regions = graph_mapping_result->CollectRegions(false);
 
         // results.mapping_result->Filter(1, 0.01, -1, false);
         writer->WriteSingleResult(reads, results, false, true, false);
