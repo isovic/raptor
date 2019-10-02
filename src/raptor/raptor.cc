@@ -257,7 +257,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
         std::vector<std::shared_ptr<raptor::RegionBase>> regions;
         std::unordered_map<std::string, double> timings;
         int32_t mapq = 0;
-        int64_t q_id_in_batch = qseq->id(); // It's important that this is not the absolute ID, but the local batch ID.
+        int64_t q_id = qseq->abs_id(); // It's important that this is not the absolute ID, but the local batch ID.
 
         // Linear mapping.
         auto mapper = createMapper(index, params->mapper_params);
@@ -395,7 +395,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             mapq = aln_result->CalcMapq();
         }
 
-        results[i] = raptor::createRaptorResults(q_id_in_batch, regions, timings, mapq);
+        results[i] = raptor::createRaptorResults(q_id, regions, timings, mapq);
     }
 
     return 0;

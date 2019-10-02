@@ -34,8 +34,8 @@ class RaptorResults {
 
     ~RaptorResults() { }
 
-    int64_t q_id_in_batch() const {
-        return q_id_in_batch_;
+    int64_t q_id() const {
+        return q_id_;
     }
     const std::vector<std::shared_ptr<raptor::RegionBase>>& regions() const {
         return regions_;
@@ -49,7 +49,7 @@ class RaptorResults {
 
   private:
     RaptorResults()
-                    : q_id_in_batch_(-1),
+                    : q_id_(-1),
                     regions_(),
                     timings_(),
                     mapq_(0)
@@ -59,13 +59,13 @@ class RaptorResults {
                 const std::vector<std::shared_ptr<raptor::RegionBase>>& regions,
                 const std::unordered_map<std::string, double>& timings,
                 int32_t mapq)
-                :   q_id_in_batch_(q_id),
+                :   q_id_(q_id),
                     regions_(regions),
                     timings_(timings),
                     mapq_(mapq)
     { }
 
-    int64_t q_id_in_batch_;
+    int64_t q_id_;
     std::vector<std::shared_ptr<raptor::RegionBase>> regions_;
     std::unordered_map<std::string, double> timings_;
     int32_t mapq_;
