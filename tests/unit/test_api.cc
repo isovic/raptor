@@ -80,8 +80,6 @@ TEST(APIExamples, APITest1) {
     reads->LoadAll(qnames_1, queries_1);
 
     for (auto& seq: reads->seqs()) {
-        raptor::RaptorResults results;
-
         // Linear mapping.
         auto mapping_result = mapper->Map(seq);
 
@@ -91,8 +89,9 @@ TEST(APIExamples, APITest1) {
         // The graph can be empty.
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
-        results.regions = graph_mapping_result->CollectRegions(true);
-        results.mapq = graph_mapping_result->CalcMapq();
+        auto regions = graph_mapping_result->CollectRegions(true);
+        auto mapq = graph_mapping_result->CalcMapq();
+        auto results = raptor::createRaptorResults(seq->id(), regions, {}, mapq);
 
         // results.mapping_result->Filter(1, 0.01, -1, false);
         writer->WriteSingleResult(reads, results, false, true, false);
@@ -160,8 +159,6 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
     std::ostringstream oss;
 
     for (auto& seq: reads->seqs()) {
-        raptor::RaptorResults results;
-
         ///////////////////////////////////////////////////////////////////////
         ///// Example: Linear alignment.                                  /////
         ///////////////////////////////////////////////////////////////////////

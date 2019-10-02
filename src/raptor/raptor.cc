@@ -72,7 +72,7 @@ RaptorReturnValue Raptor::Align(const mindex::SequenceFilePtr reads) {
     return RaptorReturnValue::OK;
 }
 
-RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results, bool cleanup_target_hits) const {
+RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<std::unique_ptr<RaptorResults>>& results, bool cleanup_target_hits) const {
 
     results.clear();
     results.resize(reads->seqs().size());
@@ -216,7 +216,8 @@ RaptorReturnValue Raptor::PairwiseAlign_(const mindex::SequenceFilePtr reads, st
 int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::IndexPtr index,
                            const raptor::GraphPtr graph, const raptor::SplitSegmentGraphPtr ssg,
                            const std::shared_ptr<ParamsRaptor> params,
-                           const MappingJob& mapping_job, std::vector<RaptorResults>& results,
+                           const MappingJob& mapping_job,
+                           std::vector<std::unique_ptr<RaptorResults>>& results,
                            bool cleanup_target_hits // If true, target_hits will be cleared to reduce memory consumption.
                            ) {
     // The results vector needs to be large enough to store results for a particular range.
@@ -249,10 +250,17 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             continue;
         }
 
-        auto mapper = createMapper(index, params->mapper_params);
-
+        // Shorthand to the qseq for later.
         const auto& qseq = reads->seqs()[i];
-        results[i].q_id_in_batch = qseq->id();   // It's important that this is not the absolute ID, but the local batch ID.
+
+        // These are the results which will be stored in a new RaptorResults object.
+        std::vector<std::shared_ptr<raptor::RegionBase>> regions;
+        std::unordered_map<std::string, double> timings;
+        int32_t mapq = 0;
+        int64_t q_id_in_batch = qseq->id(); // It's important that this is not the absolute ID, but the local batch ID.
+
+        // Linear mapping.
+        auto mapper = createMapper(index, params->mapper_params);
         mapping_result = mapper->Map(qseq);
 
         if (graph != nullptr && params->mapper_params->no_graph_mapping == false) {
@@ -262,7 +270,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             // Map to a dummy graph, where each path will be (almost) equal to a single chain,
             // without any additional edges added.
 
-            // results[i].mapping_result->Filter(params->bestn, params->bestn_threshold,
+            // mapping_result->Filter(params->bestn, params->bestn_threshold,
             // params->min_map_len, false);
             graph_mapping_result = graph_mapper->DummyMap(qseq, mapping_result);
         }
@@ -316,7 +324,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
-            results[i].regions = aln_result->CollectRegions(params->one_hit_per_target);
+            regions = aln_result->CollectRegions(params->one_hit_per_target);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
 
@@ -350,14 +358,14 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
-            results[i].regions = graph_mapping_result->CollectRegions(params->one_hit_per_target);
+            regions = graph_mapping_result->CollectRegions(params->one_hit_per_target);
 
             if (params->do_diff) {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Performing diff alignment without traceback."));
 
                 auto difflib = raptor::createDifflibEdlib();
-                for (size_t region_id = 0; region_id < results[i].regions.size(); ++region_id) {
-                    auto& region = results[i].regions[region_id];
+                for (size_t region_id = 0; region_id < regions.size(); ++region_id) {
+                    auto& region = regions[region_id];
                     const char* tseq_raw = (const char*) index->FetchRawSeq(region->TargetID());
 
                     int64_t diffs = difflib->CalcDiffs((const char *) qseq->data().data(), region->QueryStart(), region->QueryEnd(), region->QueryLen(),
@@ -373,19 +381,21 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
         // Accumulate all timing results.
         if (mapping_result != nullptr) {
             const auto& other_timings = mapping_result->Timings();
-            results[i].timings.insert(other_timings.begin(), other_timings.end());
-            results[i].mapq = 0;
+            timings.insert(other_timings.begin(), other_timings.end());
+            mapq = 0;
         }
         if (graph_mapping_result != nullptr) {
             const auto& other_timings = graph_mapping_result->Timings();
-            results[i].timings.insert(other_timings.begin(), other_timings.end());
-            results[i].mapq = graph_mapping_result->CalcMapq();
+            timings.insert(other_timings.begin(), other_timings.end());
+            mapq = graph_mapping_result->CalcMapq();
         }
         if (aln_result != nullptr) {
             const auto& other_timings = aln_result->Timings();
-            results[i].timings.insert(other_timings.begin(), other_timings.end());
-            results[i].mapq = aln_result->CalcMapq();
+            timings.insert(other_timings.begin(), other_timings.end());
+            mapq = aln_result->CalcMapq();
         }
+
+        results[i] = raptor::createRaptorResults(q_id_in_batch, regions, timings, mapq);
     }
 
     return 0;
