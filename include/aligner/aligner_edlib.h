@@ -63,7 +63,7 @@ class AlignerEdlib : public AlignerBase {
     AlignerEdlib(AlignerEdlib&&) = delete;                   // No move constructor.
     AlignerEdlib& operator=(const AlignerEdlib&&) = delete;  // No copying.
 
-    const raptor::AlignmentOptions& opt_;
+    const raptor::AlignmentOptions opt_;
 };
 
 } /* namespace raptor */

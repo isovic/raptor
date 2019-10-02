@@ -61,48 +61,23 @@ void RaptorResultsWriterStream::WriteHeader(const mindex::HeaderGroupType header
     }
 }
 
-void RaptorResultsWriterStream::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterStream::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<std::unique_ptr<raptor::RaptorResults>>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     for (auto& result: results) {
         WriteSingleResult(seqs, result, is_alignment_applied, write_custom_tags, one_hit_per_target);
     }
     oss_ptr_->flush();
 }
 
-void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
-    int32_t mapq = 0;
-    std::string timings_all;
-    bool do_output = false;
-    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
-
-    // Collect the results to write.
-    // Branching is because the output can either be aligned or unaligned.
-    if (is_alignment_applied) {
-        do_output = (result.aln_result != nullptr && result.aln_result->path_alignments().empty() == false);
-        if (do_output) {
-            mapq = result.aln_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
-
-    } else {
-        do_output = (result.graph_mapping_result != nullptr && result.graph_mapping_result->paths().empty() == false);
-        if (do_output) {
-            mapq = result.graph_mapping_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
+void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr seqs, const std::unique_ptr<raptor::RaptorResults>& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+    if (result == nullptr) {
+        return;
     }
 
-    // This cannot be written here - because it would be dumped after _each_ query sequence.
-    // // Write the header for the current sequences.
-    // if (outfmt_ == raptor::OutputFormat::GFA2) {
-    //     for (const auto& seq: seqs->seqs()) {
-    //         std::string header = TrimToFirstSpace(seq->header());
-    //         *oss_ptr_ << "S\t" << header << "\t" << seq->len() << "\t" << "*" << std::endl;
-    //     }
-    // }
+    bool do_output = !result->regions().empty();
+    std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
+    int32_t mapq = result->mapq();
+    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
+    int64_t q_id = result->q_id();
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
@@ -125,12 +100,12 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
             }
         }
     } else {
-        // If the q_id_in_batch < 0, it means that the result was initialized, but never
+        // If the q_id < 0, it means that the result was initialized, but never
         // updated.
         // This can happen in processing a certain range of reads, and all the other ones
         // outside this range will not be processed, but could have still been allocated.
-        if (result.q_id_in_batch >= 0) {
-            const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
+        if (q_id >= 0) {
+            const auto& qseq = seqs->GetSeqByAbsID(q_id);
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
                 *oss_ptr_ << OutputFormatter::UnmappedSAM(qseq, write_custom_tags);

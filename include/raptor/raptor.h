@@ -16,6 +16,7 @@
 #include <containers/raptor_results.h>
 #include <raptor/yield_index.h>
 #include <graph/split_segment_graph.h>
+#include <types/typedefs.h>
 
 namespace raptor {
 
@@ -55,7 +56,7 @@ class Raptor {
     void Clear();
     RaptorReturnValue Align(const mindex::SequenceFilePtr reads);
 
-    const std::vector<RaptorResults>& results() const { return results_; }
+    const std::vector<std::unique_ptr<RaptorResults>>& results() const { return results_; }
 
    private:
     Raptor(const mindex::IndexPtr index, const raptor::GraphPtr graph,
@@ -65,12 +66,13 @@ class Raptor {
     Raptor(const Raptor&) = delete;
     Raptor& operator=(const Raptor&) = delete;
 
-    RaptorReturnValue PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<RaptorResults>& results, bool cleanup_target_hits) const;
+    RaptorReturnValue PairwiseAlign_(const mindex::SequenceFilePtr reads, std::vector<std::unique_ptr<RaptorResults>>& results, bool cleanup_target_hits) const;
 
     static int MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::IndexPtr index,
                               const raptor::GraphPtr graph, const raptor::SplitSegmentGraphPtr ssg,
                               const std::shared_ptr<ParamsRaptor> params,
-                              const MappingJob& mapping_job, std::vector<RaptorResults>& results,
+                              const MappingJob& mapping_job,
+                              std::vector<std::unique_ptr<RaptorResults>>& results,
                               bool cleanup_target_hits // If true, target_hits will be cleared to reduce memory consumption.
                               );
 
@@ -79,7 +81,7 @@ class Raptor {
     const mindex::IndexPtr index_;
     const raptor::GraphPtr graph_;
     const raptor::SplitSegmentGraphPtr ssg_;
-    std::vector<RaptorResults> results_;
+    std::vector<std::unique_ptr<RaptorResults>> results_;
     RaptorReturnValue mapping_status_;
 };
 

@@ -58,7 +58,7 @@ void RaptorResultsWriterBAM::WriteHeader(const mindex::HeaderGroupType header_gr
 
 }
 
-void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<std::unique_ptr<raptor::RaptorResults>>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     if (bam_writer_ == nullptr) {
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Output BAM file not opened. Ensure that WriteHeader is called first.");
     }
@@ -68,36 +68,20 @@ void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, cons
     }
 }
 
-void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seqs, const std::unique_ptr<raptor::RaptorResults>& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     if (bam_writer_ == nullptr) {
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Output BAM file not opened. Ensure that WriteHeader is called first.");
     }
 
-    int32_t mapq = 0;
-    std::string timings_all;
-    bool do_output = false;
-    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
-
-    // Collect the results to write.
-    // Branching is because the output can either be aligned or unaligned.
-    if (is_alignment_applied) {
-        do_output = (result.aln_result != nullptr && result.aln_result->path_alignments().empty() == false);
-        if (do_output) {
-            mapq = result.aln_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
-
-    } else {
-        do_output = (result.graph_mapping_result != nullptr && result.graph_mapping_result->paths().empty() == false);
-        if (do_output) {
-            mapq = result.graph_mapping_result->CalcMapq();
-            std::string map_timings = OutputFormatter::TimingMapToString(result.mapping_result->timings());
-            std::string graphmap_timings = OutputFormatter::TimingMapToString(result.graph_mapping_result->timings());
-            timings_all = map_timings + "///" + graphmap_timings;
-        }
+    if (result == nullptr) {
+        return;
     }
+
+    bool do_output = !result->regions().empty();
+    std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
+    int32_t mapq = result->mapq();
+    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
+    int64_t q_id = result->q_id();
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
@@ -114,12 +98,12 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
             // bam_writer_->Write(*record);
         }
     } else {
-        // If the q_id_in_batch < 0, it means that the result was initialized, but never
+        // If the q_id < 0, it means that the result was initialized, but never
         // updated.
         // This can happen in processing a certain range of reads, and all the other ones
         // outside this range will not be processed, but could have still been allocated.
-        if (result.q_id_in_batch >= 0) {
-            const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
+        if (q_id >= 0) {
+            const auto& qseq = seqs->GetSeqByAbsID(q_id);
 
             auto record = ToUnmappedBAM(qseq);
             bam_writer_->Write(record);

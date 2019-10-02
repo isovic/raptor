@@ -62,7 +62,7 @@ class AlignerKSW2Single : public AlignerBase {
                                int tlen, int8_t m, const int8_t* mat, int8_t q, int8_t e, int w,
                                int zdrop, int end_bonus, int flag, ksw_extz_t* ez);
 
-    const raptor::AlignmentOptions& opt_;
+    const raptor::AlignmentOptions opt_;
 };
 
 } /* namespace raptor */
