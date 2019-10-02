@@ -61,18 +61,23 @@ void RaptorResultsWriterStream::WriteHeader(const mindex::HeaderGroupType header
     }
 }
 
-void RaptorResultsWriterStream::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterStream::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<std::unique_ptr<raptor::RaptorResults>>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     for (auto& result: results) {
         WriteSingleResult(seqs, result, is_alignment_applied, write_custom_tags, one_hit_per_target);
     }
     oss_ptr_->flush();
 }
 
-void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
-    bool do_output = !result.regions.empty();
-    std::string timings_all = OutputFormatter::TimingMapToString(result.timings);
-    int32_t mapq = result.mapq;
-    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
+void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr seqs, const std::unique_ptr<raptor::RaptorResults>& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+    if (result == nullptr) {
+        return;
+    }
+
+    bool do_output = !result->regions().empty();
+    std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
+    int32_t mapq = result->mapq();
+    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
+    int64_t q_id_in_batch = result->q_id_in_batch();
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
@@ -99,8 +104,8 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
         // updated.
         // This can happen in processing a certain range of reads, and all the other ones
         // outside this range will not be processed, but could have still been allocated.
-        if (result.q_id_in_batch >= 0) {
-            const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
+        if (q_id_in_batch >= 0) {
+            const auto& qseq = seqs->GetSeqByID(q_id_in_batch);
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
                 *oss_ptr_ << OutputFormatter::UnmappedSAM(qseq, write_custom_tags);

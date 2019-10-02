@@ -58,7 +58,7 @@ void RaptorResultsWriterBAM::WriteHeader(const mindex::HeaderGroupType header_gr
 
 }
 
-void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<RaptorResults>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, const std::vector<std::unique_ptr<raptor::RaptorResults>>& results, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     if (bam_writer_ == nullptr) {
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Output BAM file not opened. Ensure that WriteHeader is called first.");
     }
@@ -68,15 +68,20 @@ void RaptorResultsWriterBAM::WriteBatch(const mindex::SequenceFilePtr seqs, cons
     }
 }
 
-void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seqs, const RaptorResults& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
+void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seqs, const std::unique_ptr<raptor::RaptorResults>& result, bool is_alignment_applied, bool write_custom_tags, bool one_hit_per_target) {
     if (bam_writer_ == nullptr) {
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Output BAM file not opened. Ensure that WriteHeader is called first.");
     }
 
-    bool do_output = !result.regions.empty();
-    std::string timings_all = OutputFormatter::TimingMapToString(result.timings);
-    int32_t mapq = result.mapq;
-    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result.regions;
+    if (result == nullptr) {
+        return;
+    }
+
+    bool do_output = !result->regions().empty();
+    std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
+    int32_t mapq = result->mapq();
+    const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
+    int64_t q_id_in_batch = result->q_id_in_batch();
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
@@ -97,8 +102,8 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
         // updated.
         // This can happen in processing a certain range of reads, and all the other ones
         // outside this range will not be processed, but could have still been allocated.
-        if (result.q_id_in_batch >= 0) {
-            const auto& qseq = seqs->GetSeqByID(result.q_id_in_batch);
+        if (q_id_in_batch >= 0) {
+            const auto& qseq = seqs->GetSeqByID(q_id_in_batch);
 
             auto record = ToUnmappedBAM(qseq);
             bam_writer_->Write(record);
