@@ -81,7 +81,7 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
     std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
     int32_t mapq = result->mapq();
     const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
-    int64_t q_id_in_batch = result->q_id_in_batch();
+    int64_t q_id = result->q_id();
 
     // The writing code is generic.
     if (do_output && !regions_to_write.empty()) {
@@ -98,12 +98,12 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
             // bam_writer_->Write(*record);
         }
     } else {
-        // If the q_id_in_batch < 0, it means that the result was initialized, but never
+        // If the q_id < 0, it means that the result was initialized, but never
         // updated.
         // This can happen in processing a certain range of reads, and all the other ones
         // outside this range will not be processed, but could have still been allocated.
-        if (q_id_in_batch >= 0) {
-            const auto& qseq = seqs->GetSeqByID(q_id_in_batch);
+        if (q_id >= 0) {
+            const auto& qseq = seqs->GetSeqByAbsID(q_id);
 
             auto record = ToUnmappedBAM(qseq);
             bam_writer_->Write(record);
