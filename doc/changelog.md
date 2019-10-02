@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.18.2 -> 0.18.3.
+- Further significant reduction in memory consumption. All intermediate information (linear mapping, graph mapping and alignment) can be cleared after the query has been processed, because only the regions are important. For larger batches and more accurate data, this provides a significant reduction in required memory.
+- Refactoring of the RaptorResults.
+
 ## 0.18.1 -> 0.18.2.
 - Much lower memory consumption. Previously, the seed hits were never released after mapping was performed, which means that for a batch of sequences they would accumulate until the batch was done. The seed hits are no longer required after all mapping and alignment stages are complete, so the MappingWorker_ now clears the target hits vector. This is optional, in case the API user wants to retain the hits.
 
