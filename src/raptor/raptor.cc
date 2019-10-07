@@ -282,10 +282,10 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             // Filter mappings, but leave room for error and mapq calculation.
             graph_mapping_result->Filter(-1,
-                                                    std::max(0.20, params->bestn_threshold),
-                                                    params->min_map_len,
-                                                    0,
-                                                    false);
+                                            std::max(0.20, params->bestn_threshold),
+                                            params->min_map_len / 2,  // Ideally we wouldn't filter by min_map_len here because alignment can extend it, but realistically that can cause many short mappings to be aligned and thus slow down the process.
+                                            0,                        // Don't filter by mapq, scores may change after alignment.
+                                            false);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering mappings.\n"));
 
@@ -320,7 +320,8 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             aln_result->Filter(params->bestn, params->bestn_threshold,
                                           params->min_map_len,
                                           params->min_mapq,
-                                          params->min_identity, false);
+                                          params->min_identity,
+                                          false);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
@@ -331,14 +332,15 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
         } else {
             DEBUG_QSEQ(params, qseq, LOG_ALL("Not aligning the paths because params->do_align == false.\n"));
 
-            graph_mapping_result->Filter(params->bestn,
-                                                    params->bestn_threshold,
-                                                    params->min_map_len,
-                                                    (params->do_align) ? 0 : params->min_mapq,
-                                                    false);
-
-
+            // Extend the flanks if required.
             if (params->mapper_params->flank_ext_len != 0) {
+                graph_mapping_result->Filter(params->bestn,
+                                                params->bestn_threshold,
+                                                params->min_map_len / 2,  // Ideally we wouldn't filter by min_map_len here because alignment can extend it, but realistically that can cause many short mappings to be aligned and thus slow down the process.
+                                                params->min_mapq,
+                                                false);
+                DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (1/2).\n"));
+
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Extending flanks up to length %ld.\n", params->mapper_params->flank_ext_len));
                 const std::vector<std::shared_ptr<raptor::LocalPath>>& paths = graph_mapping_result->paths();
                 std::vector<std::shared_ptr<raptor::LocalPath>> new_paths;
@@ -352,14 +354,27 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                 }
                 graph_mapping_result->paths(new_paths);
 
+                // Filter again with the full min_map_len, now that the flanks were extended.
+                graph_mapping_result->Filter(params->bestn,
+                                                params->bestn_threshold,
+                                                params->min_map_len,
+                                                params->min_mapq,
+                                                false);
+                DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (2/2).\n"));
+
             } else {
+                graph_mapping_result->Filter(params->bestn,
+                                                params->bestn_threshold,
+                                                params->min_map_len,
+                                                params->min_mapq,
+                                                false);
+                DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (1/1).\n"));
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Not extending the flanks because flank_ext_len == 0."));
             }
 
-            DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
-
             regions = graph_mapping_result->CollectRegions(params->one_hit_per_target);
 
+            // If required, align using a diff aligner.
             if (params->do_diff) {
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Performing diff alignment without traceback."));
 
