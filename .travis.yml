@@ -23,7 +23,7 @@ before_install:
 
     # Workaround for pip3. Without the Pyenv line, build fails because both versions 3.6 and 3.6.3 are available.
     - pyenv global system 3.7.1
-    - pip3 install meson
+    - pip3 install meson==0.51.1
     - pip3 install intervaltree
     - python3.7 --version
     - pip3 --version
