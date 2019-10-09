@@ -836,7 +836,7 @@ int DenseIndex::GenerateSeeds_(std::vector<mindex128_t>& minimizers,
         }
 
         // Select kmers with a step 'w'.
-        if (new_seed_set && (pos % w) == 0) {
+        if (new_seed_set && (new_seed.pos % w) == 0) {
             minimizers.emplace_back(new_seed.to_128t());
         }
     }
