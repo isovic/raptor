@@ -1,11 +1,11 @@
 /*
- * minimizer_index.cc
+ * dense_index.cc
  *
- *  Created on: Oct 04, 2017
+ *  Created on: Sep 27, 2019
  *      Author: Ivan Sovic
  */
 
-#include <index/minimizer_index.h>
+#include <index/dense_index.h>
 
 #include <ctime>
 #include <cmath>
@@ -24,14 +24,14 @@ static const int32_t NUM_HASH_BUCKETS = pow(2, NUM_HASH_BUCKET_BITS);
 
 namespace mindex {
 
-std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
+std::unique_ptr<mindex::IndexBase> createDenseIndex(
     std::shared_ptr<mindex::IndexParams> params) {
-    auto ret = std::unique_ptr<mindex::IndexBase>(new MinimizerIndex(params));
+    auto ret = std::unique_ptr<mindex::IndexBase>(new DenseIndex(params));
     ret->seqs(mindex::createSequenceFile());
     return std::move(ret);
 }
 
-MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::IndexParams> params)
+DenseIndex::DenseIndex(std::shared_ptr<mindex::IndexParams> params)
     : params_(params),
       seqs_(nullptr),
       dummy_nullptr_seqs_(nullptr),
@@ -59,23 +59,23 @@ MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::IndexParams> params)
     bucket_mask_ = CalcBucketMask_();
 }
 
-MinimizerIndex::~MinimizerIndex() {}
+DenseIndex::~DenseIndex() {}
 
-void MinimizerIndex::AddSequence(const std::string& seq, const std::string& header) {
+void DenseIndex::AddSequence(const std::string& seq, const std::string& header) {
     if (seq.size() == 0) {
         return;
     }
     AddSequence((const int8_t*)&seq[0], seq.size(), (const char*)&header[0], header.size());
 }
 
-void MinimizerIndex::AddSequence(const std::vector<int8_t>& seq, const std::string& header) {
+void DenseIndex::AddSequence(const std::vector<int8_t>& seq, const std::string& header) {
     if (seq.size() == 0) {
         return;
     }
     AddSequence((const int8_t*)&seq[0], seq.size(), (const char*)&header[0], header.size());
 }
 
-bool MinimizerIndex::AddSequences(const std::vector<std::string>& seqs, const std::vector<std::string>& headers) {
+bool DenseIndex::AddSequences(const std::vector<std::string>& seqs, const std::vector<std::string>& headers) {
     if (seqs.size() != headers.size()) {
         std::cerr << "Warning: the seqs and the headers vectors are not of same length. Cannot add to index. Skipping." << std::endl;
         return false;
@@ -86,7 +86,7 @@ bool MinimizerIndex::AddSequences(const std::vector<std::string>& seqs, const st
     return true;
 }
 
-void MinimizerIndex::AddSequence(const int8_t* seq, size_t seq_len, const char* header,
+void DenseIndex::AddSequence(const int8_t* seq, size_t seq_len, const char* header,
                                  size_t header_len) {
     mindex::SequencePtr new_seq = mindex::createSequence(std::string(header, header_len), seq, seq_len);
     if (seqs_ == nullptr) {
@@ -95,11 +95,11 @@ void MinimizerIndex::AddSequence(const int8_t* seq, size_t seq_len, const char* 
     seqs_->Add(std::move(new_seq));
 }
 
-void MinimizerIndex::SetSequenceFile(mindex::SequenceFilePtr seq_file) {
+void DenseIndex::SetSequenceFile(mindex::SequenceFilePtr seq_file) {
     seqs_ = seq_file;
 }
 
-int MinimizerIndex::BuildIndex() {
+int DenseIndex::BuildIndex() {
     seeds_.clear();
     if (seqs_ == nullptr) {
         return 1;
@@ -155,7 +155,7 @@ int MinimizerIndex::BuildIndex() {
 
         size_t num_seeds_before = seeds_.size();
 
-        GenerateMinimizers_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
+        GenerateSeeds_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
                             !params_->index_only_fwd_strand,
                             params_->homopolymer_suppression, params_->max_homopolymer_len,
                             region_rstart, region_rend);
@@ -257,7 +257,7 @@ int MinimizerIndex::BuildIndex() {
     return 0;
 }
 
-std::vector<int64_t> MinimizerIndex::BucketPrecount_(const std::vector<mindex128_t>& minimizers,
+std::vector<int64_t> DenseIndex::BucketPrecount_(const std::vector<mindex128_t>& minimizers,
                                                      int32_t num_buckets, int32_t bucket_shift,
                                                      int32_t bucket_mask,
                                                      int64_t& total_key_count) {
@@ -301,7 +301,7 @@ std::vector<int64_t> MinimizerIndex::BucketPrecount_(const std::vector<mindex128
     return bucket_precount;
 }
 
-void MinimizerIndex::ConstructHash_(const std::vector<mindex128_t>& minimizers) {
+void DenseIndex::ConstructHash_(const std::vector<mindex128_t>& minimizers) {
     // Cleanup.
     for (auto& hash : hashes_) {
         hash.clear();
@@ -368,7 +368,7 @@ void MinimizerIndex::ConstructHash_(const std::vector<mindex128_t>& minimizers) 
     }
 }
 
-size_t MinimizerIndex::CountKeys_(const std::vector<mindex128_t>& minimizers) const {
+size_t DenseIndex::CountKeys_(const std::vector<mindex128_t>& minimizers) const {
     if (minimizers.size() == 0) {
         return 0;
     }
@@ -390,7 +390,7 @@ size_t MinimizerIndex::CountKeys_(const std::vector<mindex128_t>& minimizers) co
     return key_count;
 }
 
-void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutoff,
+void DenseIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutoff,
                                               size_t& occ_singletons, double& occ_avg) const {
     occ_max = 0;
     occ_cutoff = 0;
@@ -448,7 +448,7 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
     occ_avg = ((double)sum_before) / ((double)hit_counts.size());
 }
 
-// void MinimizerIndex::RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers,
+// void DenseIndex::RemoveFrequentMinimizers_(std::vector<mindex128_t>& minimizers,
 //                                                size_t cutoff) const {
 //     if (minimizers.size() == 0) {
 //         return;
@@ -488,23 +488,23 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
 //     minimizers.resize(dest_id);
 // }
 
-int MinimizerIndex::Load(const std::string& index_path) { return 1; }
+int DenseIndex::Load(const std::string& index_path) { return 1; }
 
-int MinimizerIndex::Store(const std::string& index_path) { return 1; }
+int DenseIndex::Store(const std::string& index_path) { return 1; }
 
-std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const std::string& seq) {
+std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const std::string& seq) {
     return CollectHits((const int8_t*)&seq[0], seq.size(), 0);
 }
 
-int32_t MinimizerIndex::CalcBucketShift_() const {
+int32_t DenseIndex::CalcBucketShift_() const {
     return std::max(0, (k() * 2 - NUM_HASH_BUCKET_BITS));
 }
 
-int32_t MinimizerIndex::CalcBucketMask_() const {
+int32_t DenseIndex::CalcBucketMask_() const {
     return (1 << NUM_HASH_BUCKET_BITS) - 1;
 }
 
-bool MinimizerIndex::SkipHP_(const int8_t* seq, size_t seq_len, int32_t pos, int32_t max_homopolymer_len, int32_t& ret_pos) const {
+bool DenseIndex::SkipHP_(const int8_t* seq, size_t seq_len, int32_t pos, int32_t max_homopolymer_len, int32_t& ret_pos) const {
     ret_pos = pos;
     int8_t b = seq[pos];
     int32_t hp_len = 0;
@@ -523,7 +523,7 @@ bool MinimizerIndex::SkipHP_(const int8_t* seq, size_t seq_len, int32_t pos, int
     return true;
 }
 
-std::vector<int32_t> MinimizerIndex::CalcHPSpan_(const int8_t* seq, size_t seq_len, int32_t k, bool homopolymer_suppression, int32_t max_homopolymer_len) const {
+std::vector<int32_t> DenseIndex::CalcHPSpan_(const int8_t* seq, size_t seq_len, int32_t k, bool homopolymer_suppression, int32_t max_homopolymer_len) const {
     std::vector<int32_t> ret(seq_len, 0);
 
     std::deque<ind_t> base_pos;
@@ -577,7 +577,7 @@ std::vector<int32_t> MinimizerIndex::CalcHPSpan_(const int8_t* seq, size_t seq_l
     return ret;
 }
 
-void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
+void DenseIndex::VerboseSeeds_(std::ostream& os) {
     minkey_t prev_key = mindex::Seed::DecodeKey(seeds_[0]);
     size_t curr_key_id = 0;
     size_t prev_start = 0;
@@ -614,7 +614,7 @@ void MinimizerIndex::VerboseSeeds_(std::ostream& os) {
 
 
 // #define EXPERIMENTAL_QUERY_MASK
-std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq,
+std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
                                                                     size_t seq_len,
                                                                     indid_t seq_id) {
     std::vector<mindex::SeedHitPacked> hits;
@@ -631,17 +631,18 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
     hits.reserve(seq_len);
 
     // For lookup, don't index the reverse complement;
-    std::vector<mindex128_t> minimizers;
+    std::vector<mindex128_t> seeds;
 
-    int ret_val = GenerateMinimizers_(
-        minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
+    // We must enforce w = 1 in the query sequence because these are not minimizers.
+    int ret_val = GenerateSeeds_(
+        seeds, seq, seq_len, 0, seq_id, params_->k, 1, !params_->index_only_fwd_strand,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     // tt1.stop();
     // std::cerr << "Time for GenerateMinimizers: " << tt1.get_msecs() << std::endl;
 
 #ifdef EXPERIMENTAL_QUERY_MASK
-    kx::radix_sort(minimizers.begin(), minimizers.end());
+    kx::radix_sort(seeds.begin(), seeds.end());
 #endif
 
     if (ret_val) {
@@ -655,7 +656,7 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
 
     // To properly handle the reverse complement hit coordinates, the reverse minimizer
     // position _end_ location needs to be known. One way would be to store that with
-    // the minimizer when generating minimizers.
+    // the minimizer when generating seeds.
     // Instead, we calculate the end position on the fly, so that the number of bits
     // in a minimizes's position is not reduced.
     std::vector<int32_t> hp_span = (params_->homopolymer_suppression == false)
@@ -670,9 +671,9 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
 
     // VerboseSeeds_(std::cerr);
 
-    for (size_t min_id = 0; min_id < minimizers.size(); ++min_id) {
+    for (size_t min_id = 0; min_id < seeds.size(); ++min_id) {
         // Decode the minimizer.
-        mindex::Seed minimizer(minimizers[min_id]);
+        mindex::Seed minimizer(seeds[min_id]);
         bool minimizer_is_rev = minimizer.is_rev();
 
         // Query mask is an additional filter which will be encoded in the seed hit.
@@ -680,10 +681,10 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
         // or other interesting info which should impact the sorting order.
         int32_t query_mask = 0x0;
         #ifdef EXPERIMENTAL_QUERY_MASK
-                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id - 1]) >> 8)) {
+                if (min_id > 0 && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(seeds[min_id - 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
-                if ((min_id + 1) < minimizers.size() && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id + 1]) >> 8)) {
+                if ((min_id + 1) < seeds.size() && (minimizer.key >> 8) == (mindex::Seed::DecodeKey(minimizers[min_id + 1]) >> 8)) {
                     query_mask |= MINIMIZER_HIT_TANDEM_FLAG;
                 }
         #endif
@@ -725,7 +726,7 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
     return hits;
 }
 
-int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
+int DenseIndex::GenerateSeeds_(std::vector<mindex128_t>& minimizers,
                                         const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
                                         indid_t seq_id, int32_t k, int32_t w, bool use_rc,
                                         bool homopolymer_suppression,
@@ -760,16 +761,8 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
     int32_t num_bases_in = 0;   // Number of bases added to the buffer.
-    mindex::Seed win_buff[512];    // Define the new circular buffer for the window.
-    bool win_pos_set[512];
-    int32_t win_buff_pos = 0;
-    int32_t win_buff_min_pos = -1;
     ind_t kmer_span = 0;
     std::deque<ind_t> hp_events;
-
-    for (size_t i = 0; i < 512; ++i) {
-        win_pos_set[i] = false;
-    }
 
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
         int8_t b = seq[pos];
@@ -836,107 +829,22 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             // We only need to write one and not loop through all of them, because when we encounter a seed
             // with the same key then we write out the previous minimizer out. This means that we only need
             // to write out the current minimizer.
-            if (num_bases_in >= (w + k) && win_buff_min_pos >= 0) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
-            }
             num_bases_in = 0;
-            win_buff_pos = 0;
-            win_buff_min_pos = -1;
             buffer = 0;
             buffer_rc = 0;
             hp_events.clear();
-            for (size_t i = 0; i < w; ++i) {
-                win_pos_set[i] = false;
-                win_buff[i] = mindex::Seed();
-            }
         }
 
-        // The first time the buffer is filled, find and add the previous
-        // distinct minimizer matches.
-        if (num_bases_in == (w + k - 1) && win_buff_min_pos >= 0) {
-            const auto& min_seed = win_buff[win_buff_min_pos];
-            // First portion of the circular buffer.
-            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                    minimizers.emplace_back(win_buff[j].to_128t());
-                }
-            }
-            // Second portion of the circular buffer.
-            for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                    minimizers.emplace_back(win_buff[j].to_128t());
-                }
-            }
+        // Select kmers with a step 'w'.
+        if (new_seed_set && (new_seed.pos % w) == 0) {
+            minimizers.emplace_back(new_seed.to_128t());
         }
-
-        if (new_seed_set && win_buff_min_pos < 0) {
-            // No minimum has been set yet. Set the current buffer pos.
-            win_buff_min_pos = win_buff_pos;
-        } else if (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key) {
-            // In this case, even if we encountered the same minimal key, we will write
-            // out the previous occurence of this key, and then set the minimum to the current
-            // one. This ensures that all equal minimizers in a window are written.
-            if (num_bases_in >= (w + k)) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
-            }
-            win_buff_min_pos = win_buff_pos;
-        } else if (win_buff_pos == win_buff_min_pos && win_buff_min_pos >= 0) {  // The entire window has been circled around to the minimum seed key.
-            if (num_bases_in >= (w + k - 1)) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
-            }
-            win_buff_min_pos = -1;
-            // First portion of the circular buffer.
-            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
-                    win_buff_min_pos = j;
-                }
-            }
-            // std::cerr << "(1) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
-            // Second portion of the circular buffer.
-            for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
-                    win_buff_min_pos = j;
-                }
-            }
-            // std::cerr << "(2) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
-            if (win_buff_min_pos < 0 || (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key)) {
-                win_buff_min_pos = win_buff_pos;
-            }
-            // std::cerr << "(3) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
-            // Find and add identical seed keys.
-            if (num_bases_in >= (w + k - 1)) {
-                const auto& min_seed = win_buff[win_buff_min_pos];
-                // First portion of the circular buffer.
-                for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                        minimizers.emplace_back(win_buff[j].to_128t());
-                    }
-                }
-                // Second portion of the circular buffer.
-                for (int32_t j = 0; j < win_buff_pos; ++j) {
-                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                        minimizers.emplace_back(win_buff[j].to_128t());
-                    }
-                }
-            }
-        }
-        // Store the new seed to the circular buffer.
-        win_buff[win_buff_pos] = new_seed;
-        win_pos_set[win_buff_pos] = new_seed_set;
-        ++win_buff_pos;
-        if (win_buff_pos == w) {
-            win_buff_pos = 0;
-        }
-
-    }
-    if (win_buff_min_pos >= 0) {
-        minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
     }
 
     return 0;
 }
 
-const int8_t* MinimizerIndex::FetchRawSeq(size_t seq_id) const {
+const int8_t* DenseIndex::FetchRawSeq(size_t seq_id) const {
     const mindex::SequencePtr& seq = seqs_->GetSeqByID(seq_id);
     if (seq == nullptr) {
         return NULL;
@@ -945,7 +853,7 @@ const int8_t* MinimizerIndex::FetchRawSeq(size_t seq_id) const {
     return &seq->data()[0];
 }
 
-std::string MinimizerIndex::FetchSeqAsString(size_t seq_id, size_t start, size_t end,
+std::string DenseIndex::FetchSeqAsString(size_t seq_id, size_t start, size_t end,
                                              bool rev_cmp) const {
     const mindex::SequencePtr& seq = seqs_->GetSeqByID(seq_id);
     if (seq == nullptr) {
@@ -980,7 +888,7 @@ std::string MinimizerIndex::FetchSeqAsString(size_t seq_id, size_t start, size_t
     return ret;
 }
 
-std::string MinimizerIndex::FetchSeqAsString(size_t seq_id, bool rev_cmp) const {
+std::string DenseIndex::FetchSeqAsString(size_t seq_id, bool rev_cmp) const {
     const mindex::SequencePtr& seq = seqs_->GetSeqByID(seq_id);
     if (seq == nullptr) {
         return std::string("");

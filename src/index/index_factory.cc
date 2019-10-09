@@ -7,6 +7,7 @@
 
 #include <index/index_factory.h>
 #include <index/minimizer_index.h>
+#include <index/dense_index.h>
 #include <log/log_tools.h>
 
 namespace mindex {
@@ -15,6 +16,9 @@ std::unique_ptr<mindex::IndexBase> createIndex(mindex::IndexType index_type, std
     switch (index_type) {
     case mindex::IndexType::Minimizer:
         return mindex::createMinimizerIndex(params);
+        break;
+    case mindex::IndexType::Dense:
+        return mindex::createDenseIndex(params);
         break;
     default:
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Unknown index type.");

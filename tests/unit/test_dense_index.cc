@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <index/index_params.h>
-#include <index/minimizer_index.h>
+#include <index/dense_index.h>
 #include <index/seed.hpp>
 
 #include <cstdint>
@@ -12,9 +12,9 @@
 
 #include <tests/unit/test_index_common.h>
 
-TEST(MinimizerIndexTest, AddSequenceTest1) {
+TEST(DenseIndexTest, AddSequenceTest1) {
     auto index_params = mindex::createIndexParams();
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {"AAAAA", "CCCCC", "TTTTTG", "GGGGG"};
@@ -43,9 +43,9 @@ TEST(MinimizerIndexTest, AddSequenceTest1) {
     ASSERT_EQ((size_t) index->total_len(), expected_total_len);
 }
 
-TEST(MinimizerIndexTest, AddSequenceTest2) {
+TEST(DenseIndexTest, AddSequenceTest2) {
     auto index_params = mindex::createIndexParams();
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {"AAAAA", "CCCCC", "TTTTTG", "GGGGG"};
@@ -74,10 +74,10 @@ TEST(MinimizerIndexTest, AddSequenceTest2) {
     ASSERT_EQ((size_t) index->total_len(), expected_total_len);
 }
 
-TEST(MinimizerIndexTest, AddSequencesTest1) {
+TEST(DenseIndexTest, AddSequencesTest3) {
     auto index_params = mindex::createIndexParams();
-    auto index1 = mindex::createMinimizerIndex(index_params);
-    auto index2 = mindex::createMinimizerIndex(index_params);
+    auto index1 = mindex::createDenseIndex(index_params);
+    auto index2 = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {"AAAAA", "CCCCC", "TTTTTG", "GGGGG"};
@@ -101,9 +101,9 @@ TEST(MinimizerIndexTest, AddSequencesTest1) {
     }
 }
 
-TEST(MinimizerIndexTest, FetchSeqAsStringTest1) {
+TEST(DenseIndexTest, FetchSeqAsStringTest1) {
     auto index_params = mindex::createIndexParams();
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {"AAAAAAAAAACCCCCTTTTTGGGGGGGGGG", "ACTGGTCA"};
@@ -172,9 +172,9 @@ TEST(MinimizerIndexTest, FetchSeqAsStringTest1) {
     }
 }
 
-TEST(MinimizerIndexTest, FetchRawSeqTest1) {
+TEST(DenseIndexTest, FetchRawSeqTest1) {
     auto index_params = mindex::createIndexParams();
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {"AAAAA", "CCCCC", "TTTTTG", "GGGGG"};
@@ -191,7 +191,7 @@ TEST(MinimizerIndexTest, FetchRawSeqTest1) {
     }
 }
 
-TEST(MinimizerIndexTest, TestBuild1) {
+TEST(DenseIndexTest, TestBuild1) {
     auto index_params = mindex::createIndexParams();
 
     index_params->k = 5;
@@ -206,7 +206,7 @@ TEST(MinimizerIndexTest, TestBuild1) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -232,12 +232,12 @@ TEST(MinimizerIndexTest, TestBuild1) {
                                         mindex::Seed::Encode(0, 0, 5, false),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild2) {
+TEST(DenseIndexTest, TestBuild2) {
     auto index_params = mindex::createIndexParams();
 
     index_params->k = 5;
@@ -252,7 +252,7 @@ TEST(MinimizerIndexTest, TestBuild2) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -282,12 +282,12 @@ TEST(MinimizerIndexTest, TestBuild2) {
                                         mindex::Seed::Encode(256, 0, 0, false)
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild3) {
+TEST(DenseIndexTest, TestBuild3) {
     /*
      * Tests building on a more complex sequence.
     */
@@ -305,7 +305,7 @@ TEST(MinimizerIndexTest, TestBuild3) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -341,12 +341,12 @@ TEST(MinimizerIndexTest, TestBuild3) {
                                         mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild4) {
+TEST(DenseIndexTest, TestBuild4) {
     /*
      * Test building the index from only a selected region.
     */
@@ -364,7 +364,7 @@ TEST(MinimizerIndexTest, TestBuild4) {
     index_params->region_rend = 20;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -391,12 +391,12 @@ TEST(MinimizerIndexTest, TestBuild4) {
                                         mindex::Seed::Encode(840, 0, 10, true),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild5) {
+TEST(DenseIndexTest, TestBuild5) {
     /*
      * Test building the index from only a selected region,
      * but the region is out of bounds (hanging off the end of the reference).
@@ -417,7 +417,7 @@ TEST(MinimizerIndexTest, TestBuild5) {
     index_params->region_rend = 80;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -443,12 +443,12 @@ TEST(MinimizerIndexTest, TestBuild5) {
                                         mindex::Seed::Encode(820, 0, 60, true),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild6) {
+TEST(DenseIndexTest, TestBuild6) {
     /*
      * Test building the index from only a selected region,
      * but the region is out of bounds (hanging off the beginning of the reference).
@@ -469,7 +469,7 @@ TEST(MinimizerIndexTest, TestBuild6) {
     index_params->region_rend = 10;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -495,12 +495,12 @@ TEST(MinimizerIndexTest, TestBuild6) {
                                         mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild7) {
+TEST(DenseIndexTest, TestBuild7) {
     /*
      * Test building the index from only a selected region,
      * but the entire region is out of bounds for the reference.
@@ -520,7 +520,7 @@ TEST(MinimizerIndexTest, TestBuild7) {
     index_params->region_rend = 200;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -540,12 +540,12 @@ TEST(MinimizerIndexTest, TestBuild7) {
     std::vector<mindex128_t> expected{
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild8) {
+TEST(DenseIndexTest, TestBuild8) {
     /*
      * Test building the index from only a selected region,
      * but the reference specified by the region does not exist.
@@ -565,7 +565,7 @@ TEST(MinimizerIndexTest, TestBuild8) {
     index_params->region_rend = 20;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -585,13 +585,13 @@ TEST(MinimizerIndexTest, TestBuild8) {
     std::vector<mindex128_t> expected{
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    // raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 
 }
 
-TEST(MinimizerIndexTest, TestBuild9) {
+TEST(DenseIndexTest, TestBuild9) {
     /*
      * Test a larger k-mer size and a minimizer window.
     */
@@ -609,7 +609,7 @@ TEST(MinimizerIndexTest, TestBuild9) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -627,37 +627,26 @@ TEST(MinimizerIndexTest, TestBuild9) {
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Seed::Encode(35767, 0, 46, false),
-                                        mindex::Seed::Encode(143070, 0, 47, false),
-                                        mindex::Seed::Encode(572280, 0, 48, false),
-                                        mindex::Seed::Encode(2289123, 0, 49, false),
                                         mindex::Seed::Encode(9156492, 0, 50, false),
-                                        mindex::Seed::Encode(27856109, 0, 19, false),
-                                        mindex::Seed::Encode(36625970, 0, 51, false),
-                                        mindex::Seed::Encode(54228923, 0, 26, false),
-                                        mindex::Seed::Encode(55644705, 0, 31, true),
-                                        mindex::Seed::Encode(74973168, 0, 44, true),
-                                        mindex::Seed::Encode(76041465, 0, 24, true),
-                                        mindex::Seed::Encode(80713150, 0, 18, true),
-                                        mindex::Seed::Encode(125828877, 0, 42, true),
-                                        mindex::Seed::Encode(126904899, 0, 14, false),
+                                        mindex::Seed::Encode(111424439, 0, 20, false),
                                         mindex::Seed::Encode(167726968, 0, 0, false),
-                                        mindex::Seed::Encode(189282306, 0, 2, true),
-                                        mindex::Seed::Encode(259553542, 0, 8, false),
-                                        mindex::Seed::Encode(315756032, 0, 3, true),
+                                        mindex::Seed::Encode(222578820, 0, 30, true),
+                                        mindex::Seed::Encode(281992686, 0, 25, false),
                                         mindex::Seed::Encode(364792648, 0, 10, true),
-                                        mindex::Seed::Encode(502196464, 0, 33, false),
-                                        mindex::Seed::Encode(503315509, 0, 41, true),
+                                        mindex::Seed::Encode(507619596, 0, 15, false),
                                         mindex::Seed::Encode(518950656, 0, 35, false),
-                                        mindex::Seed::Encode(536855377, 0, 39, true),
+                                        mindex::Seed::Encode(555614204, 0, 45, true),
+                                        mindex::Seed::Encode(664588817, 0, 55, true),
+                                        mindex::Seed::Encode(939520212, 0, 40, true),
+                                        mindex::Seed::Encode(959258848, 0, 5, true),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild10) {
+TEST(DenseIndexTest, TestBuild10) {
     /*
      * Tests building on a small sequence with w > 1.
     */
@@ -675,7 +664,7 @@ TEST(MinimizerIndexTest, TestBuild10) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -690,6 +679,12 @@ TEST(MinimizerIndexTest, TestBuild10) {
 
     // Build the index from the added sequences.
     index->BuildIndex();
+
+    ////////////////////////////////
+    /// NOTE: The k-mer keys are still he same as in the minimizer case, because
+    /// the dense index takes the minimum of the (fwd, rev) k-mer hash, and discards
+    // the other one.
+    ////////////////////////////////
 
     // These are all seeds for a w = 1:
     // Sorted by key:
@@ -729,13 +724,13 @@ TEST(MinimizerIndexTest, TestBuild10) {
         // mindex::Seed::Encode(121, 0, 14, false),    (11, 12)
         // mindex::Seed::Encode(484, 0, 15, false),
 
+
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
-                                        mindex::Seed::Encode(2, 0, 2, true),
-                                        mindex::Seed::Encode(56, 0, 6, true),
-                                        mindex::Seed::Encode(121, 0, 14, false),
+                                        mindex::Seed::Encode(39, 0, 0, true),
                                         mindex::Seed::Encode(131, 0, 8, true),
                                         mindex::Seed::Encode(180, 0, 12, true),
+                                        mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
@@ -745,12 +740,12 @@ TEST(MinimizerIndexTest, TestBuild10) {
     //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
-    // VerboseSeeds(index->seeds(), expected);
+    raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuild11) {
+TEST(DenseIndexTest, TestBuild11) {
     /*
      * Tests building on a small sequence with w > 1.
     */
@@ -768,7 +763,7 @@ TEST(MinimizerIndexTest, TestBuild11) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -785,17 +780,17 @@ TEST(MinimizerIndexTest, TestBuild11) {
     index->BuildIndex();
 
     // Seeds are in a sorted order by their key.
+    // This is different compared to the minimizer index, because we are keeping only
+    // those seeds whose position is (pos % w) == 0.
     std::vector<mindex128_t> expected{
-                                        mindex::Seed::Encode(2, 0, 2, true),
-                                        mindex::Seed::Encode(2, 0, 33, true),
-                                        mindex::Seed::Encode(56, 0, 6, true),
-                                        mindex::Seed::Encode(56, 0, 37, true),
-                                        mindex::Seed::Encode(121, 0, 14, false),
-                                        mindex::Seed::Encode(121, 0, 45, false),
+                                        mindex::Seed::Encode(9, 0, 32, true),
+                                        mindex::Seed::Encode(39, 0, 0, true),
                                         mindex::Seed::Encode(131, 0, 8, true),
-                                        mindex::Seed::Encode(131, 0, 39, true),
                                         mindex::Seed::Encode(180, 0, 12, true),
-                                        mindex::Seed::Encode(180, 0, 43, true),
+                                        mindex::Seed::Encode(224, 0, 36, true),
+                                        mindex::Seed::Encode(288, 0, 40, true),
+                                        mindex::Seed::Encode(301, 0, 44, true),
+                                        mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
@@ -805,12 +800,12 @@ TEST(MinimizerIndexTest, TestBuild11) {
     //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
-    // VerboseSeeds(index->seeds(), expected);
+    raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestCollectHits1) {
+TEST(DenseIndexTest, TestCollectHits1) {
     /*
      * Test an empty query.
     */
@@ -819,7 +814,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     auto index_params = mindex::createIndexParams();
 
     // Create the index.
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -843,7 +838,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     ASSERT_EQ(hits.size(), 0);
 }
 
-TEST(MinimizerIndexTest, TestCollectHits2) {
+TEST(DenseIndexTest, TestCollectHits2) {
     /*
      * Test an empty index but a non-empty query.
     */
@@ -852,7 +847,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     auto index_params = mindex::createIndexParams();
 
     // Create the index.
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -874,7 +869,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     ASSERT_EQ(hits.size(), 0);
 }
 
-TEST(MinimizerIndexTest, TestCollectHits3) {
+TEST(DenseIndexTest, TestCollectHits3) {
     // Test the collection of hits with the default parameters (k = 15, w = 5).
     // This is like a realistic scenario, but the query and the target are the same.
 	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
@@ -883,7 +878,7 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
     auto index_params = mindex::createIndexParams();
 
     // Create the index.
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -918,7 +913,7 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
     }
 }
 
-TEST(MinimizerIndexTest, TestCollectHits4) {
+TEST(DenseIndexTest, TestCollectHits4) {
     /*
      * Test a scenario which results in 0 hits, but neither the
      * index nor the query are empty.
@@ -928,7 +923,7 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
     auto index_params = mindex::createIndexParams();
 
     // Create the index.
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -966,7 +961,7 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
 
 }
 
-TEST(MinimizerIndexTest, TestCollectHits5) {
+TEST(DenseIndexTest, TestCollectHits5) {
     /*
      * Test a scenario where query is not identical to the index.
     */
@@ -975,7 +970,7 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     auto index_params = mindex::createIndexParams();
 
     // Create the index.
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -1001,17 +996,11 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
 
     std::vector<mindex::SeedHitPacked> expected {
                                                 mindex::SeedHitPacked(0, false, 0, 0, 0),
-                                                mindex::SeedHitPacked(0, false, 2, 0, 2),
-                                                mindex::SeedHitPacked(0, false, 3, 0, 3),
-                                                mindex::SeedHitPacked(0, false, 8, 0, 8),
+                                                mindex::SeedHitPacked(0, false, 5, 0, 5),
                                                 mindex::SeedHitPacked(0, false, 10, 0, 10),
-                                                mindex::SeedHitPacked(0, false, 44, 0, 43),
-                                                mindex::SeedHitPacked(0, false, 46, 0, 45),
-                                                mindex::SeedHitPacked(0, false, 47, 0, 46),
-                                                mindex::SeedHitPacked(0, false, 48, 0, 47),
-                                                mindex::SeedHitPacked(0, false, 49, 0, 48),
+                                                mindex::SeedHitPacked(0, false, 45, 0, 44),
                                                 mindex::SeedHitPacked(0, false, 50, 0, 49),
-                                                mindex::SeedHitPacked(0, false, 51, 0, 50),
+                                                mindex::SeedHitPacked(0, false, 55, 0, 54),
                                                        };
 
     // for (int32_t i = 0; i < index->seeds().size(); i++) {
@@ -1026,7 +1015,7 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     ASSERT_EQ(hits, expected);
 }
 
-TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
+TEST(DenseIndexTest, TestBuildHomopolymerSuppression1) {
     /*
      * Tests building on a more complex sequence.
     */
@@ -1044,7 +1033,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
     index_params->region_rend = 0;
     index_params->index_only_fwd_strand = false;
 
-    auto index = mindex::createMinimizerIndex(index_params);
+    auto index = mindex::createDenseIndex(index_params);
 
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs = {
@@ -1065,12 +1054,12 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
                                     mindex::Seed::Encode(110, 0, 0, false),
                                     };
 
-    // VerboseSeeds(index->seeds(), expected);
+    raptor::unit::VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
 
-TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
+TEST(DenseIndexTest, TestBuildHomopolymerSuppression2) {
     /*
      * Tests building a more complex sequence with homopolymer suppression.
      * The index should correspond to the index same sequence without any homopolymers.
@@ -1089,7 +1078,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     index_params_hp->region_rstart = 0;
     index_params_hp->region_rend = 0;
     index_params_hp->index_only_fwd_strand = false;
-    auto index_hp = mindex::createMinimizerIndex(index_params_hp);
+    auto index_hp = mindex::createDenseIndex(index_params_hp);
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs_for_hp = {"AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC"};
     std::vector<std::string> headers_for_hp = {"ecoli"};
@@ -1112,7 +1101,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     index_params_no_hp->region_rstart = 0;
     index_params_no_hp->region_rend = 0;
     index_params_no_hp->index_only_fwd_strand = false;
-    auto index_no_hp = mindex::createMinimizerIndex(index_params_no_hp);
+    auto index_no_hp = mindex::createDenseIndex(index_params_no_hp);
     // Define the reference sequences and their headers.
     std::vector<std::string> seqs_with_no_hp = {"AGCTCATCTGACTGCACGCATATGTCTCTGTGTGATAGAGTGTCTGATAGCAGC"};
     std::vector<std::string> headers_with_no_hp = {"ecoli"};
@@ -1124,7 +1113,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     // We need to manually compare the seed keys, because the positions will have changed.
     ASSERT_EQ(index_hp->seeds().size(), index_no_hp->seeds().size());
 
-    // VerboseSeeds(index_hp->seeds(), index_no_hp->seeds());
+    raptor::unit::VerboseSeeds(index_hp->seeds(), index_no_hp->seeds());
 
     for (int32_t i = 0; i < index_hp->seeds().size(); i++) {
         auto minimizer_hp = mindex::Seed(index_hp->seeds()[i]);
@@ -1134,10 +1123,10 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     }
 }
 
-TEST(MinimizerIndexTest, TestLoad1) {
+TEST(DenseIndexTest, TestLoad1) {
     // ASSERT_EQ(0, 1);
 }
 
-TEST(MinimizerIndexTest, TestStore1) {
+TEST(DenseIndexTest, TestStore1) {
     // ASSERT_EQ(0, 1);
 }
