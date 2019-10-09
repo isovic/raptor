@@ -10,25 +10,7 @@
 #include <vector>
 #include <log/log_system.h>
 
-// #define TEST_DEBUG_VERBOSE_
-
-void VerboseSeeds(const std::vector<mindex128_t>& results, const std::vector<mindex128_t>& expected) {
-#ifdef TEST_DEBUG_VERBOSE_
-    std::cerr << "Result:" << std::endl;
-    for (int32_t i = 0; i < results.size(); i++) {
-        auto minimizer = mindex::Seed(results[i]);
-        std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
-    }
-    std::cerr << std::endl;
-
-    std::cerr << "Expected:" << std::endl;
-    for (int32_t i = 0; i < expected.size(); i++) {
-        auto minimizer = mindex::Seed(expected[i]);
-        std::cerr << "mindex::Seed::Encode(" << minimizer.key << ", " << minimizer.seq_id << ", " << minimizer.pos << ", " << ((minimizer.flag) ? "true" : "false") << ")," << std::endl;
-    }
-    std::cerr << std::endl;
-#endif
-}
+#include <tests/unit/test_index_common.h>
 
 TEST(MinimizerIndexTest, AddSequenceTest1) {
     auto index_params = mindex::createIndexParams();
@@ -250,7 +232,7 @@ TEST(MinimizerIndexTest, TestBuild1) {
                                         mindex::Seed::Encode(0, 0, 5, false),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -300,7 +282,7 @@ TEST(MinimizerIndexTest, TestBuild2) {
                                         mindex::Seed::Encode(256, 0, 0, false)
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -359,7 +341,7 @@ TEST(MinimizerIndexTest, TestBuild3) {
                                         mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -409,7 +391,7 @@ TEST(MinimizerIndexTest, TestBuild4) {
                                         mindex::Seed::Encode(840, 0, 10, true),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -461,7 +443,7 @@ TEST(MinimizerIndexTest, TestBuild5) {
                                         mindex::Seed::Encode(820, 0, 60, true),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -513,7 +495,7 @@ TEST(MinimizerIndexTest, TestBuild6) {
                                         mindex::Seed::Encode(896, 0, 4, true),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -558,7 +540,7 @@ TEST(MinimizerIndexTest, TestBuild7) {
     std::vector<mindex128_t> expected{
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -603,7 +585,7 @@ TEST(MinimizerIndexTest, TestBuild8) {
     std::vector<mindex128_t> expected{
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 
@@ -670,7 +652,7 @@ TEST(MinimizerIndexTest, TestBuild9) {
                                         mindex::Seed::Encode(536855377, 0, 39, true),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -711,41 +693,41 @@ TEST(MinimizerIndexTest, TestBuild10) {
 
     // These are all seeds for a w = 1:
     // Sorted by key:
-        // mindex::Seed::Encode(2, 0, 6, true),
-        // mindex::Seed::Encode(9, 0, 5, true),
-        // mindex::Seed::Encode(39, 0, 4, true),
-        // mindex::Seed::Encode(56, 0, 10, true),
-        // mindex::Seed::Encode(121, 0, 18, false),
-        // mindex::Seed::Encode(131, 0, 12, true),
-        // mindex::Seed::Encode(180, 0, 16, true),
-        // mindex::Seed::Encode(224, 0, 9, true),
-        // mindex::Seed::Encode(288, 0, 13, true),
-        // mindex::Seed::Encode(301, 0, 17, true),
-        // mindex::Seed::Encode(317, 0, 11, false),
-        // mindex::Seed::Encode(481, 0, 15, false),
-        // mindex::Seed::Encode(484, 0, 19, false),
-        // mindex::Seed::Encode(512, 0, 7, true),
-        // mindex::Seed::Encode(840, 0, 14, true),
-        // mindex::Seed::Encode(896, 0, 8, true),
+        // mindex::Seed::Encode(2, 0, 2, true),
+        // mindex::Seed::Encode(9, 0, 1, true),
+        // mindex::Seed::Encode(39, 0, 0, true),
+        // mindex::Seed::Encode(56, 0, 6, true),
+        // mindex::Seed::Encode(121, 0, 14, false),
+        // mindex::Seed::Encode(131, 0, 8, true),
+        // mindex::Seed::Encode(180, 0, 12, true),
+        // mindex::Seed::Encode(224, 0, 5, true),
+        // mindex::Seed::Encode(288, 0, 9, true),
+        // mindex::Seed::Encode(301, 0, 13, true),
+        // mindex::Seed::Encode(317, 0, 7, false),
+        // mindex::Seed::Encode(481, 0, 11, false),
+        // mindex::Seed::Encode(484, 0, 15, false),
+        // mindex::Seed::Encode(512, 0, 3, true),
+        // mindex::Seed::Encode(840, 0, 10, true),
+        // mindex::Seed::Encode(896, 0, 4, true),
 
     // Sorted by start position. Numbers on the right are the
     // IDs of the windows in which the particular seed is a minimizer.
-        // mindex::Seed::Encode(39, 0, 4, true),
-        // mindex::Seed::Encode(9, 0, 5, true),
-        // mindex::Seed::Encode(2, 0, 6, true),        (0, 1, 2)
-        // mindex::Seed::Encode(512, 0, 7, true),
-        // mindex::Seed::Encode(896, 0, 8, true),
-        // mindex::Seed::Encode(224, 0, 9, true),
-        // mindex::Seed::Encode(56, 0, 10, true),      (3, 4, 5, 6)
-        // mindex::Seed::Encode(317, 0, 11, false),
-        // mindex::Seed::Encode(131, 0, 12, true),     (7, 8)
-        // mindex::Seed::Encode(288, 0, 13, true),
-        // mindex::Seed::Encode(840, 0, 14, true),
-        // mindex::Seed::Encode(481, 0, 15, false),
-        // mindex::Seed::Encode(180, 0, 16, true),     (9, 10)
-        // mindex::Seed::Encode(301, 0, 17, true),
-        // mindex::Seed::Encode(121, 0, 18, false),    (11, 12)
-        // mindex::Seed::Encode(484, 0, 19, false),
+        // mindex::Seed::Encode(39, 0, 0, true),
+        // mindex::Seed::Encode(9, 0, 1, true),
+        // mindex::Seed::Encode(2, 0, 2, true),        (0, 1, 2)
+        // mindex::Seed::Encode(512, 0, 3, true),
+        // mindex::Seed::Encode(896, 0, 4, true),
+        // mindex::Seed::Encode(224, 0, 5, true),
+        // mindex::Seed::Encode(56, 0, 6, true),      (3, 4, 5, 6)
+        // mindex::Seed::Encode(317, 0, 7, false),
+        // mindex::Seed::Encode(131, 0, 8, true),     (7, 8)
+        // mindex::Seed::Encode(288, 0, 9, true),
+        // mindex::Seed::Encode(840, 0, 10, true),
+        // mindex::Seed::Encode(481, 0, 11, false),
+        // mindex::Seed::Encode(180, 0, 12, true),     (9, 10)
+        // mindex::Seed::Encode(301, 0, 13, true),
+        // mindex::Seed::Encode(121, 0, 14, false),    (11, 12)
+        // mindex::Seed::Encode(484, 0, 15, false),
 
     // Seeds are in a sorted order by their key.
     std::vector<mindex128_t> expected{
@@ -763,7 +745,7 @@ TEST(MinimizerIndexTest, TestBuild10) {
     //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -823,7 +805,7 @@ TEST(MinimizerIndexTest, TestBuild11) {
     //     // std::cerr << "[" << i << "] " << mindex::Seed(expected[i]).Verbose() << std::endl;
     // }
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -1083,7 +1065,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
                                     mindex::Seed::Encode(110, 0, 0, false),
                                     };
 
-    VerboseSeeds(index->seeds(), expected);
+    // VerboseSeeds(index->seeds(), expected);
 
     ASSERT_EQ(index->seeds(), expected);
 }
@@ -1142,7 +1124,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     // We need to manually compare the seed keys, because the positions will have changed.
     ASSERT_EQ(index_hp->seeds().size(), index_no_hp->seeds().size());
 
-    VerboseSeeds(index_hp->seeds(), index_no_hp->seeds());
+    // VerboseSeeds(index_hp->seeds(), index_no_hp->seeds());
 
     for (int32_t i = 0; i < index_hp->seeds().size(); i++) {
         auto minimizer_hp = mindex::Seed(index_hp->seeds()[i]);
