@@ -13,10 +13,12 @@
 
 namespace raptor {
 
+constexpr int32_t PlusInf = std::numeric_limits<int32_t>::max() - 10000;  // Leave a margin.
+
 // #define DEBUG_DP_VERBOSE_
 
 std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
-    const mindex::IndexPtr index,
+    const mindex::IndexPtr index,       // Optional. If nullptr, then the target sequence length won't be initialized in the MappingEnv.
     int64_t qseq_abs_id,
     int64_t qseq_len,
     int32_t chain_max_skip,
@@ -38,18 +40,12 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
     }
 
     int32_t n_hits = (int32_t) hits.size();
-    static const int32_t PlusInf = std::numeric_limits<int32_t>::max() - 10000;  // Leave a margin.
 
     // Zeroth element will be the "Null" state.
-    std::vector<int32_t> dp(n_hits + 1, 0);
+    std::vector<int32_t> dp(n_hits + 1, 0);         // Initial dp score is 0, for local alignment.
     std::vector<int32_t> pred(n_hits + 1, 0);
     std::vector<int32_t> chain_id(n_hits + 1, -1);  // For each node, it's chain ID is the same as of it's predecessor.
     int32_t num_chains = 0;
-
-    // Set initial gap penalty for local alignment.
-    for (int32_t i = 1; i < (n_hits + 1); i++) {
-        dp[i] = 0;
-    }
 
     auto hits_unpacked = mindex::UnpackMinimizerHitVector(hits);
 
@@ -208,7 +204,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
         bool t_rev = hits_unpacked[nodes.front()].TargetRev();
         if (new_env == nullptr || new_env->t_id != index_t_id || new_env->t_rev != t_rev) {
             int32_t index_t_start = 0; // index->starts()[index_t_id];
-            int32_t t_len = index->len(index_t_id);
+            int32_t t_len = (index == nullptr) ? 0 : index->len(index_t_id);
             new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq_abs_id, qseq_len, false);
         }
 
