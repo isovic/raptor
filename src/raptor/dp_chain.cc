@@ -17,10 +17,15 @@ namespace raptor {
 
 std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
     const mindex::IndexPtr index,
-    const mindex::SequencePtr& qseq,
-    const std::vector<mindex::SeedHitPacked>& hits,
-    const std::shared_ptr<raptor::ParamsMapper> params,
-    int32_t min_cov_bases, int32_t min_dp_score, int32_t k) {
+    int64_t qseq_abs_id,
+    int64_t qseq_len,
+    int32_t chain_max_skip,
+    int32_t chain_max_predecessors,
+    int32_t seed_join_dist,
+    int32_t diag_margin,
+    int32_t min_num_seeds,
+    int32_t min_cov_bases, int32_t min_dp_score, int32_t k,
+    const std::vector<mindex::SeedHitPacked>& hits) {
 
     std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> chains;
 
@@ -28,7 +33,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
         return chains;
     }
 
-    if (params->chain_max_skip <= 0) {
+    if (chain_max_skip <= 0) {
         return chains;
     }
 
@@ -71,10 +76,10 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
 
         int32_t min_j = 0;
         // int32_t min_j = std::max(0, i - 1000);
-        min_j = (params->chain_max_predecessors <= 0) ? 0 : std::max(static_cast<int32_t>(0), (i - 1 - params->chain_max_predecessors));
+        min_j = (chain_max_predecessors <= 0) ? 0 : std::max(static_cast<int32_t>(0), (i - 1 - chain_max_predecessors));
         for (int32_t j = (i - 1); j > min_j; j--) {
-            // if (num_processed > params->chain_max_predecessors) {
-            //     // std::cerr << "Bump 1! num_processed = " << num_processed << ", params->chain_max_predecessors = " << params->chain_max_predecessors << std::endl;
+            // if (num_processed > chain_max_predecessors) {
+            //     // std::cerr << "Bump 1! num_processed = " << num_processed << ", chain_max_predecessors = " << chain_max_predecessors << std::endl;
             //     break;
             // }
 
@@ -98,7 +103,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
             if (t_id_j != t_id_i || t_rev_j != t_rev_i) {
                 break;
             }
-            if (dist_y > params->seed_join_dist) {
+            if (dist_y > seed_join_dist) {
                 break;
             }
 
@@ -111,10 +116,10 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
             if (x_i_start <= x_j_start || y_i_start <= y_j_start) {
                 continue;
             }
-            if (gap_dist > params->diag_margin) {
+            if (gap_dist > diag_margin) {
                 continue;
             }
-            if (dist_x > params->seed_join_dist) {
+            if (dist_x > seed_join_dist) {
                 continue;
             }
 
@@ -138,8 +143,8 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
 
             } else {
                 num_skipped_predecessors += 1;
-                if (num_skipped_predecessors > params->chain_max_skip) {
-                    // std::cerr << "Bump! num_skipped_predecessors = " << num_skipped_predecessors << ", params->chain_max_skip = " << params->chain_max_skip << std::endl;
+                if (num_skipped_predecessors > chain_max_skip) {
+                    // std::cerr << "Bump! num_skipped_predecessors = " << num_skipped_predecessors << ", chain_max_skip = " << chain_max_skip << std::endl;
                     break;
                 }
             }
@@ -189,7 +194,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
         }
         // Reverse the backtracked nodes.
         std::reverse(nodes.begin(), nodes.end());
-        if (nodes.size() == 0 || nodes.size() < params->min_num_seeds) {
+        if (nodes.size() == 0 || nodes.size() < min_num_seeds) {
             continue;
         }
 
@@ -204,7 +209,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
         if (new_env == nullptr || new_env->t_id != index_t_id || new_env->t_rev != t_rev) {
             int32_t index_t_start = 0; // index->starts()[index_t_id];
             int32_t t_len = index->len(index_t_id);
-            new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq->abs_id(), qseq->data().size(), false);
+            new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq_abs_id, qseq_len, false);
         }
 
         auto chain = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
