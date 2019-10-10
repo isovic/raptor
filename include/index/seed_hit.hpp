@@ -147,6 +147,16 @@ class SeedHitUnpacked {
           q_pos_(_q_pos) {
     }
 
+    SeedHitUnpacked(indid_t _t_id, bool _t_rev, ind_t _t_pos,
+                        ind_t _q_mask, ind_t _q_pos)
+        : t_id_(_t_id),
+          t_rev_(_t_rev),
+          t_pos_(_t_pos),
+          q_mask_(_q_mask),
+          q_pos_(_q_pos) {
+    }
+
+
     SeedHitUnpacked(const mindex128_t& packed)
         : t_id_(SeedHitPacked::DecodeTargetId(packed)),
           t_rev_(SeedHitPacked::DecodeTargetRev(packed)),
