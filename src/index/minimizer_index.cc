@@ -24,6 +24,42 @@ static const int32_t NUM_HASH_BUCKETS = pow(2, NUM_HASH_BUCKET_BITS);
 
 namespace mindex {
 
+const int32_t MAX_SPACING_IN_SEED = 32;
+const int32_t MAX_WINDOW_BUFFER_SIZE = 512;
+
+// This is a temporary class, just used for implementing the minimizer window.
+class BufferWindow {
+  public:
+    BufferWindow() = default;
+    ~BufferWindow() = default;
+
+    minkey_t buffer = 0x0;                              // Holds the current 2-bit seed representation.
+    minkey_t buffer_rc = 0x0;                           // Holds the reverse complement 2-bit seed at the same position.
+    int32_t num_bases_in = 0;                           // Number of bases added to the buffer.
+    mindex::Seed win_buff[MAX_WINDOW_BUFFER_SIZE];      // Define the new circular buffer for the window.
+    bool win_pos_set[MAX_WINDOW_BUFFER_SIZE];
+    int32_t win_buff_pos = 0;
+    int32_t win_buff_min_pos = -1;
+    ind_t kmer_span = 0;
+    std::deque<ind_t> hp_events;
+
+    void Clear(int32_t w) {
+        buffer = 0;
+        buffer_rc = 0;
+        num_bases_in = 0;
+        win_buff_pos = 0;
+        win_buff_min_pos = -1;
+        kmer_span = 0;
+        hp_events.clear();
+        for (int32_t i = 0; i < w; ++i) {
+            win_buff[i] = mindex::Seed();
+            win_pos_set[i] = false;
+        }
+    }
+};
+
+
+
 std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
     std::shared_ptr<mindex::IndexParams> params) {
     auto ret = std::unique_ptr<mindex::IndexBase>(new MinimizerIndex(params));
