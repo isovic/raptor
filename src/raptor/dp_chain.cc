@@ -17,7 +17,7 @@ constexpr int32_t PlusInf = std::numeric_limits<int32_t>::max() - 10000;  // Lea
 
 // #define DEBUG_DP_VERBOSE_
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+std::vector<raptor::ChainPtr> ChainHits(
     const std::vector<mindex::SeedHitPacked>& hits,
     int64_t qseq_abs_id,
     int64_t qseq_len,
@@ -32,7 +32,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
                 min_num_seeds, min_cov_bases, min_dp_score, k);
 }
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+std::vector<raptor::ChainPtr> ChainHits(
     const std::vector<mindex::SeedHitPacked>& hits,
     const mindex::IndexPtr index,       // Optional. If nullptr, then the target sequence length won't be initialized in the MappingEnv.
     int64_t qseq_abs_id,
@@ -44,9 +44,11 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
     int32_t min_num_seeds,
     int32_t min_cov_bases, int32_t min_dp_score, int32_t k) {
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> chains;
+    std::vector<raptor::ChainPtr> chains;
 
-    if (hits.size() == 0) {
+    auto hits_unpacked = mindex::UnpackMinimizerHitVector(hits);
+
+    if (hits_unpacked.size() == 0) {
         return chains;
     }
 
@@ -54,15 +56,13 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
         return chains;
     }
 
-    int32_t n_hits = (int32_t) hits.size();
+    int32_t n_hits = hits_unpacked.size();
 
     // Zeroth element will be the "Null" state.
     std::vector<int32_t> dp(n_hits + 1, 0);         // Initial dp score is 0, for local alignment.
     std::vector<int32_t> pred(n_hits + 1, 0);
     std::vector<int32_t> chain_id(n_hits + 1, -1);  // For each node, it's chain ID is the same as of it's predecessor.
     int32_t num_chains = 0;
-
-    auto hits_unpacked = mindex::UnpackMinimizerHitVector(hits);
 
     const double lin_factor = 0.01 * k;
 
@@ -188,7 +188,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
     std::shared_ptr<raptor::MappingEnv> new_env = nullptr;
 
     // Backtrack.
-    for (int32_t i = 0; i < (int32_t)chain_maxima.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(chain_maxima.size()); i++) {
 
         // Trace back from the maxima.
         int32_t node_id = chain_maxima[i];
@@ -223,7 +223,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
             new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq_abs_id, qseq_len, false);
         }
 
-        auto chain = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
+        auto chain = raptor::ChainPtr(new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
 
         for (auto& node : nodes) {
             chain->hits().emplace_back(hits[node]);

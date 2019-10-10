@@ -22,10 +22,10 @@ void CalcHitCoverage(const std::vector<mindex::SeedHitPacked>& hits, int32_t see
                     int32_t& cov_bases_r);
 
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
-    const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits);
+    const std::vector<raptor::ChainPtr>& target_hits);
 
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> GroupTargetSeedHits(
+std::vector<raptor::ChainPtr> GroupTargetSeedHits(
                     std::vector<mindex::SeedHitPacked> seed_hits,  // Copy.
                     int32_t k,
                     int32_t qid,

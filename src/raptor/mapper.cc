@@ -274,7 +274,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
 
 #ifdef USE_LIS_FILTER
 // #define DETAILED_FILTER_DEBUG_
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>
+std::vector<raptor::ChainPtr>
 raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::SeedHitPacked>& seed_hits, indid_t q_id,
                                     ind_t q_len, ind_t diag_margin, ind_t min_cov_bases,
                                     int32_t min_num_hits) {
@@ -284,7 +284,7 @@ raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::SeedHitPacked>& s
     std::sort(seed_hits.begin(), seed_hits.end());
 
     // Each vector element corresponds to one target ID.
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ret_target_hits;
+    std::vector<raptor::ChainPtr> ret_target_hits;
 
     // Relation from target ID to the ordinal number of the vector element where the target is.
     std::unordered_map<indid_t, size_t> t_id_to_ret;
@@ -407,7 +407,7 @@ raptor::Mapper::LISFilterAndGroupByTarget_(std::vector<mindex::SeedHitPacked>& s
                         auto new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev,
                                                             q_id, q_len, false);
                         auto new_target_hits =
-                            std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(
+                            raptor::ChainPtr(
                                 new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
                         ret_target_hits.emplace_back(new_target_hits);
                         it_loc = t_id_to_ret.find(prev_t_id_rev_packed);
