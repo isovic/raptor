@@ -794,18 +794,11 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     }
 
     const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;   // Mask the number of required bits for the k-mer.
-    minkey_t buffer = 0x0;     // Holds the current 2-bit seed representation.
-    minkey_t buffer_rc = 0x0;  // Holds the reverse complement 2-bit seed at the same position.
-    int32_t num_bases_in = 0;   // Number of bases added to the buffer.
-    mindex::Seed win_buff[512];    // Define the new circular buffer for the window.
-    bool win_pos_set[512];
-    int32_t win_buff_pos = 0;
-    int32_t win_buff_min_pos = -1;
-    ind_t kmer_span = 0;
-    std::deque<ind_t> hp_events;
+
+    BufferWindow buffer_wd;
 
     for (size_t i = 0; i < 512; ++i) {
-        win_pos_set[i] = false;
+        buffer_wd.win_pos_set[i] = false;
     }
 
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
@@ -825,31 +818,31 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                         break;
                     }
                 }
-                hp_events.push_back(hp_len);
+                buffer_wd.hp_events.push_back(hp_len);
                 pos += hp_len - 1;
-                kmer_span += hp_len;
+                buffer_wd.kmer_span += hp_len;
                 // We need to keep track of the length of each HP event. They contribute as a single
                 // base, but in reality, the span is larger. This deque keeps track of all hp events
                 // in the current k-mer.
-                while (hp_events.size() > k) {
-                    kmer_span -= hp_events.front();
-                    hp_events.pop_front();
+                while (buffer_wd.hp_events.size() > k) {
+                    buffer_wd.kmer_span -= buffer_wd.hp_events.front();
+                    buffer_wd.hp_events.pop_front();
                 }
                 if (hp_len >= max_homopolymer_len) {
                     continue;
                 }
             } else {
-                kmer_span = std::min(num_bases_in + 1, k);
+                buffer_wd.kmer_span = std::min(buffer_wd.num_bases_in + 1, k);
             }
 
             // Add the base to the buffer.
-            buffer = ((buffer << 2) | ((((uint64_t)nuc_to_twobit[b]))));
-            buffer_rc = (buffer_rc >> 2) | ((((uint64_t)nuc_to_twobit_complement[b])) << (k * 2 - 2));
+            buffer_wd.buffer = ((buffer_wd.buffer << 2) | ((((uint64_t)nuc_to_twobit[b]))));
+            buffer_wd.buffer_rc = (buffer_wd.buffer_rc >> 2) | ((((uint64_t)nuc_to_twobit_complement[b])) << (k * 2 - 2));
             // Calculate the seed key.
-            minkey_t key = buffer & mask;
-            minkey_t rev_key = buffer_rc & mask;
+            minkey_t key = buffer_wd.buffer & mask;
+            minkey_t rev_key = buffer_wd.buffer_rc & mask;
             // Skip symmetric k-mers.
-            if (buffer == buffer_rc) {
+            if (buffer_wd.buffer == buffer_wd.buffer_rc) {
                 continue;
             }
 
@@ -860,10 +853,10 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                 flag = MINIMIZER_FLAG_IS_REV;
             }
 
-            ++num_bases_in;
+            ++buffer_wd.num_bases_in;
 
-            if (num_bases_in >= k) {    // Minimap2 has another condition here: "kmer_span < 256". That's because it encodes the kmer span into the seed definition as 8 bits.
-                int32_t kmer_start = (pos + 1) - kmer_span; // The 'pos' is the current position which is inclusive. We need to add a +1 to make it non-inclusive, so that the start position is calculated properly.
+            if (buffer_wd.num_bases_in >= k) {    // Minimap2 has another condition here: "kmer_span < 256". That's because it encodes the kmer span into the seed definition as 8 bits.
+                int32_t kmer_start = (pos + 1) - buffer_wd.kmer_span; // The 'pos' is the current position which is inclusive. We need to add a +1 to make it non-inclusive, so that the start position is calculated properly.
                 new_seed = mindex::Seed(key, seq_id, kmer_start + seq_offset, flag);
                 new_seed_set = true;
             }
@@ -873,101 +866,91 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
             // We only need to write one and not loop through all of them, because when we encounter a seed
             // with the same key then we write out the previous minimizer out. This means that we only need
             // to write out the current minimizer.
-            if (num_bases_in >= (w + k) && win_buff_min_pos >= 0) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            if (buffer_wd.num_bases_in >= (w + k) && buffer_wd.win_buff_min_pos >= 0) {
+                minimizers.emplace_back(buffer_wd.win_buff[buffer_wd.win_buff_min_pos].to_128t());
             }
-            num_bases_in = 0;
-            win_buff_pos = 0;
-            win_buff_min_pos = -1;
-            buffer = 0;
-            buffer_rc = 0;
-            hp_events.clear();
-            for (size_t i = 0; i < w; ++i) {
-                win_pos_set[i] = false;
-                win_buff[i] = mindex::Seed();
-            }
+            buffer_wd.Clear(w);
         }
 
         // The first time the buffer is filled, find and add the previous
         // distinct minimizer matches.
-        if (num_bases_in == (w + k - 1) && win_buff_min_pos >= 0) {
-            const auto& min_seed = win_buff[win_buff_min_pos];
+        if (buffer_wd.num_bases_in == (w + k - 1) && buffer_wd.win_buff_min_pos >= 0) {
+            const auto& min_seed = buffer_wd.win_buff[buffer_wd.win_buff_min_pos];
             // First portion of the circular buffer.
-            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                    minimizers.emplace_back(win_buff[j].to_128t());
+            for (int32_t j = (buffer_wd.win_buff_pos + 1); j < w; ++j) {
+                if (buffer_wd.win_pos_set[j] && min_seed.Compare(buffer_wd.win_buff[j].key) == 2) {
+                    minimizers.emplace_back(buffer_wd.win_buff[j].to_128t());
                 }
             }
             // Second portion of the circular buffer.
-            for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                    minimizers.emplace_back(win_buff[j].to_128t());
+            for (int32_t j = 0; j < buffer_wd.win_buff_pos; ++j) {
+                if (buffer_wd.win_pos_set[j] && min_seed.Compare(buffer_wd.win_buff[j].key) == 2) {
+                    minimizers.emplace_back(buffer_wd.win_buff[j].to_128t());
                 }
             }
         }
 
-        if (new_seed_set && win_buff_min_pos < 0) {
+        if (new_seed_set && buffer_wd.win_buff_min_pos < 0) {
             // No minimum has been set yet. Set the current buffer pos.
-            win_buff_min_pos = win_buff_pos;
-        } else if (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key) {
+            buffer_wd.win_buff_min_pos = buffer_wd.win_buff_pos;
+        } else if (new_seed_set && new_seed.key <= buffer_wd.win_buff[buffer_wd.win_buff_min_pos].key) {
             // In this case, even if we encountered the same minimal key, we will write
             // out the previous occurence of this key, and then set the minimum to the current
             // one. This ensures that all equal minimizers in a window are written.
-            if (num_bases_in >= (w + k)) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            if (buffer_wd.num_bases_in >= (w + k)) {
+                minimizers.emplace_back(buffer_wd.win_buff[buffer_wd.win_buff_min_pos].to_128t());
             }
-            win_buff_min_pos = win_buff_pos;
-        } else if (win_buff_pos == win_buff_min_pos && win_buff_min_pos >= 0) {  // The entire window has been circled around to the minimum seed key.
-            if (num_bases_in >= (w + k - 1)) {
-                minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+            buffer_wd.win_buff_min_pos = buffer_wd.win_buff_pos;
+        } else if (buffer_wd.win_buff_pos == buffer_wd.win_buff_min_pos && buffer_wd.win_buff_min_pos >= 0) {  // The entire window has been circled around to the minimum seed key.
+            if (buffer_wd.num_bases_in >= (w + k - 1)) {
+                minimizers.emplace_back(buffer_wd.win_buff[buffer_wd.win_buff_min_pos].to_128t());
             }
-            win_buff_min_pos = -1;
+            buffer_wd.win_buff_min_pos = -1;
             // First portion of the circular buffer.
-            for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
-                    win_buff_min_pos = j;
+            for (int32_t j = (buffer_wd.win_buff_pos + 1); j < w; ++j) {
+                if (buffer_wd.win_pos_set[j] && (buffer_wd.win_buff_min_pos < 0 || buffer_wd.win_buff[buffer_wd.win_buff_min_pos].key >= buffer_wd.win_buff[j].key)) {
+                    buffer_wd.win_buff_min_pos = j;
                 }
             }
             // std::cerr << "(1) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
             // Second portion of the circular buffer.
-            for (int32_t j = 0; j < win_buff_pos; ++j) {
-                if (win_pos_set[j] && (win_buff_min_pos < 0 || win_buff[win_buff_min_pos].key >= win_buff[j].key)) {
-                    win_buff_min_pos = j;
+            for (int32_t j = 0; j < buffer_wd.win_buff_pos; ++j) {
+                if (buffer_wd.win_pos_set[j] && (buffer_wd.win_buff_min_pos < 0 || buffer_wd.win_buff[buffer_wd.win_buff_min_pos].key >= buffer_wd.win_buff[j].key)) {
+                    buffer_wd.win_buff_min_pos = j;
                 }
             }
             // std::cerr << "(2) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
-            if (win_buff_min_pos < 0 || (new_seed_set && new_seed.key <= win_buff[win_buff_min_pos].key)) {
-                win_buff_min_pos = win_buff_pos;
+            if (buffer_wd.win_buff_min_pos < 0 || (new_seed_set && new_seed.key <= buffer_wd.win_buff[buffer_wd.win_buff_min_pos].key)) {
+                buffer_wd.win_buff_min_pos = buffer_wd.win_buff_pos;
             }
             // std::cerr << "(3) Looking for new win_buff_min_pos, win_buff_min_pos = " << win_buff_min_pos << "\n";
             // Find and add identical seed keys.
-            if (num_bases_in >= (w + k - 1)) {
-                const auto& min_seed = win_buff[win_buff_min_pos];
+            if (buffer_wd.num_bases_in >= (w + k - 1)) {
+                const auto& min_seed = buffer_wd.win_buff[buffer_wd.win_buff_min_pos];
                 // First portion of the circular buffer.
-                for (int32_t j = (win_buff_pos + 1); j < w; ++j) {
-                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                        minimizers.emplace_back(win_buff[j].to_128t());
+                for (int32_t j = (buffer_wd.win_buff_pos + 1); j < w; ++j) {
+                    if (buffer_wd.win_pos_set[j] && min_seed.Compare(buffer_wd.win_buff[j].key) == 2) {
+                        minimizers.emplace_back(buffer_wd.win_buff[j].to_128t());
                     }
                 }
                 // Second portion of the circular buffer.
-                for (int32_t j = 0; j < win_buff_pos; ++j) {
-                    if (win_pos_set[j] && min_seed.Compare(win_buff[j].key) == 2) {
-                        minimizers.emplace_back(win_buff[j].to_128t());
+                for (int32_t j = 0; j < buffer_wd.win_buff_pos; ++j) {
+                    if (buffer_wd.win_pos_set[j] && min_seed.Compare(buffer_wd.win_buff[j].key) == 2) {
+                        minimizers.emplace_back(buffer_wd.win_buff[j].to_128t());
                     }
                 }
             }
         }
         // Store the new seed to the circular buffer.
-        win_buff[win_buff_pos] = new_seed;
-        win_pos_set[win_buff_pos] = new_seed_set;
-        ++win_buff_pos;
-        if (win_buff_pos == w) {
-            win_buff_pos = 0;
+        buffer_wd.win_buff[buffer_wd.win_buff_pos] = new_seed;
+        buffer_wd.win_pos_set[buffer_wd.win_buff_pos] = new_seed_set;
+        ++buffer_wd.win_buff_pos;
+        if (buffer_wd.win_buff_pos == w) {
+            buffer_wd.win_buff_pos = 0;
         }
-
     }
-    if (win_buff_min_pos >= 0) {
-        minimizers.emplace_back(win_buff[win_buff_min_pos].to_128t());
+    if (buffer_wd.win_buff_min_pos >= 0) {
+        minimizers.emplace_back(buffer_wd.win_buff[buffer_wd.win_buff_min_pos].to_128t());
     }
 
     return 0;
