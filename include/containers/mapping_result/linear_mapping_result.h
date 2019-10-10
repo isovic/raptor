@@ -68,7 +68,7 @@ public:
         target_anchors_ = new_anchors;
     }
 
-    void target_hits(const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& new_target_hits) {
+    void target_hits(const std::vector<raptor::ChainPtr>& new_target_hits) {
         target_hits_ = new_target_hits;
     }
 
@@ -76,7 +76,7 @@ public:
         return target_anchors_;
     }
 
-    const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits() const {
+    const std::vector<raptor::ChainPtr>& target_hits() const {
         return target_hits_;
     }
 
@@ -108,7 +108,7 @@ public:
         return target_anchors_;
     }
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits() {
+    std::vector<raptor::ChainPtr>& target_hits() {
         return target_hits_;
     }
 
@@ -131,7 +131,7 @@ private:
     // Anchors summarize a colinear chain of target hits.
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> target_anchors_;
     // Corresponding target hits (seeds) that make up the anchors above.
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> target_hits_;
+    std::vector<raptor::ChainPtr> target_hits_;
     // Time measurements, useful for debugging.
     std::unordered_map<std::string, double> timings_;
 };

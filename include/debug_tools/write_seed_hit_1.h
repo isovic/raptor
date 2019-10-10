@@ -13,6 +13,7 @@
 #include <vector>
 #include <index/seed_hit.hpp>
 #include <containers/target_hits.hpp>
+#include <types/typedefs.h>
 
 namespace raptor {
 void WriteSeedHits(const std::string& out_path,
@@ -21,7 +22,7 @@ void WriteSeedHits(const std::string& out_path,
                    const std::string& rname, int64_t rlen);
 
 void WriteTargetHits(const std::string& out_path,
-                     const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits,
+                     const std::vector<raptor::ChainPtr>& target_hits,
                      int32_t seed_len,
                      const std::string& qname, int64_t qlen,
                      const std::string& rname, int64_t rlen);

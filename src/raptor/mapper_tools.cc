@@ -52,7 +52,7 @@ void CalcHitCoverage(const std::vector<mindex::SeedHitPacked>& hits, int32_t see
  * A single TargetHits<raptor::RegionMapped> ".hits" entry represents one colinear range of seed hits.
  */
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
-    const std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>>& target_hits) {
+    const std::vector<raptor::ChainPtr>& target_hits) {
     // Each target ID is one vector element. Each raptor::TargetHits has a .hits
     // vector with anchors.
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> target_anchors;
@@ -125,13 +125,13 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
     return target_anchors;
 }
 
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> GroupTargetSeedHits(
+std::vector<raptor::ChainPtr> GroupTargetSeedHits(
             std::vector<mindex::SeedHitPacked> seed_hits,  // Copy.
             int32_t k,
             int32_t qid,
             int32_t qlen) {
 
-    std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> all_target_hits;
+    std::vector<raptor::ChainPtr> all_target_hits;
 
     // There is an "operator<" defined in the SeedHitPacked.
     std::sort(seed_hits.begin(), seed_hits.end());
@@ -155,7 +155,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> GroupTar
         std::shared_ptr<raptor::MappingEnv> new_env = raptor::createMappingEnv(
                 t_id, 0, t_len, t_rev, qid, qlen, false);
 
-        auto single_target_hits = std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>(
+        auto single_target_hits = raptor::ChainPtr(
                             new raptor::TargetHits<mindex::SeedHitPacked>(new_env));
 
         for (size_t seed_id = range_start; seed_id < range_end; ++seed_id) {

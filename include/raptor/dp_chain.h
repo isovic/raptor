@@ -16,17 +16,19 @@
 #include <containers/region/region_mapped.h>
 #include <params/params_mapper.h>
 #include <index/minimizer_index.h>
+#include <types/typedefs.h>
 
 namespace raptor {
 
 /*
  * Performs a dynamic programming based chaining on a set of hits.
+ * Converts the packed seed hits into the unpacked form.
  * Does not require the IndexPtr for input, but it will mark target sequence
  * lengths as 0 because of this.
  * However, sometimes it's useful to simply chain the hits, without extra
  * mapping environment information.
 */
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+std::vector<raptor::ChainPtr> ChainHits(
     const std::vector<mindex::SeedHitPacked>& hits,
     int64_t qseq_abs_id,
     int64_t qseq_len,
@@ -39,13 +41,14 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
 
 /*
  * Performs a dynamic programming based chaining on a set of hits.
+ * Converts the packed seed hits into the unpacked form.
  * For each chain, a separate TargetHits object will be created, and each
  * TargetHits has it's own MappingEnv describing the target and query
  * information (IDs, lengths and strands).
 */
-std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+std::vector<raptor::ChainPtr> ChainHits(
     const std::vector<mindex::SeedHitPacked>& hits,
-    const mindex::IndexPtr index,
+    const mindex::IndexPtr index,       // Optional. If nullptr, then the target sequence length won't be initialized in the MappingEnv.
     int64_t qseq_abs_id,
     int64_t qseq_len,
     int32_t chain_max_skip,
