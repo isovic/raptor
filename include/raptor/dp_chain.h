@@ -19,7 +19,32 @@
 
 namespace raptor {
 
+/*
+ * Performs a dynamic programming based chaining on a set of hits.
+ * Does not require the IndexPtr for input, but it will mark target sequence
+ * lengths as 0 because of this.
+ * However, sometimes it's useful to simply chain the hits, without extra
+ * mapping environment information.
+*/
 std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+    const std::vector<mindex::SeedHitPacked>& hits,
+    int64_t qseq_abs_id,
+    int64_t qseq_len,
+    int32_t chain_max_skip,
+    int32_t chain_max_predecessors,
+    int32_t seed_join_dist,
+    int32_t diag_margin,
+    int32_t min_num_seeds,
+    int32_t min_cov_bases, int32_t min_dp_score, int32_t k);
+
+/*
+ * Performs a dynamic programming based chaining on a set of hits.
+ * For each chain, a separate TargetHits object will be created, and each
+ * TargetHits has it's own MappingEnv describing the target and query
+ * information (IDs, lengths and strands).
+*/
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+    const std::vector<mindex::SeedHitPacked>& hits,
     const mindex::IndexPtr index,
     int64_t qseq_abs_id,
     int64_t qseq_len,
@@ -28,13 +53,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
     int32_t seed_join_dist,
     int32_t diag_margin,
     int32_t min_num_seeds,
-    int32_t min_cov_bases, int32_t min_dp_score, int32_t k,
-    const std::vector<mindex::SeedHitPacked>& hits);
-
-// std::vector<mindex::SeedHitPacked> ChainTargetHits2(
-//     const SingleSequence& qseq,
-//     const std::vector<mindex::SeedHitPacked>& hits,
-//     const std::shared_ptr<raptor::ParamsMapper> params, int32_t k);
+    int32_t min_cov_bases, int32_t min_dp_score, int32_t k);
 
 } /* namespace raptor */
 

@@ -126,7 +126,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_,
+    auto filtered_hits = raptor::ChainHits(
+                                seed_hits,
+                                index_,
                                 qseq->abs_id(), qseq->len(),
                                 params_->chain_max_skip,
                                 params_->chain_max_predecessors,
@@ -135,8 +137,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
                                 params_->min_num_seeds,
                                 params_->min_cov_bases,
                                 params_->min_dp_score,
-                                index_->params()->k,
-                                seed_hits);
+                                index_->params()->k);
     tt_chain.stop();
 #else
     ////////////////////////////////////
@@ -158,7 +159,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_sort.stop();
 
     tt_chain.start();
-    auto filtered_hits = raptor::ChainHits(index_,
+    auto filtered_hits = raptor::ChainHits(
+                                new_seed_hits,
+                                index_,
                                 qseq->abs_id(), qseq->len(),
                                 params_->chain_max_skip,
                                 params_->chain_max_predecessors,
@@ -167,8 +170,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
                                 params_->min_num_seeds,
                                 params_->min_cov_bases,
                                 params_->min_dp_score,
-                                index_->params()->k,
-                                new_seed_hits);
+                                index_->params()->k);
     tt_chain.stop();
     ///////////////////////////
 #endif
