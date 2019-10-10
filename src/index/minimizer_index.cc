@@ -30,7 +30,12 @@ const int32_t MAX_WINDOW_BUFFER_SIZE = 512;
 // This is a temporary class, just used for implementing the minimizer window.
 class BufferWindow {
   public:
-    BufferWindow() = default;
+    BufferWindow() {
+        for (size_t i = 0; i < 512; ++i) {
+            win_pos_set[i] = false;
+        }
+    }
+
     ~BufferWindow() = default;
 
     minkey_t buffer = 0x0;                              // Holds the current 2-bit seed representation.
@@ -796,10 +801,6 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
     const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;   // Mask the number of required bits for the k-mer.
 
     BufferWindow buffer_wd;
-
-    for (size_t i = 0; i < 512; ++i) {
-        buffer_wd.win_pos_set[i] = false;
-    }
 
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
         int8_t b = seq[pos];
