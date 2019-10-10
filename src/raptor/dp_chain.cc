@@ -18,6 +18,22 @@ constexpr int32_t PlusInf = std::numeric_limits<int32_t>::max() - 10000;  // Lea
 // #define DEBUG_DP_VERBOSE_
 
 std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+    const std::vector<mindex::SeedHitPacked>& hits,
+    int64_t qseq_abs_id,
+    int64_t qseq_len,
+    int32_t chain_max_skip,
+    int32_t chain_max_predecessors,
+    int32_t seed_join_dist,
+    int32_t diag_margin,
+    int32_t min_num_seeds,
+    int32_t min_cov_bases, int32_t min_dp_score, int32_t k) {
+    return ChainHits(hits, nullptr, qseq_abs_id, qseq_len, chain_max_skip,
+                chain_max_predecessors, seed_join_dist, diag_margin,
+                min_num_seeds, min_cov_bases, min_dp_score, k);
+}
+
+std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHits(
+    const std::vector<mindex::SeedHitPacked>& hits,
     const mindex::IndexPtr index,       // Optional. If nullptr, then the target sequence length won't be initialized in the MappingEnv.
     int64_t qseq_abs_id,
     int64_t qseq_len,
@@ -26,8 +42,7 @@ std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> ChainHit
     int32_t seed_join_dist,
     int32_t diag_margin,
     int32_t min_num_seeds,
-    int32_t min_cov_bases, int32_t min_dp_score, int32_t k,
-    const std::vector<mindex::SeedHitPacked>& hits) {
+    int32_t min_cov_bases, int32_t min_dp_score, int32_t k) {
 
     std::vector<std::shared_ptr<raptor::TargetHits<mindex::SeedHitPacked>>> chains;
 
