@@ -190,6 +190,10 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "5",
                           "Length of the window to select a minimizer from if index type is 'minimizer'. Step size if index type is 'dense'.",
                           0, "Index options");
+    argparser.AddArgument(&(parameters->index_params->base_spacing), VALUE_TYPE_INT32, "", "space",
+                          "1",
+                          "Spaced seeds. Every <val> base will be used to form a seed.",
+                          0, "Index options");
     argparser.AddArgument(&(parameters->index_params->freq_percentil), VALUE_TYPE_DOUBLE, "",
                           "freq-percentile", "0.0002",
                           "Filer this fraction of most frequent seeds in the lookup process.", 0,
