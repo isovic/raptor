@@ -18,7 +18,8 @@ namespace mindex {
 class IndexParams;
 
 std::shared_ptr<mindex::IndexParams> createIndexParams();
-std::shared_ptr<mindex::IndexParams> createIndexParams(int32_t _k, int32_t _w, bool _hp_supp,
+std::shared_ptr<mindex::IndexParams> createIndexParams(int32_t _k, int32_t _w,
+                                                       int32_t _base_spacing, bool _hp_supp,
                                                        int32_t _max_hp_len, double _freq_percentile,
                                                        int32_t _min_occ_cutoff,
                                                        bool _index_only_fwd_strand,
@@ -28,12 +29,13 @@ class IndexParams {
    public:
     friend std::shared_ptr<mindex::IndexParams> createIndexParams();
     friend std::shared_ptr<mindex::IndexParams> createIndexParams(
-        int32_t _k, int32_t _w, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
+        int32_t _k, int32_t _w, int32_t _base_spacing, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
         int32_t _min_occ_cutoff, bool _index_only_fwd_strand, int64_t _min_tlen);
     ~IndexParams();
 
     int32_t k;
     int32_t w;
+    int32_t base_spacing;
     bool homopolymer_suppression;
     int32_t max_homopolymer_len;
     double freq_percentil;
@@ -50,7 +52,7 @@ class IndexParams {
 
    private:
     IndexParams();
-    IndexParams(int32_t _k, int32_t _w, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
+    IndexParams(int32_t _k, int32_t _w, int32_t _base_spacing, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
                 int32_t _min_occ_cutoff, bool _index_only_fwd_strand, int64_t _min_tlen);
 };
 
