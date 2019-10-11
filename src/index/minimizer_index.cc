@@ -7,6 +7,7 @@
 
 #include <index/minimizer_index.h>
 
+#include <array>
 #include <ctime>
 #include <cmath>
 #include <iostream>
@@ -22,21 +23,21 @@
 static const int32_t NUM_HASH_BUCKET_BITS = 10;
 static const int32_t NUM_HASH_BUCKETS = pow(2, NUM_HASH_BUCKET_BITS);
 
-namespace mindex {
-
 const int32_t MAX_SPACING_IN_SEED = 32;
 const int32_t MAX_WINDOW_BUFFER_SIZE = 512;
 
+namespace mindex {
+
 // This is a temporary class, just used for implementing the minimizer window.
-class BufferWindow {
+class SpacedBuffer {
   public:
-    BufferWindow() {
+    SpacedBuffer() {
         for (size_t i = 0; i < 512; ++i) {
             win_pos_set[i] = false;
         }
     }
 
-    ~BufferWindow() = default;
+    ~SpacedBuffer() = default;
 
     minkey_t buffer = 0x0;                              // Holds the current 2-bit seed representation.
     minkey_t buffer_rc = 0x0;                           // Holds the reverse complement 2-bit seed at the same position.
@@ -197,7 +198,7 @@ int MinimizerIndex::BuildIndex() {
         size_t num_seeds_before = seeds_.size();
 
         GenerateMinimizers_(seeds_, &seq->data()[0], seq->len(), 0, i, params_->k, params_->w,
-                            !params_->index_only_fwd_strand,
+                            params_->base_spacing, !params_->index_only_fwd_strand,
                             params_->homopolymer_suppression, params_->max_homopolymer_len,
                             region_rstart, region_rend);
 
@@ -675,7 +676,7 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
     std::vector<mindex128_t> minimizers;
 
     int ret_val = GenerateMinimizers_(
-        minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, !params_->index_only_fwd_strand,
+        minimizers, seq, seq_len, 0, seq_id, params_->k, params_->w, params_->base_spacing, !params_->index_only_fwd_strand,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     // tt1.stop();
@@ -769,7 +770,8 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
 
 int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                                         const int8_t* seq, ind_t seq_len, ind_t seq_offset, // The seq_offset is the distance from the beginning of the sequence, used for the seed position.
-                                        indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                        indid_t seq_id, int32_t k, int32_t w, int32_t spacing,
+                                        bool use_rc,
                                         bool homopolymer_suppression,
                                         int32_t max_homopolymer_len,
                                         ind_t seq_start, ind_t seq_end) {
@@ -800,12 +802,19 @@ int MinimizerIndex::GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
 
     const minkey_t mask = (((uint64_t)1) << (2 * k)) - 1;   // Mask the number of required bits for the k-mer.
 
-    BufferWindow buffer_wd;
+    std::array<SpacedBuffer, MAX_SPACING_IN_SEED> all_buffer_wd;
+    int32_t space = 0;
 
     for (ind_t pos = seq_start; pos < seq_end; ++pos) {
         int8_t b = seq[pos];
         mindex::Seed new_seed; // (UINT64_T_MAX, INT32_T_MAX, INT32_T_MAX, INT8_T_MAX);
         bool new_seed_set = false;
+
+        auto& buffer_wd = all_buffer_wd[space];
+        ++space;
+        if (space >= spacing) {
+            space = 0;
+        }
 
         if (is_nuc[b]) {
             // If enabled, skip same bases.

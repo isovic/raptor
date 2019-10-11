@@ -142,7 +142,8 @@ class MinimizerIndex : mindex::IndexBase {
     */
     static int GenerateMinimizers_(std::vector<mindex128_t>& minimizers,
                                     const int8_t* seq, ind_t seq_len, ind_t seq_offset,
-                                    indid_t seq_id, int32_t k, int32_t w, bool use_rc,
+                                    indid_t seq_id, int32_t k, int32_t w, int32_t spacing,
+                                    bool use_rc,
                                     bool homopolymer_suppression,
                                     int32_t max_homopolymer_run,
                                     ind_t seq_start, ind_t seq_end);
