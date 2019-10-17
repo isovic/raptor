@@ -168,11 +168,11 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(const mindex::Seque
 
     tt_total.stop();
 
-    result->timings()["gmap_total"] = tt_total.get_millisecs();
-    result->timings()["gmap_break_anchors"] = tt_break_anchors.get_millisecs();
-    result->timings()["gmap_align_anchors"] = tt_align_anchors.get_millisecs();
-    result->timings()["gmap_constr_anchor_graph"] = tt_construct_anchor_graph.get_millisecs();
-    result->timings()["gmap_graph_dp"] = tt_graph_dp.get_millisecs();
+    result->timings()["gmap_total"] = tt_total.get_microsecs();
+    result->timings()["gmap_break_anchors"] = tt_break_anchors.get_microsecs();
+    result->timings()["gmap_align_anchors"] = tt_align_anchors.get_microsecs();
+    result->timings()["gmap_constr_anchor_graph"] = tt_construct_anchor_graph.get_microsecs();
+    result->timings()["gmap_graph_dp"] = tt_graph_dp.get_microsecs();
 
     return result;
 }
@@ -347,11 +347,11 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::MapBetter(const mindex:
 
     tt_total.stop();
 
-    result->timings()["gmap_total"] = tt_total.get_millisecs();
-    result->timings()["gmap_break_anchors"] = tt_break_anchors.get_millisecs();
-    result->timings()["gmap_align_anchors"] = tt_align_anchors.get_millisecs();
-    result->timings()["gmap_constr_anchor_graph"] = tt_construct_anchor_graph.get_millisecs();
-    result->timings()["gmap_graph_dp"] = tt_graph_dp.get_millisecs();
+    result->timings()["gmap_total"] = tt_total.get_microsecs();
+    result->timings()["gmap_break_anchors"] = tt_break_anchors.get_microsecs();
+    result->timings()["gmap_align_anchors"] = tt_align_anchors.get_microsecs();
+    result->timings()["gmap_constr_anchor_graph"] = tt_construct_anchor_graph.get_microsecs();
+    result->timings()["gmap_graph_dp"] = tt_graph_dp.get_microsecs();
 
     return result;
 }
@@ -381,7 +381,7 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::DummyMap(const mindex::
 
     tt_total.stop();
 
-    result->timings()["gmap_total"] = tt_total.get_millisecs();
+    result->timings()["gmap_total"] = tt_total.get_microsecs();
     result->timings()["gmap_break_anchors"] = 0.0;
     result->timings()["gmap_align_anchors"] = 0.0;
     result->timings()["gmap_constr_anchor_graph"] = 0.0;

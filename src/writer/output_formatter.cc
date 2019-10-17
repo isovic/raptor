@@ -12,12 +12,13 @@ namespace raptor {
 
 std::string OutputFormatter::TimingMapToString(const std::unordered_map<std::string, double>& timings) {
     std::ostringstream oss;
+    oss << std::fixed;
     bool is_first = false;
     for (auto& it: timings) {
         if (is_first == false) {
             oss << "/";
         }
-        oss << it.first << "=" << it.second << "ms";
+        oss << it.first << "=" << it.second << "us";
     }
     return oss.str();
 }

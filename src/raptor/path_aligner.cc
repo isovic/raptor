@@ -809,9 +809,9 @@ std::shared_ptr<raptor::PathAlignment> PathAligner::Align(const mindex::Sequence
 
     total_time.stop();
 
-    // fprintf (stderr, "aln_total_time = %lf\n", total_time.get_millisecs());
+    // fprintf (stderr, "aln_total_time = %lf\n", total_time.get_microsecs());
 
-    result->add_timing("aln_total_time", total_time.get_millisecs());
+    result->add_timing("aln_total_time", total_time.get_microsecs());
     result->entire_alignment(entire_alignment);
     result->path_score(total_score);
     result->alns(region_aln);
