@@ -639,7 +639,7 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
         params_->homopolymer_suppression, params_->max_homopolymer_len, 0, -1);
 
     // tt1.stop();
-    // std::cerr << "Time for GenerateMinimizers: " << tt1.get_msecs() << std::endl;
+    // std::cerr << "Time for GenerateMinimizers: " << tt1.get_millisecs() << std::endl;
 
 #ifdef EXPERIMENTAL_QUERY_MASK
     kx::radix_sort(seeds.begin(), seeds.end());
@@ -664,7 +664,7 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
                                     : CalcHPSpan_(seq, seq_len, k_len, params_->homopolymer_suppression, params_->max_homopolymer_len);
 
     // tt2.stop();
-    // std::cerr << "Time for CalcHPSpan_: " << tt2.get_msecs() << std::endl;
+    // std::cerr << "Time for CalcHPSpan_: " << tt2.get_millisecs() << std::endl;
 
     // TicToc tt3;
     // tt3.start();
@@ -721,7 +721,7 @@ std::vector<mindex::SeedHitPacked> DenseIndex::CollectHits(const int8_t* seq,
     }
 
     // tt3.stop();
-    // std::cerr << "Time for processing hits: " << tt3.get_msecs() << std::endl;
+    // std::cerr << "Time for processing hits: " << tt3.get_millisecs() << std::endl;
 
     return hits;
 }

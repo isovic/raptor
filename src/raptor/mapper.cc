@@ -82,14 +82,14 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     if (result->qseq_len() == 0) {
         result->return_value(raptor::MapperReturnValueBase::QlenIsZero);
         tt_total.stop();
-        result->timings()["map_total"] = tt_total.get_msecs();
+        result->timings()["map_total"] = tt_total.get_millisecs();
         return result;
     }
 
     if (result->qseq_len() < params_->min_qlen) {
         result->return_value(raptor::MapperReturnValueBase::QseqTooShort);
         tt_total.stop();
-        result->timings()["map_total"] = tt_total.get_msecs();
+        result->timings()["map_total"] = tt_total.get_millisecs();
         return result;
     }
 
@@ -253,18 +253,18 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_debug_out.stop();
 
     tt_total.stop();
-    result->timings()["map_total"] = tt_total.get_msecs();
-    result->timings()["map_hits_collect"] = tt_collect_hits.get_msecs();
-    result->timings()["map_hits_sort"] = tt_sort.get_msecs();
-    result->timings()["map_hits_chain"] = tt_chain.get_msecs();
-    result->timings()["map_hits_filter_overlap"] = tt_filter_overlap.get_msecs();
-    result->timings()["map_anchors_make"] = tt_make_anchors.get_msecs();
-    result->timings()["map_anchors_sort"] = tt_sort_anchors.get_msecs();
-    result->timings()["map_anchors_score"] = tt_score_anchors.get_msecs();
-    result->timings()["map_debug_out"] = tt_debug_out.get_msecs();
+    result->timings()["map_total"] = tt_total.get_millisecs();
+    result->timings()["map_hits_collect"] = tt_collect_hits.get_millisecs();
+    result->timings()["map_hits_sort"] = tt_sort.get_millisecs();
+    result->timings()["map_hits_chain"] = tt_chain.get_millisecs();
+    result->timings()["map_hits_filter_overlap"] = tt_filter_overlap.get_millisecs();
+    result->timings()["map_anchors_make"] = tt_make_anchors.get_millisecs();
+    result->timings()["map_anchors_sort"] = tt_sort_anchors.get_millisecs();
+    result->timings()["map_anchors_score"] = tt_score_anchors.get_millisecs();
+    result->timings()["map_debug_out"] = tt_debug_out.get_millisecs();
 
 #ifdef USE_LIS_FILTER
-    result->timings()["map_hits_filter_lis"] = tt_filter_hits.get_msecs();
+    result->timings()["map_hits_filter_lis"] = tt_filter_hits.get_millisecs();
 #endif
 
     return result;
