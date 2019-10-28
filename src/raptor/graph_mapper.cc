@@ -1349,7 +1349,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
         auto out_edges = graph->GetOutEdges(v);
         int64_t num_valid_out_edges = 0;
         for (const auto& e_item: out_edges) {
-            if (e_item->data()->path_id() == -1) {
+            if (e_item->data()->path_id() < 0) {
                 continue;
             }
             if (e_item->data()->path_id() != pid) {
