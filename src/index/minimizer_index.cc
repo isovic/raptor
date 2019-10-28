@@ -713,6 +713,7 @@ std::vector<mindex::SeedHitPacked> MinimizerIndex::CollectHits(const int8_t* seq
                         pos += hp_span[pos] - 1;
                     }
 
+                    // Store the local seq_id (not absolute).
                     hits.emplace_back(mindex::SeedHitPacked(hit.seq_id, hit_is_rev, hit.pos, query_mask, pos));
                 }
             }

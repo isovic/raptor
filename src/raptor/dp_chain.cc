@@ -220,6 +220,7 @@ std::vector<raptor::ChainPtr> ChainHits(
         if (new_env == nullptr || new_env->t_id != index_t_id || new_env->t_rev != t_rev) {
             int32_t index_t_start = 0; // index->starts()[index_t_id];
             int32_t t_len = (index == nullptr) ? 0 : index->len(index_t_id);
+            // The index_t_id is local and not abs, because it's taken from the SeedHitPacked.
             new_env = raptor::createMappingEnv(index_t_id, index_t_start, t_len, t_rev, qseq_abs_id, qseq_len, false);
         }
 

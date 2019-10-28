@@ -58,11 +58,15 @@ void GraphLoader::AssertGraphValidity(const mindex::IndexPtr& index, const std::
         int64_t source_id = edge->source_id();
         int64_t sink_id = edge->sink_id();
 
+        // Using GetSeqByAbsID here is good, because the source_id and sink_id in the graph
+        // are absolute IDs in the Index (as added in AddGraphNodesFromIndex()).
         const mindex::SequencePtr& source_seq = index->seqs()->GetSeqByAbsID(source_id);
         if (source_seq == nullptr) {
             FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Absolute source sequence ID %ld not found in index!", source_id);
         }
 
+        // Using GetSeqByAbsID here is good, because the source_id and sink_id in the graph
+        // are absolute IDs in the Index (as added in AddGraphNodesFromIndex()).
         const mindex::SequencePtr& sink_seq = index->seqs()->GetSeqByAbsID(sink_id);
         if (sink_seq == nullptr) {
             FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Absolute sink sequence ID %ld not found in index!", sink_id);
