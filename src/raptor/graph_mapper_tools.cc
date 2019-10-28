@@ -76,10 +76,8 @@ GraphEdgePenalties CalcAnchorGraphEdgePenalty(const raptor::AnchorPtr& node_v, c
         ret.v_pivot_tpos = (local_graph_edge->sink_start() - local_graph_edge->source_start() - jump_length) + ret.v_pivot_tpos;
         ret.v_virtual_l = ret.v_virtual_tend - ret.v_qend;
 
-        ret.v_score_compensation = (local_graph_edge->source_start() >= node_v->TargetStart() && local_graph_edge->source_start() < node_v->TargetEnd()) ?
-                                (ret.v_tspan() != 0) ?
-                                    ((int32_t) (node_v_score * (static_cast<double>(node_v->TargetEnd() - local_graph_edge->source_start())) / (static_cast<double>(ret.v_tspan())))) : 0
-                                : 0;
+        ret.v_score_compensation = (local_graph_edge->source_start() >= node_v->TargetStart() && local_graph_edge->source_start() < node_v->TargetEnd() && ret.v_tspan() != 0) ?
+                                ((int32_t) (node_v_score * (static_cast<double>(node_v->TargetEnd() - local_graph_edge->source_start())) / (static_cast<double>(ret.v_tspan())))) : 0;
     }
 
     // int64_t dist_min = (int64_t) abs(std::min(abs(dist_y), abs(dist_x)));
