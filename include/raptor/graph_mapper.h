@@ -86,18 +86,18 @@ class GraphMapper {
     // */
 //    static void ReduceMappedAnchorGraph(
 //                                 std::shared_ptr<raptor::AnchorGraph>& graph,
-//                                 double edge_retain_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+//                                 double allowed_score_diff_frac,
 //                                 bool verbose_debug_qid);
 
     static std::vector<raptor::AnchorGraphPtr> BacktrackReducedMappedAnchorGraph(
                                             const std::shared_ptr<raptor::AnchorGraph>& graph,
-                                            const double edge_retain_frac,  // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                            const double allowed_score_diff_frac,
                                             std::unordered_map<int64_t, int64_t>& node_to_path_score,
                                             const bool verbose_debug_qid);
 
     static std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> CreateAnchorGraphConnectedComponents(
                                                 const std::shared_ptr<raptor::AnchorGraph>& graph,
-                                                const double edge_retain_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                                const double allowed_score_diff_frac,
                                                 const bool verbose_debug_qid);
 
 

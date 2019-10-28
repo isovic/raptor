@@ -1119,13 +1119,13 @@ std::shared_ptr<raptor::AnchorGraph> GraphMapper::GraphDP2(
 
 // void GraphMapper::ReduceMappedAnchorGraph(
 //                                             std::shared_ptr<raptor::AnchorGraph>& graph,
-//                                             double edge_retain_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+//                                             double allowed_score_diff_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * allowed_score_diff_frac).
 //                                             bool verbose_debug_qid) {
 
 //     std::set<std::pair<int64_t, int64_t>> edges_for_removal;
 
 //     // Find all edges which are not part of the maximum scoring path, and
-//     // which do not have scores _close_ to the maximum (within the edge_retain_frac from max).
+//     // which do not have scores _close_ to the maximum (within the allowed_score_diff_frac from max).
 //     for (const auto& v_item: graph->nodes()) {
 
 //         int64_t v = v_item->name();
@@ -1153,7 +1153,7 @@ std::shared_ptr<raptor::AnchorGraph> GraphMapper::GraphDP2(
 //                 max_out_score = std::max(max_out_score, score);
 //             }
 //             // Take care of both positive and negative scores.
-//             double min_out_score = max_out_score - (std::abs(max_out_score) * edge_retain_frac);
+//             double min_out_score = max_out_score - (std::abs(max_out_score) * allowed_score_diff_frac);
 //             // Do the filtering.
 //             for (const auto& e_item: out_edges) {
 //                 if (e_item->is_removed()) {
@@ -1183,7 +1183,7 @@ std::shared_ptr<raptor::AnchorGraph> GraphMapper::GraphDP2(
 //                 max_in_score = std::max(max_in_score, score);
 //             }
 //             // Take care of both positive and negative scores.
-//             double min_in_score = max_in_score - (std::abs(max_in_score) * edge_retain_frac);
+//             double min_in_score = max_in_score - (std::abs(max_in_score) * allowed_score_diff_frac);
 //             // Do the filtering.
 //             for (const auto& e_item: in_edges) {
 //                 if (e_item->is_removed()) {
@@ -1311,8 +1311,8 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
 
 std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGraph(
                                             const std::shared_ptr<raptor::AnchorGraph>& graph,
-                                            const double edge_retain_frac,
-                                            std::unordered_map<int64_t, int64_t>& node_to_path_score,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                            const double allowed_score_diff_frac,
+                                            std::unordered_map<int64_t, int64_t>& node_to_path_score,    // For a node with multiple out edges, pick all those with score >= (max_score * allowed_score_diff_frac).
                                             const bool verbose_debug_qid) {
 
     std::vector<raptor::AnchorGraphPtr> ret_graphs;
@@ -1408,7 +1408,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
         std::deque<std::pair<int64_t, int64_t>> fork_queue;
 
         // Emplace all leafs. We expect that the filtering was applied on the outside.
-        double min_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid] * edge_retain_frac);
+        double min_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid]) * (1.0 - allowed_score_diff_frac);
         for (const auto& v: pid_leafs[pid]) {
             const auto& v_data = graph->GetNode(v);
             if (v_data->score() < min_leaf_score) {
@@ -1500,7 +1500,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                     break;
                 }
 
-                double min_allowed_in_edge_score = max_in_score * edge_retain_frac;
+                double min_allowed_in_edge_score = max_in_score  - std::abs(max_in_score) * (1.0 - allowed_score_diff_frac);
 
                 // Reiterate over all edges, and add all alternate paths to the queue.
                 // This expects that all edges which are not of interest are already
@@ -1611,7 +1611,7 @@ raptor::EdgeItemAnchorGraphPtr FindMaxInEdgeForPathId(
 */
 std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> GraphMapper::CreateAnchorGraphConnectedComponents(
                                             const std::shared_ptr<raptor::AnchorGraph>& graph,
-                                            const double allowed_score_diff_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * edge_retain_frac).
+                                            const double allowed_score_diff_frac,    // For a node with multiple out edges, pick all those with score >= (max_score * allowed_score_diff_frac).
                                             const bool verbose_debug_qid) {
 
     // Find leafs for all paths.
@@ -1646,8 +1646,8 @@ std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> GraphMapper::Cr
                 }
         );
         // Initialize the processing queue with top scoring leafs which are above
-        // a heuristic threshold.
-        double min_leaf_score = max_pid_score * allowed_score_diff_frac;
+        // a heuristic threshold. Consider that the score could potentially be negative.
+        double min_leaf_score = max_pid_score - std::abs(max_pid_score) * (1.0 - allowed_score_diff_frac);
         std::deque<std::pair<int64_t, double>> proc_queue;
         for (const auto& leaf_pair: candidate_leafs) {
             if (std::get<1>(leaf_pair) < min_leaf_score) {
@@ -1731,7 +1731,7 @@ std::vector<std::tuple<raptor::AnchorGraphPtr, int64_t, double>> GraphMapper::Cr
                 }
 
                 double max_in_score = e_in_max->data()->score();
-                double min_allowed_in_edge_score = max_in_score * allowed_score_diff_frac;
+                double min_allowed_in_edge_score = max_in_score - std::abs(max_in_score) * (1.0 - allowed_score_diff_frac);
 
                 #ifdef RAPTOR_TESTING_MODE
                     DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t  - max_in_score = %lf\n", max_in_score));

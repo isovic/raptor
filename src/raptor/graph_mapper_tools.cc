@@ -349,7 +349,9 @@ std::vector<std::vector<int64_t>> FindBestLeafNodes(
 
     // For each path, remove poor scoring leafs.
     for (size_t pid = 0; pid < pid_leafs.size(); pid++) {
-        double min_allowed_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid]) * allowed_score_diff_frac;
+        // Using the abs because if the score is below zero, our minimum threshold needs to be
+        // even below that.
+        double min_allowed_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid]) * (1.0 - allowed_score_diff_frac);
         std::vector<int64_t> filtered_pid_leafs;
         for (size_t leaf_id = 0; leaf_id < pid_leafs[pid].size(); ++leaf_id) {
             if (pid_leaf_scores[pid][leaf_id] >= min_allowed_leaf_score) {
