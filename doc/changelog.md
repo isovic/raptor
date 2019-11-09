@@ -1,7 +1,9 @@
 # Raptor Changelog
 
-## 0.19.0 -> 0.xx.xx.
+## 0.19.0 -> 0.19.1.
 - Minor refactor of the ChainHits interface.
+- Updated the TicToc to use C++11 chrono, and now reporting microseconds instead of milliseconds for higher resolution on smaller inputs.
+- Minor changes, added some comments, simplified a few lines of code.
 
 ## 0.18.3 -> 0.19.0.
 - Modified how the `--min-map-len` option was applied. Previously, even if alignment extension was used, `--min-map-len` was still applied before alignment (at the mapping stage), which means that even if the mapping was extended, it would still be filtered out. Now, the value of `min_map_len / 2` is used to filter the mappings in case the extension will be applied, and then the full `min_map_len` is applied after alignment. If alignment/flank extension is not applied, then the full `min_map_len` is used right away.
