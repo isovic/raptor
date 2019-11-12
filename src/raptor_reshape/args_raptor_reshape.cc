@@ -18,6 +18,7 @@
 #include <iostream>
 #include <utility/files.hpp>
 #include <utility/fofn.h>
+#include <sequences/sequence_file_utils.h>
 
 namespace raptor {
 
@@ -156,7 +157,10 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     // Collect all FOFN files.
     parameters->in_paths = ExpandPathList(parameters->in_fmt, in_fmt, parameters->in_paths);
     // Validate the input files and formats.
-    ValidateInputFiles(argc, argv, parameters->in_fmt, parameters->in_paths);
+    bool validate_rv1 = ValidateInputFiles(parameters->in_fmt, parameters->in_paths);
+    if (validate_rv1 == false) {
+        VerboseShortHelpAndExit(argc, argv);
+    }
     // In case the input was RaptorDB, modify the infmt for future use in the index factory.
     if (IsInputFormatRaptorDB(parameters->in_fmt, parameters->in_paths)) {
         parameters->in_fmt = mindex::SequenceFormat::RaptorDB;

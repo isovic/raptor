@@ -99,9 +99,25 @@ inline std::string SequenceFormatToString(const SequenceFormat& fmt) {
     return ret;
 }
 
+/*
+ * Deduce the format from the file extension.
+*/
 inline SequenceFormat GetSequenceFormatFromPath(const std::string& path) {
     std::string ext = raptor::GetFileExtWithoutGZ(path);
     return SequenceFormatFromString(ext);
+}
+
+/*
+ * In case the input format has been specified explicitly before (i.e. it is different from Auto),
+ * then return that one.
+ * Otherwise, deduce the format from the path.
+*/
+inline mindex::SequenceFormat GetSequenceFormatFromPath(const std::string& path, const mindex::SequenceFormat& apriori_in_fmt) {
+    if (apriori_in_fmt != mindex::SequenceFormat::Auto) {
+        return apriori_in_fmt;
+    }
+    mindex::SequenceFormat fmt = mindex::GetSequenceFormatFromPath(path);
+    return fmt;
 }
 
 }
