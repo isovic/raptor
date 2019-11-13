@@ -10,6 +10,7 @@
 #include <sequences/sequence_file.h>
 #include <sequences/sequence_file_composite_fofn.h>
 #include <sequences/sequence_file_composite_pbxml.h>
+#include <sequences/sequence_file_composite_factory.h>
 #include <sequences/random_access_sequence_file.h>
 #include <lib/argparser.h>
 #include <version.h>
@@ -127,12 +128,16 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	LOG_ALL("Creating the Raptor object.\n");
 	auto raptor = raptor::createRaptor(index, graph, ssg, parameters, true);
 
+	// The RandomAccessSequenceFile has a slightly different interface compared
+	// to the Composite sequence files, and that's why here we have a separate
+	// branch for both options. This is becauase for a RandomAccessSequenceFile
+	// batch size is equal to the block size.
 	if (parameters->infmt == mindex::SequenceFormat::RaptorDB) {
-		const std::string& query_path = parameters->query_paths[0];
-
 		// If the input is a RaptorDB, then a batch size is one block of the input.
+		const std::string& query_path = parameters->query_paths[0];
 		LOG_ALL("Processing reads from: %s\n", query_path.c_str());
 
+		// Open the input DB file.
 		mindex::RandomAccessSequenceFilePtr random_seqfile = mindex::createRandomAccessSequenceFile(query_path, 50);
 
 		int64_t num_blocks = static_cast<int64_t>(random_seqfile->db_blocks().size());
@@ -152,19 +157,17 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The end_block_id >= num_blocks. end_block_id = %ld, num_blocks = %ld. Exiting.", end_block_id, num_blocks);
 		}
 
-		const auto& header_groups = random_seqfile->GetHeaderGroups();
-
 		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
+		const auto& header_groups = random_seqfile->GetHeaderGroups();
 		writer->WriteHeader(header_groups);
 
+		// Process all blocks.
 		for (int64_t block_id = start_block_id; block_id < end_block_id; ++block_id) {
 			LOG_ALL("Loading block %ld from the RaptorDB.\n", block_id);
-
 			mindex::SequenceFilePtr reads = random_seqfile->FetchBlock(block_id);
 
 			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
 						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
-
 			raptor->Clear();
 			raptor->Align(reads);
 			writer->WriteBatch(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
@@ -178,32 +181,6 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		}
 
 	} else {
-		// Open a sequence file object which will iterate through all inputs.
-		std::vector<mindex::SequenceFormat> query_fmts(parameters->query_paths.size(), parameters->infmt);
-
-		mindex::SequenceFileCompositeBasePtr reads_parser = nullptr;
-
-		///////////////////////////////
-		/// PacBio DataSet support. ///
-		///////////////////////////////
-		bool is_xml_used = false;
-		#ifdef RAPTOR_COMPILED_WITH_PBBAM
-			if (parameters->infmt == mindex::SequenceFormat::XML) {
-				is_xml_used = true;
-				reads_parser = mindex::createSequenceFileCompositePbXml(parameters->query_paths[0]);
-			}
-		#endif
-		if (is_xml_used == false) {
-			reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, parameters->infmt);
-		}
-
-		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
-
-		const auto& header_groups = reads_parser->GetHeaderGroups();
-
-		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
-		writer->WriteHeader(header_groups);
-
 		LOG_ALL("Processing reads.\n");
 		int64_t batch_size_in_mb = static_cast<int64_t>(parameters->batch_size);
 		if (parameters->batch_type == mindex::BatchLoadType::Coverage) {
@@ -215,20 +192,26 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 			LOG_ALL("Rough batch size: %ld MB.\n", batch_size_in_mb);
 		}
 
+		// Open a sequence file object which will iterate through all inputs.
+		mindex::SequenceFileCompositeBasePtr reads_parser = mindex::createSequenceFileCompositeFactory(parameters->query_paths, parameters->infmt);
+
+		// Write the header if needed (e.g. parameters->outfmt == raptor::OutputFormat::SAM).
+		const auto& header_groups = reads_parser->GetHeaderGroups();
+		writer->WriteHeader(header_groups);
+
+		// Iterate through all the batches.
+		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
 		while ((reads = reads_parser->YieldBatchMB(batch_size_in_mb))) {
 			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
 						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
-
 			raptor->Clear();
 			raptor->Align(reads);
 			writer->WriteBatch(reads, raptor->results(), parameters->do_align, parameters->strict_format == false, parameters->one_hit_per_target);
 			total_processed += reads->seqs().size();
-
 			if (parameters->num_reads_to_process > 0 &&
 				total_processed > (parameters->start_read + parameters->num_reads_to_process)) {
 				break;
 			}
-
 			LOG_ALL("Batch done! Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
 			fflush(stdout);
 		}
