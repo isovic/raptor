@@ -128,14 +128,6 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	auto raptor = raptor::createRaptor(index, graph, ssg, parameters, true);
 
 	if (parameters->infmt == mindex::SequenceFormat::RaptorDB) {
-
-		if (parameters->query_paths.size() != 1) {
-			FATAL_REPORT(ERR_UNEXPECTED_VALUE,
-				"There has to be exactly 1 query path specified when the input is a RaptorDB. "
-				"parameters->query_paths.size() = %ld. Exiting.",
-				parameters->query_paths.size());
-		}
-
 		const std::string& query_path = parameters->query_paths[0];
 
 		// If the input is a RaptorDB, then a batch size is one block of the input.
@@ -195,31 +187,16 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		/// PacBio DataSet support. ///
 		///////////////////////////////
 		bool is_xml_used = false;
-#ifdef RAPTOR_COMPILED_WITH_PBBAM
-		// Sanity check for the input files. Allow only one XML file to be specified,
-		// as by design of the SequenceFileCompositePbXml.
-		for (const auto& in_path: parameters->query_paths) {
-			if (mindex::GetSequenceFormatFromPath(in_path) == mindex::SequenceFormat::XML) {
+		#ifdef RAPTOR_COMPILED_WITH_PBBAM
+			if (parameters->infmt == mindex::SequenceFormat::XML) {
 				is_xml_used = true;
-				break;
+				reads_parser = mindex::createSequenceFileCompositePbXml(parameters->query_paths[0]);
 			}
-		}
-#endif
-		// Set-up the parser for the correct sequence format.
-		if (is_xml_used && parameters->query_paths.size() != 1) {
-			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "When using XML as input, only a single input can be specified.");
-		} else if (is_xml_used && parameters->query_paths.size() == 1) {
-#ifdef RAPTOR_COMPILED_WITH_PBBAM
-			reads_parser = mindex::createSequenceFileCompositePbXml(parameters->query_paths[0]);
-#else
-			FATAL_REPORT(ERR_UNEXPECTED_VALUE, "The raptor-reshape tool was not compiled with PacBio BAM support. Cannot use the .xml input files.");
-#endif
-		} else {
+		#endif
+		if (is_xml_used == false) {
 			reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, parameters->infmt);
 		}
-		///////////////////////////////
 
-		// mindex::SequenceFileCompositeBasePtr reads_parser = mindex::createSequenceFileCompositeFofn(parameters->query_paths, query_fmts);
 		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
 
 		const auto& header_groups = reads_parser->GetHeaderGroups();

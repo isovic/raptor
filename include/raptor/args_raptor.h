@@ -15,8 +15,8 @@
 
 namespace raptor {
 
-void VerboseShortHelp(int argc, char **argv);
-void VerboseShortHelpAndExit(int argc, char **argv, int ret_val = 1);
+void VerboseShortHelpRaptor(int argc, char **argv);
+void VerboseShortHelpRaptorAndExit(int argc, char **argv, int ret_val = 1);
 int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRaptor> parameters);
 
 } /* namespace raptor */

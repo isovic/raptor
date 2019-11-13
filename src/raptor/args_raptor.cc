@@ -22,7 +22,7 @@
 
 namespace raptor {
 
-void VerboseShortHelp(int argc, char **argv) {
+void VerboseShortHelpRaptor(int argc, char **argv) {
     fprintf(stderr, "For detailed help, please run with -h option.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Example usage:\n");
@@ -39,8 +39,8 @@ void VerboseShortHelp(int argc, char **argv) {
     fprintf(stderr, "\n");
 }
 
-void VerboseShortHelpAndExit(int argc, char **argv, int ret_val) {
-    VerboseShortHelp(argc, argv);
+void VerboseShortHelpRaptorAndExit(int argc, char **argv, int ret_val) {
+    VerboseShortHelpRaptor(argc, argv);
     exit(ret_val);
 }
 
@@ -479,7 +479,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Check if help was triggered.
     if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        VerboseShortHelp(argc, argv);
+        VerboseShortHelpRaptor(argc, argv);
         fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
         exit(0);
     }
@@ -503,14 +503,14 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     if (parameters->ref_paths.size() == 0) {
         fprintf(stderr, "Please specify the path to the reference file.\n");
         fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     // Sanity check for the reads path.
     if (parameters->query_paths.size() == 0 && parameters->calc_only_index == false) {
         fprintf(stderr, "Please specify the path to the reads file.\n");
         fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     /////////////////////////////////////////////////
@@ -520,19 +520,24 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     parameters->infmt = mindex::SequenceFormatFromString(infmt);
     if (parameters->infmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unknown input format '%s'!\n\n", infmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // Collect all FOFN files.
     parameters->query_paths = ExpandPathList(parameters->infmt, infmt, parameters->query_paths);
     // Validate the input files and formats.
     bool validate_rv1 = ValidateInputFiles(parameters->infmt, parameters->query_paths);
     if (validate_rv1 == false) {
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // In case the input was RaptorDB, modify the infmt for future use in the index factory.
     if (IsInputFormatRaptorDB(parameters->infmt, parameters->query_paths)) {
         parameters->infmt = mindex::SequenceFormat::RaptorDB;
     }
+    #ifdef RAPTOR_COMPILED_WITH_PBBAM
+        if (IsInputFormatXML(parameters->infmt, parameters->query_paths)) {
+            parameters->infmt = mindex::SequenceFormat::XML;
+        }
+    #endif
     /////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////
@@ -542,33 +547,38 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     parameters->ref_fmt = mindex::SequenceFormatFromString(ref_fmt);
     if (parameters->ref_fmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unknown reference format '%s'!\n\n", ref_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // Collect all FOFN files.
     parameters->ref_paths = ExpandPathList(parameters->ref_fmt, infmt, parameters->ref_paths);
     // Validate the input files and formats.
     bool validate_rv = ValidateInputFiles(parameters->ref_fmt, parameters->ref_paths);
     if (validate_rv1 == false) {
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // In case the input was RaptorDB, modify the infmt for future use in the index factory.
     if (IsInputFormatRaptorDB(parameters->ref_fmt, parameters->ref_paths)) {
         parameters->ref_fmt = mindex::SequenceFormat::RaptorDB;
     }
+    #ifdef RAPTOR_COMPILED_WITH_PBBAM
+        if (IsInputFormatXML(parameters->ref_fmt, parameters->ref_paths)) {
+            parameters->ref_fmt = mindex::SequenceFormat::XML;
+        }
+    #endif
     /////////////////////////////////////////////////////
 
     // Parse the input graph format.
     parameters->graph_fmt = raptor::GraphFormatFromString(graph_fmt);
     if (parameters->graph_fmt == GraphFormat::Unknown) {
         fprintf(stderr, "Unknown input graph format '%s'!\n\n", graph_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     // Parse the output format.
     parameters->outfmt = raptor::OutputFormatFromString(outfmt);
     if (parameters->outfmt == OutputFormat::Unknown) {
         fprintf(stderr, "Unknown output format '%s'!\n\n", outfmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     if (parameters->num_threads < 0) {
@@ -577,13 +587,13 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     if (parameters->index_params->w <= 0) {
         fprintf(stderr, "Minimizer window length cannot be <= 0!\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     if (parameters->index_params->freq_percentil < 0.0 ||
         parameters->index_params->freq_percentil > 1.0) {
         fprintf(stderr, "Frequency percentil should be in range [0.0, 1.0].\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     // Write this out for every debug verbose level.
@@ -609,14 +619,14 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     if (parameters->mapper_params->is_rna == true) {
         fprintf(stderr, "The RNA feature is unfortunately not implemented yet.\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     if (argparser.GetArgumentByLongName("graph")->is_set == true &&
         argparser.GetArgumentByLongName("agraph")->is_set == true) {
         fprintf(stderr,
                 "Two types of input graph are specified. Use either '--graph' or '--agraph'.\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     parameters->add_symmetric_arcs = false;
@@ -640,7 +650,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                 fprintf(stderr,
                         "Region format is incorrect. Two coordinates need to be provided, "
                         "separated by '-', in the format: chr:start-end.\n");
-                VerboseShortHelpAndExit(argc, argv);
+                VerboseShortHelpRaptorAndExit(argc, argv);
             }
             parameters->index_params->region_rstart =
                 atoi(index_region_string.substr((rname_end + 1), dash_pos).c_str());
@@ -657,12 +667,12 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     } else {
         parameters->index_type = mindex::IndexType::Undefined;
         fprintf(stderr, "Unknown index type.\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     if (parameters->do_align && parameters->do_diff) {
         fprintf (stderr, "Both '--align' and '--diff' options are specified. These are mutually exclusive.\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     // Parse the alignment parameters.
@@ -671,11 +681,11 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
         auto gap_ext_segments = raptor::Tokenize(gap_ext_penalty_str, ',');
         if (gap_open_segments.size() != gap_ext_segments.size()) {
             fprintf (stderr, "The gap open and gap ext parameters need to have same number of segments.\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
         if (gap_open_segments.size() == 0 || gap_ext_segments.size() == 0) {
             fprintf (stderr, "At least one gap penalty segment needs to be specified.\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
 
         std::string::size_type sz;
@@ -703,7 +713,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
         if (parameters->aligner_params->aligner_type == raptor::AlignerType::Unknown) {
             fprintf (stderr, "Unknown aligner.\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
 
         // KSW2 tends to segfault on larger sequences if bandwidth is not specified
@@ -859,12 +869,12 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 //     if (parameters->ref_paths.size() == 0) {
 //         fprintf(stderr, "Please specify the path to the reference file.\n");
 //         fprintf(stderr, "\n");
-//         VerboseShortHelpAndExit(argc, argv);
+//         VerboseShortHelpRaptorAndExit(argc, argv);
 //     }
 //     for (auto& ref_path: parameters->ref_paths) {
 //         if (!raptor::FileExists(ref_path.c_str())) {
 //             fprintf(stderr, "Reference does not exist: '%s'\n\n", ref_path.c_str());
-//             VerboseShortHelpAndExit(argc, argv);
+//             VerboseShortHelpRaptorAndExit(argc, argv);
 //         }
 //     }
 
@@ -882,7 +892,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 //     //             : mindex::SequenceFormat::Unknown;
 //     // if (parameters->ref_fmt == mindex::SequenceFormat::Unknown) {
 //     //     fprintf(stderr, "Unknown reference format '%s'!\n\n", ref_fmt.c_str());
-//     //     VerboseShortHelpAndExit(argc, argv);
+//     //     VerboseShortHelpRaptorAndExit(argc, argv);
 //     // }
 
 //     if (parameters->num_threads < 0) {
@@ -891,13 +901,13 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
 //     if (parameters->index_params->w <= 0) {
 //         fprintf(stderr, "Minimizer window length cannot be <= 0!\n");
-//         VerboseShortHelpAndExit(argc, argv);
+//         VerboseShortHelpRaptorAndExit(argc, argv);
 //     }
 
 //     if (parameters->index_params->freq_percentil < 0.0 ||
 //         parameters->index_params->freq_percentil > 1.0) {
 //         fprintf(stderr, "Frequency percentil should be in range [0.0, 1.0].\n");
-//         VerboseShortHelpAndExit(argc, argv);
+//         VerboseShortHelpRaptorAndExit(argc, argv);
 //     }
 
 //     // Write this out for every debug verbose level.
@@ -921,7 +931,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 //                 fprintf(stderr,
 //                         "Region format is incorrect. Two coordinates need to be provided, "
 //                         "separated by '-', in the format: chr:start-end.\n");
-//                 VerboseShortHelpAndExit(argc, argv);
+//                 VerboseShortHelpRaptorAndExit(argc, argv);
 //             }
 //             parameters->index_params->region_rstart =
 //                 atoi(index_region_string.substr((rname_end + 1), dash_pos).c_str());

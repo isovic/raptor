@@ -136,7 +136,7 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     if (parameters->in_paths.size() == 0) {
         fprintf(stderr, "Please specify the path to the reference file.\n");
         fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     /////////////////////////////////////////////////
@@ -146,25 +146,30 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
     if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unsupported input format '%s'!\n\n", in_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // Parse the input format.
     parameters->in_fmt = mindex::SequenceFormatFromString(in_fmt);
     if (parameters->in_fmt == mindex::SequenceFormat::Unknown) {
         fprintf(stderr, "Unknown input format '%s'!\n\n", in_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // Collect all FOFN files.
     parameters->in_paths = ExpandPathList(parameters->in_fmt, in_fmt, parameters->in_paths);
     // Validate the input files and formats.
     bool validate_rv1 = ValidateInputFiles(parameters->in_fmt, parameters->in_paths);
     if (validate_rv1 == false) {
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     // In case the input was RaptorDB, modify the infmt for future use in the index factory.
     if (IsInputFormatRaptorDB(parameters->in_fmt, parameters->in_paths)) {
         parameters->in_fmt = mindex::SequenceFormat::RaptorDB;
     }
+    #ifdef RAPTOR_COMPILED_WITH_PBBAM
+        if (IsInputFormatXML(parameters->in_fmt, parameters->in_paths)) {
+            parameters->in_fmt = mindex::SequenceFormat::XML;
+        }
+    #endif
     parameters->in_fmt = (parameters->in_fmt == mindex::SequenceFormat::FOFN) ? mindex::SequenceFormat::Auto : parameters->in_fmt;
     /////////////////////////////////////////////////
 
@@ -172,21 +177,21 @@ int ProcessArgsRaptorReshape(int argc, char **argv, std::shared_ptr<raptor::Para
     parameters->out_fmt = mindex::SequenceFormatFromString(out_fmt);
     if (parameters->out_fmt == mindex::SequenceFormat::Unknown || parameters->out_fmt == mindex::SequenceFormat::Auto || parameters->out_fmt == mindex::SequenceFormat::GFA) {
         fprintf(stderr, "Unsupported output format '%s'!\n\n", out_fmt.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     if (parameters->symlink_files) {
         if (parameters->rename_seqs) {
             fprintf(stderr, "Option '--rename' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
         if (parameters->keep_lowercase) {
             fprintf(stderr, "Option '--keep-lowercase' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
         if (parameters->split_blocks) {
             fprintf(stderr, "Option '--split-blocks' cannot be used in combination with '--symlink'.\n\n");
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
     }
 

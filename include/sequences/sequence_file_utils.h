@@ -30,6 +30,9 @@ bool ValidateInputFiles(
 bool IsInputFormatRaptorDB(const mindex::SequenceFormat& apriori_in_fmt,
                             const std::vector<std::string>& paths);
 
+bool IsInputFormatXML(const mindex::SequenceFormat& apriori_in_fmt,
+                            const std::vector<std::string>& paths);
+
 }
 
 #endif

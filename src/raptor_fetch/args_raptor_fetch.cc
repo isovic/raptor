@@ -77,7 +77,7 @@ int ProcessArgsRaptorFetch(int argc, char **argv, std::shared_ptr<raptor::Params
 
     // Check if help was triggered.
     if (argparser.GetArgumentByLongName("help")->is_set == true) {
-        VerboseShortHelp(argc, argv);
+        VerboseShortHelpRaptor(argc, argv);
         fprintf(stderr, "%s\n", argparser.VerboseUsage().c_str());
         exit(0);
     }
@@ -93,23 +93,23 @@ int ProcessArgsRaptorFetch(int argc, char **argv, std::shared_ptr<raptor::Params
     if (argparser.GetArgumentByLongName("rdb")->is_set == false) {
         fprintf(stderr, "Please specify the path to the RaptorDB file.\n");
         fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     if (!raptor::FileExists(params->rdb_path.c_str())) {
         fprintf(stderr, "RaptorDB does not exist: '%s'\n\n", params->rdb_path.c_str());
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
 
     // Sanity check for the input paths.
     if (params->in_paths.size() == 0) {
         fprintf(stderr, "Please specify the path to the input file.\n");
         fprintf(stderr, "\n");
-        VerboseShortHelpAndExit(argc, argv);
+        VerboseShortHelpRaptorAndExit(argc, argv);
     }
     for (auto& in_path: params->in_paths) {
         if (!raptor::FileExists(in_path.c_str())) {
             fprintf(stderr, "Reference does not exist: '%s'\n\n", in_path.c_str());
-            VerboseShortHelpAndExit(argc, argv);
+            VerboseShortHelpRaptorAndExit(argc, argv);
         }
     }
 

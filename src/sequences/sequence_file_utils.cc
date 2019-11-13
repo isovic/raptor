@@ -50,6 +50,7 @@ bool ValidateInputFiles(
     }
 
     int32_t num_rdb_paths = 0;
+    int32_t num_xml_paths = 0;
 
     for (size_t in_id = 0; in_id < paths.size(); ++in_id) {
         const auto& in_path = paths[in_id];
@@ -64,6 +65,11 @@ bool ValidateInputFiles(
 
         } else if (fmt == mindex::SequenceFormat::RaptorDB) {
             ++num_rdb_paths;
+
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+        } else if (fmt == mindex::SequenceFormat::XML) {
+            ++num_xml_paths;
+#endif
         }
 
         if (!raptor::FileExists(in_path.c_str())) {
@@ -79,6 +85,12 @@ bool ValidateInputFiles(
     } else if (num_rdb_paths == 1 && paths.size() > 1) {
         fprintf(stderr, "A RaptorDB input cannot be specified along side to another input file.\n\n");
         return false;
+    } else if (num_xml_paths > 1) {
+        fprintf(stderr, "Only one XML query sequence file can be loaded.\n\n");
+        return false;
+    } else if (num_xml_paths == 1 && paths.size() > 1) {
+        fprintf(stderr, "An XML input cannot be specified along side to another input file.\n\n");
+        return false;
     }
 
     return true;
@@ -93,5 +105,17 @@ bool IsInputFormatRaptorDB(const mindex::SequenceFormat& apriori_in_fmt,
     return fmt == mindex::SequenceFormat::RaptorDB;
 }
 
+bool IsInputFormatXML(const mindex::SequenceFormat& apriori_in_fmt,
+                            const std::vector<std::string>& paths) {
+#ifdef RAPTOR_COMPILED_WITH_PBBAM
+    if (paths.size() != 1) {
+        return false;
+    }
+    mindex::SequenceFormat fmt = GetSequenceFormatFromPath(paths[0], apriori_in_fmt);
+    return fmt == mindex::SequenceFormat::XML;
+#else
+    return false;
+#endif
+}
 
 }
