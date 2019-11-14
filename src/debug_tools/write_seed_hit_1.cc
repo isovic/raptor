@@ -20,7 +20,7 @@ void WriteSeedHits(const std::string& out_path,
 //   fprintf (fp, "%s\t0\t%ld\t%s\t0\t%ld\t0.0\n", qname.c_str(), qlen, rname.c_str(), rlen);
 
     for (size_t j=0; j<seed_hits.size(); j++) {
-        int32_t cluster_id = 0;
+        int32_t cluster_id = seed_hits[j].TargetId() * 2 + (seed_hits[j].TargetRev() ? 1 : 0);
         ofs << seed_hits[j].QueryPos() << "\t" << seed_hits[j].TargetPos() << "\t" << cluster_id << std::endl;
         ofs << seed_hits[j].QueryPos() + seed_len << "\t" << seed_hits[j].TargetPos() + seed_len << "\t" << cluster_id << std::endl;
     }
