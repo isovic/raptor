@@ -100,24 +100,24 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	if (parameters->graph_path.size() > 0) {
 		LOG_ALL("Loading graph from '%s'.\n", parameters->graph_path.c_str());
 		graph = raptor::GraphLoader::FromGFA(parameters->graph_path, index, parameters->add_symmetric_arcs);
-		ssg = raptor::createSplitSegmentGraph(graph);
+		// ssg = raptor::createSplitSegmentGraph(graph);
 
-		#ifdef RAPTOR_TESTING_MODE
-			if (parameters->verbose_level >= 9) {
-				std::cerr << "Loaded graph:" << std::endl << graph->Verbose() << std::endl << std::endl;
-				std::cerr << "Split segment graph:" << std::endl << ssg->Verbose() << std::endl << std::endl;
+		// #ifdef RAPTOR_TESTING_MODE
+		// 	if (parameters->verbose_level >= 9) {
+		// 		std::cerr << "Loaded graph:" << std::endl << graph->Verbose() << std::endl << std::endl;
+		// 		std::cerr << "Split segment graph:" << std::endl << ssg->Verbose() << std::endl << std::endl;
 
-				std::ofstream ofs_debug_graph_sg("temp/debug-graph/segment_graph.html");
-                if (ofs_debug_graph_sg.is_open()) {
-					graph->WriteAsHTML(ofs_debug_graph_sg);
-				}
+		// 		std::ofstream ofs_debug_graph_sg("temp/debug-graph/segment_graph.html");
+        //         if (ofs_debug_graph_sg.is_open()) {
+		// 			graph->WriteAsHTML(ofs_debug_graph_sg);
+		// 		}
 
-				std::ofstream ofs_debug_graph_ssg("temp/debug-graph/split_segment_graph.html");
-                if (ofs_debug_graph_ssg.is_open()) {
-					ssg->WriteAsHTML(ofs_debug_graph_ssg);
-				}
-			}
-		#endif
+		// 		std::ofstream ofs_debug_graph_ssg("temp/debug-graph/split_segment_graph.html");
+        //         if (ofs_debug_graph_ssg.is_open()) {
+		// 			ssg->WriteAsHTML(ofs_debug_graph_ssg);
+		// 		}
+		// 	}
+		// #endif
 	}
 
 	// Create a writer for results. If "-" or empty, writing is to stdout.
