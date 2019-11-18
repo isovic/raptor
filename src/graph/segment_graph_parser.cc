@@ -450,24 +450,23 @@ raptor::SegmentEdgePtr GraphLoader::ParseGFA2Edge(const std::shared_ptr<raptor::
         edge->alignment(aln_str);
 
         edge->source_len(len1);
-        if (!edge->source_is_rev()) {
-            edge->source_start(start1);
-            edge->source_end(end1);
-        } else {
+        edge->source_start(start1);
+        edge->source_end(end1);
+        if (edge->source_is_rev()) {
             // Convert the coordinates to the strand of the sequence.
             edge->source_start(len1 - end1);
             edge->source_end(len1 - start1);
         }
 
         edge->sink_len(len2);
-        if (!edge->sink_is_rev()) {
-            edge->sink_start(start2);
-            edge->sink_end(end2);
-        } else {
+        edge->sink_start(start2);
+        edge->sink_end(end2);
+        if (edge->sink_is_rev()) {
             // Convert the coordinates to the strand of the sequence.
             edge->sink_start(len2 - end2);
             edge->sink_end(len2 - start2);
         }
+
     // }
 
     return edge;
