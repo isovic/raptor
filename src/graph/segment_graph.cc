@@ -60,19 +60,19 @@ void raptor::SegmentGraph::BuildSegmentTrees() {
     in_interval_trees_.reserve(nodes_.size());
 
     for (size_t node_id = 0; node_id < nodes_.size(); ++node_id) {
-        std::vector<raptor::IntervalInt64> out_intervals;
+        IntervalVectorInt64 out_intervals;
         for (auto& edge_id: out_edge_list_[node_id]) {
             auto& edge = edges_[edge_id]->data();
-            out_intervals.emplace_back(raptor::IntervalInt64(edge->source_start(), edge->source_end(), edge_id));
+            out_intervals.emplace_back(IntervalInt64(edge->source_start(), edge->source_end(), edge_id));
         }
-        out_interval_trees_.emplace_back(raptor::IntervalTreeInt64(out_intervals));
+        out_interval_trees_.emplace_back(IntervalTreeInt64(std::move(out_intervals)));
 
-        std::vector<raptor::IntervalInt64> in_intervals;
+        IntervalVectorInt64 in_intervals;
         for (auto& edge_id: in_edge_list_[node_id]) {
             auto& edge = edges_[edge_id]->data();
-            in_intervals.emplace_back(raptor::IntervalInt64(edge->sink_start(), edge->sink_end(), edge_id));
+            in_intervals.emplace_back(IntervalInt64(edge->sink_start(), edge->sink_end(), edge_id));
         }
-        in_interval_trees_.emplace_back(raptor::IntervalTreeInt64(in_intervals));
+        in_interval_trees_.emplace_back(IntervalTreeInt64(std::move(in_intervals)));
     }
 }
 
@@ -91,8 +91,7 @@ std::vector<SegmentEdgePtr> raptor::SegmentGraph::FindSegmentOutputEdges(int64_t
     }
 
     // Find the out edges within the window.
-    std::vector<raptor::IntervalInt64> intervals;
-    out_interval_trees_[node_id].findOverlapping(start, end, intervals);
+    IntervalVectorInt64 intervals = out_interval_trees_[node_id].findOverlapping(start, end);
 
     for (auto& interval: intervals) {
         uint64_t edge_id = interval.value;
@@ -118,8 +117,7 @@ std::vector<SegmentEdgePtr> raptor::SegmentGraph::FindSegmentInputEdges(int64_t 
     }
 
     // Find the out edges within the window.
-    std::vector<raptor::IntervalInt64> intervals;
-    in_interval_trees_[node_id].findOverlapping(start, end, intervals);
+    IntervalVectorInt64 intervals = in_interval_trees_[node_id].findOverlapping(start, end);
 
     for (auto& interval: intervals) {
         uint64_t edge_id = interval.value;

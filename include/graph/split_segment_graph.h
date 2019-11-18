@@ -173,8 +173,8 @@ private:
 
     // Key is the "node name" (which in our case is int64_t, and is the name of the new split node.
     // This value can then be used in combination with either GetNode or GetEdge.
-    std::unordered_map<SplitSegmentGraphNameType, raptor::IntervalTreeInt64> node_fwd_interval_trees_;
-    std::unordered_map<SplitSegmentGraphNameType, raptor::IntervalTreeInt64> node_rev_interval_trees_;
+    std::unordered_map<SplitSegmentGraphNameType, IntervalTreeInt64> node_fwd_interval_trees_;
+    std::unordered_map<SplitSegmentGraphNameType, IntervalTreeInt64> node_rev_interval_trees_;
     std::unordered_map<std::string, int32_t> node_pos_map_;
 };
 

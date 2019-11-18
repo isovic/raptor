@@ -116,7 +116,7 @@ void SplitSegmentGraph::CreateFromSegmentGraph_(const SegmentGraphPtr& seg_graph
         std::sort(rev_positions.begin(), rev_positions.end());
 
         // Process the forward coordinates.
-        std::vector<raptor::IntervalInt64> split_fwd_node_intervals;
+        IntervalVectorInt64 split_fwd_node_intervals;
         int64_t prev_fwd_node_name = -1;
         for (size_t pos_id = 1; pos_id < fwd_positions.size(); ++pos_id) {
             if (fwd_positions[pos_id-1] == fwd_positions[pos_id]) {
@@ -131,7 +131,7 @@ void SplitSegmentGraph::CreateFromSegmentGraph_(const SegmentGraphPtr& seg_graph
 
             AddNode(new_node_name, new_node_data);
 
-            split_fwd_node_intervals.emplace_back(raptor::IntervalInt64(start, end - 1, new_node_name));    // End in IntervalTree is inclusive.
+            split_fwd_node_intervals.emplace_back(IntervalInt64(start, end - 1, new_node_name));    // End in IntervalTree is inclusive.
 
             // Connect neighboring nodes.
             if (prev_fwd_node_name >= 0) {
@@ -140,10 +140,10 @@ void SplitSegmentGraph::CreateFromSegmentGraph_(const SegmentGraphPtr& seg_graph
             }
             prev_fwd_node_name = new_node_name;
         }
-        node_fwd_interval_trees_[seg_item->data()->seq_id()] = raptor::IntervalTreeInt64(split_fwd_node_intervals);
+        node_fwd_interval_trees_[seg_item->data()->seq_id()] = IntervalTreeInt64(std::move(split_fwd_node_intervals));
 
         // Process the reverse coordinates.
-        std::vector<raptor::IntervalInt64> split_rev_node_intervals;
+        IntervalVectorInt64 split_rev_node_intervals;
         int64_t prev_rev_node_name = -1;
         for (size_t pos_id = 1; pos_id < rev_positions.size(); ++pos_id) {
             if (rev_positions[pos_id-1] == rev_positions[pos_id]) {
@@ -158,7 +158,7 @@ void SplitSegmentGraph::CreateFromSegmentGraph_(const SegmentGraphPtr& seg_graph
 
             AddNode(new_node_name, new_node_data);
 
-            split_rev_node_intervals.emplace_back(raptor::IntervalInt64(start, end - 1, new_node_name));     // End in IntervalTree is inclusive.
+            split_rev_node_intervals.emplace_back(IntervalInt64(start, end - 1, new_node_name));     // End in IntervalTree is inclusive.
 
             // Connect neighboring nodes.
             if (prev_rev_node_name >= 0) {
@@ -167,7 +167,7 @@ void SplitSegmentGraph::CreateFromSegmentGraph_(const SegmentGraphPtr& seg_graph
             }
             prev_rev_node_name = new_node_name;
         }
-        node_rev_interval_trees_[seg_item->data()->seq_id()] = raptor::IntervalTreeInt64(split_rev_node_intervals);
+        node_rev_interval_trees_[seg_item->data()->seq_id()] = IntervalTreeInt64(std::move(split_rev_node_intervals));
     }
 
     for (size_t e_id = 0; e_id < seg_graph->edges().size(); ++e_id) {
@@ -234,7 +234,7 @@ bool SplitSegmentGraph::FindSplitNodeByKeyString(const std::string& node_key_str
 }
 
 std::vector<raptor::SplitSegmentGraphNameType> SplitSegmentGraph::FindSplitNodesByTargetId(int64_t t_id, bool t_rev, int64_t start, int64_t end) const {
-    std::vector<raptor::IntervalInt64> intervals;
+    IntervalVectorInt64 intervals;
 
     if (t_rev == false) {
         auto it_trees = node_fwd_interval_trees_.find(t_id);
@@ -245,7 +245,7 @@ std::vector<raptor::SplitSegmentGraphNameType> SplitSegmentGraph::FindSplitNodes
         // The IntervalTree API uses INCLUSIVE end coordinates for some reason.
         // We dislike that and our end coordinates
         // are always non-inclusive.
-        it_trees->second.findOverlapping(start, end - 1, intervals);
+        intervals = it_trees->second.findOverlapping(start, end - 1);
     } else {
         auto it_trees = node_rev_interval_trees_.find(t_id);
         if (it_trees == node_rev_interval_trees_.end()) {
@@ -255,7 +255,7 @@ std::vector<raptor::SplitSegmentGraphNameType> SplitSegmentGraph::FindSplitNodes
         // The IntervalTree API uses INCLUSIVE end coordinates for some reason.
         // We dislike that and our end coordinates
         // are always non-inclusive.
-        it_trees->second.findOverlapping(start, end - 1, intervals);
+        intervals = it_trees->second.findOverlapping(start, end - 1);
     }
 
     std::vector<raptor::SplitSegmentGraphNameType> ret;

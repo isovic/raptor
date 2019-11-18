@@ -9,13 +9,13 @@
 
 namespace raptor {
 
-std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildAnchorIntervalTrees(
+std::unordered_map<int32_t, IntervalTreeInt64> BuildAnchorIntervalTrees(
     const std::vector<raptor::AnchorPtr>& anchors) {
     // This maps the target ID to the tree of all chain intervals.
-    std::unordered_map<int32_t, raptor::IntervalTreeInt64> trees;
+    std::unordered_map<int32_t, IntervalTreeInt64> trees;
 
     // We need to poll intervals first, so that the trees can be constructed.
-    std::unordered_map<int32_t, std::vector<raptor::IntervalInt64>> intervals;
+    std::unordered_map<int32_t, IntervalVectorInt64> intervals;
 
     for (size_t i = 0; i < anchors.size(); i++) {
         auto& anchor = anchors[i];
@@ -26,26 +26,26 @@ std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildAnchorIntervalTrees(
 
         auto it = intervals.find(t_id);
         if (it == intervals.end()) {
-            intervals[t_id] = std::vector<raptor::IntervalInt64>{};
+            intervals[t_id] = IntervalVectorInt64{};
         }
 
-        intervals[t_id].emplace_back(raptor::IntervalInt64(t_start, t_end, i));
+        intervals[t_id].emplace_back(IntervalInt64(t_start, t_end, i));
     }
 
     for (auto it = intervals.begin(); it != intervals.end(); ++it) {
-        trees[it->first] = raptor::IntervalTreeInt64(it->second);
+        trees[it->first] = IntervalTreeInt64(std::move(it->second));
     }
 
     return trees;
 }
 
-std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildTargetAnchorIntervalTrees(
+std::unordered_map<int32_t, IntervalTreeInt64> BuildTargetAnchorIntervalTrees(
     const std::vector<std::shared_ptr<raptor::TargetAnchorType>>& target_anchors) {
     // This maps the target ID to the tree of all chain intervals.
-    std::unordered_map<int32_t, raptor::IntervalTreeInt64> trees;
+    std::unordered_map<int32_t, IntervalTreeInt64> trees;
 
     // We need to poll intervals first, so that the trees can be constructed.
-    std::unordered_map<int32_t, std::vector<raptor::IntervalInt64>> intervals;
+    std::unordered_map<int32_t, IntervalVectorInt64> intervals;
 
     for (size_t i = 0; i < target_anchors.size(); i++) {
         // Uses `i` instead of `t_id` so that we know where exactly the
@@ -55,7 +55,7 @@ std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildTargetAnchorInterval
 
         auto it = intervals.find(i);
         if (it == intervals.end()) {
-            intervals[i] = std::vector<raptor::IntervalInt64>{};
+            intervals[i] = IntervalVectorInt64{};
             it = intervals.find(i);
         }
 
@@ -63,12 +63,12 @@ std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildTargetAnchorInterval
             auto& hit = target_anchors[i]->hits()[j];
             int32_t t_start = hit->TargetStart();
             int32_t t_end = hit->TargetEnd();
-            it->second.emplace_back(raptor::IntervalInt64(t_start, t_end, j));
+            it->second.emplace_back(IntervalInt64(t_start, t_end, j));
         }
     }
 
     for (auto it = intervals.begin(); it != intervals.end(); ++it) {
-        trees[it->first] = raptor::IntervalTreeInt64(it->second);
+        trees[it->first] = IntervalTreeInt64(std::move(it->second));
     }
 
     return trees;

@@ -18,10 +18,10 @@
 
 namespace raptor {
 
-std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildAnchorIntervalTrees(
+std::unordered_map<int32_t, IntervalTreeInt64> BuildAnchorIntervalTrees(
     const std::vector<raptor::AnchorPtr>& anchors);
 
-std::unordered_map<int32_t, raptor::IntervalTreeInt64> BuildTargetAnchorIntervalTrees(
+std::unordered_map<int32_t, IntervalTreeInt64> BuildTargetAnchorIntervalTrees(
     const std::vector<std::shared_ptr<raptor::TargetAnchorType>>& target_anchors);
 
 }  // namespace raptor

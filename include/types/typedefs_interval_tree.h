@@ -10,11 +10,8 @@
 
 #include <intervaltree/IntervalTree.h>
 
-namespace raptor {
-
-typedef Interval<int64_t> IntervalInt64;
-typedef IntervalTree<int64_t> IntervalTreeInt64;
-
-}
+using IntervalTreeInt64 = IntervalTree<int64_t, size_t>;
+using IntervalVectorInt64 = IntervalTreeInt64::interval_vector;
+using IntervalInt64 = IntervalTreeInt64::interval;
 
 #endif

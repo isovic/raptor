@@ -49,8 +49,8 @@ private:
     SegmentGraph(const SegmentGraph&) = delete;
     SegmentGraph& operator=(const SegmentGraph&) = delete;
 
-    std::vector<raptor::IntervalTreeInt64> out_interval_trees_;
-    std::vector<raptor::IntervalTreeInt64> in_interval_trees_;
+    std::vector<IntervalTreeInt64> out_interval_trees_;
+    std::vector<IntervalTreeInt64> in_interval_trees_;
 
     std::unordered_map<std::string, int64_t> header_to_internal_node_id_;
     std::unordered_map<int64_t, int64_t> seq_id_to_internal_node_id_;
