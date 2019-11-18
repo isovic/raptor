@@ -567,13 +567,13 @@ void DiscoverPredecessorNodes_(
         }
 
         // Skip hits on the wrong strand of an edge source.
-        if (pred_anchor->TargetRev() != edge->sink_is_rev()) {
+        if (pred_anchor->TargetRev() != edge->source_is_rev()) {
             #ifdef RAPTOR_TESTING_MODE
                 if (verbose_debug_qid) {
                     LOG_ALL("          Candidate (pred_anchor->id() = %ld, anchor->id() = %ld) not added because "
-                            "pred_anchor->TargetRev() != edge->sink_is_rev();"
+                            "pred_anchor->TargetRev() != edge->source_is_rev();"
                             "%d != %d\n",
-                            pred_anchor->id(), anchor->id(), (int32_t) pred_anchor->TargetRev(), (int32_t) edge->sink_is_rev());
+                            pred_anchor->id(), anchor->id(), (int32_t) pred_anchor->TargetRev(), (int32_t) edge->source_is_rev());
                 }
             #endif
 
