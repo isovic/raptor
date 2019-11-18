@@ -1,0 +1,7 @@
+H	VN:Z:2.0
+S	insert	10008	*
+S	tc6	45	*
+E	edge-0	insert+	tc6+	10008$	10008$	0	0	*
+E	edge-1	tc6+	insert-	45$	45$	10008$	10008$	*
+E	edge-2	insert-	tc6+	0	0	0	0	*
+E	edge-3	tc6+	insert+	45$	45$	0	0	*
