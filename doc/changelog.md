@@ -1,5 +1,13 @@
 # Raptor Changelog
 
+## 0.19.1 -> 0.19.2.
+- IMPORTANT update: Updated the IntervalTree library. It turns out that the old version had a bug with certain type of overlaps (when one interval was equal or contained in another). The upstream of the library was updated in the meantime, and this required adjusting the interfaces.
+- Minor refactor of the argument parsing cpp files (extracting common functions).
+- Cram tests for sanity of inputs.
+- Minor cleanup of the meson.build.
+- Cleanup in src/sequences/sequence_file_composite_factory.cc.
+- Change to a debug function WriteSeedHits to vrite the target ID as the cluster column for coloring.
+
 ## 0.19.0 -> 0.19.1.
 - Minor refactor of the ChainHits interface.
 - Updated the TicToc to use C++11 chrono, and now reporting microseconds instead of milliseconds for higher resolution on smaller inputs.
