@@ -75,6 +75,8 @@ void APIExample() {
 }
 
 void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
+	TicToc tt_all;
+
 	LOG_ALL("Num threads: %ld\n", parameters->num_threads);
 
 	/*
@@ -90,7 +92,7 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 								parameters->index_type,
 								parameters->index_params);
 
-	LOG_ALL("Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+	LOG_ALL("Memory usage: %.2f GB. Time: %.2f/%.2f sec.\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0), tt_all.get_secs(true), tt_all.get_cpu_secs(true));
 
 	/*
 	* Construct the graph.
@@ -164,12 +166,14 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 
 		// Process all blocks.
 		for (int64_t block_id = start_block_id; block_id < end_block_id; ++block_id) {
+			TicToc tt_batch_total;
+			TicToc tt_batch_load;
 			LOG_ALL("Loading block %ld from the RaptorDB.\n", block_id);
 			mindex::SequenceFilePtr reads = random_seqfile->FetchBlock(block_id);
+			tt_batch_load.stop();
 
 			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
 						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
-			TicToc tt_batch_total;
 			raptor->Clear();
 
 			TicToc tt_batch_align;
@@ -186,9 +190,10 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 				break;
 			}
 			tt_batch_total.stop();
-			LOG_ALL("Batch done! Memory usage: %.2f GB. Time: a:%.2f/%.2f, w:%.2f/%.2f, t:%.2f/%.2f\n",
+			LOG_ALL("Batch done! Memory usage: %.2f GB. Time: a:%.2f/%.2f, l:%.2f/%.2f, w:%.2f/%.2f, t:%.2f/%.2f\n",
 						((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0),
 						tt_batch_align.get_secs(), tt_batch_align.get_cpu_secs(),
+						tt_batch_load.get_secs(), tt_batch_load.get_cpu_secs(),
 						tt_batch_write.get_secs(), tt_batch_write.get_cpu_secs(),
 						tt_batch_total.get_secs(), tt_batch_total.get_cpu_secs());
 			fflush(stdout);
@@ -214,11 +219,14 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 		writer->WriteHeader(header_groups);
 
 		// Iterate through all the batches.
+		TicToc tt_batch_total;
+		TicToc tt_batch_load;
 		mindex::SequenceFilePtr reads = mindex::createSequenceFile();
 		while ((reads = reads_parser->YieldBatchMB(batch_size_in_mb))) {
+			tt_batch_load.stop();
+
 			LOG_ALL("Mapping batch of %ld reads (%.2lf MB). Processed %ld reads so far.\n",
 						reads->seqs().size(), reads->total_size() / (1048576.0), total_processed);
-			TicToc tt_batch_total;
 			raptor->Clear();
 
 			TicToc tt_batch_align;
@@ -235,16 +243,20 @@ void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 				break;
 			}
 			tt_batch_total.stop();
-			LOG_ALL("Batch done! Memory usage: %.2f GB. Time: a:%.2f/%.2f, w:%.2f/%.2f, t:%.2f/%.2f\n",
+			LOG_ALL("Batch done! Memory usage: %.2f GB. Time: a:%.2f/%.2f, l:%.2f/%.2f, w:%.2f/%.2f, t:%.2f/%.2f\n",
 						((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0),
 						tt_batch_align.get_secs(), tt_batch_align.get_cpu_secs(),
+						tt_batch_load.get_secs(), tt_batch_load.get_cpu_secs(),
 						tt_batch_write.get_secs(), tt_batch_write.get_cpu_secs(),
 						tt_batch_total.get_secs(), tt_batch_total.get_cpu_secs());
 			fflush(stdout);
+			tt_batch_total.start();
+			tt_batch_load.start();
 		}
 	}
 
-	LOG_ALL("Memory usage: %.2f GB\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0));
+	tt_all.stop();
+	LOG_ALL("Memory usage: %.2f GB. Time: %.2f/%.2f sec.\n", ((double) raptor::getPeakRSS()) / (1024.0 * 1024.0 * 1024.0), tt_all.get_secs(), tt_all.get_cpu_secs());
 	LOG_ALL("Done!\n");
 }
 
