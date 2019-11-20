@@ -238,6 +238,19 @@ if not meson.is_subproject()
     link_with : [raptor_lib],
     cpp_args : [raptor_warning_flags, raptor_cpp_flags])
 
+  #########################
+  # The raptor-sova exe. #
+  #########################
+  raptor_reshape_bin = executable(
+    'raptor-sova',
+    ['src/raptor_sova/main_raptor_sova.cc'],
+    install : true,
+    build_by_default : true,
+    dependencies : [raptor_thread_dep, raptor_zlib_dep, htslib_dep, pbbam_dep, boost_dep],
+    include_directories : codebase_include_directories + raptor_include_directories,
+    link_with : [raptor_lib],
+    cpp_args : [raptor_warning_flags, raptor_cpp_flags])
+
   ######################
   # Tests              #
   ######################
