@@ -20,27 +20,20 @@
 
 namespace raptor {
 
-class ParamsRaptorReshape;
-
-std::shared_ptr<raptor::ParamsRaptorReshape> createParamsRaptorReshape();
-
 class ParamsRaptorReshape {
    public:
     friend std::shared_ptr<raptor::ParamsRaptorReshape> createParamsRaptorReshape();
     ~ParamsRaptorReshape() = default;
 
-    /*
-      Command-line related options.
-    */
-    std::string subprogram = "";
-    std::string command_line = "";
+    std::string subprogram;
+    std::string command_line;
 
-    int64_t verbose_level;
+    int64_t verbose_level = 0;
     std::vector<std::string> in_paths;
-    mindex::SequenceFormat in_fmt;
-    mindex::SequenceFormat out_fmt;
-    std::string out_prefix = "";
-    double in_batch_size;
+    mindex::SequenceFormat in_fmt = mindex::SequenceFormat::Auto;
+    mindex::SequenceFormat out_fmt = mindex::SequenceFormat::Auto;
+    std::string out_prefix;
+    double in_batch_size = 400.0;
     bool keep_lowercase = false;
     bool rename_seqs = false;
     double block_size = 400.0;
@@ -48,10 +41,14 @@ class ParamsRaptorReshape {
     bool symlink_files = false;
 
    private:
-    ParamsRaptorReshape();
+    ParamsRaptorReshape() = default;
     ParamsRaptorReshape(const ParamsRaptorReshape&) = delete;
     ParamsRaptorReshape& operator=(const ParamsRaptorReshape&) = delete;
 };
+
+inline std::shared_ptr<raptor::ParamsRaptorReshape> createParamsRaptorReshape() {
+    return std::shared_ptr<raptor::ParamsRaptorReshape>(new raptor::ParamsRaptorReshape);
+}
 
 }  // namespace raptor
 

@@ -68,8 +68,6 @@ raptor_cpp_sources = files([
   'raptor/raptor_aligner.cc',
   'raptor/raptor.cc',
 
-  'raptor_reshape/params_raptor_reshape.cc',
-
   'raptor_fetch/args_raptor_fetch.cc',
   'raptor_fetch/overlaps/overlap.cc',
   'raptor_fetch/overlaps/overlap_compact.cc',
