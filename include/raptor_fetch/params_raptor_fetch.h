@@ -18,35 +18,35 @@
 
 namespace raptor {
 
-class ParamsRaptorFetch;
-
-std::shared_ptr<raptor::ParamsRaptorFetch> createParamsRaptorFetch();
-
 class ParamsRaptorFetch {
    public:
     friend std::shared_ptr<raptor::ParamsRaptorFetch> createParamsRaptorFetch();
     ~ParamsRaptorFetch() = default;
 
-    int64_t verbose_level;
+    int64_t verbose_level = 0;
     std::string command_line;
-    int64_t debug_qid;
+    int64_t debug_qiq = -1;
     std::string debug_qname;
 
     std::string rdb_path;
     std::vector<std::string> in_paths;
     std::string out_prefix;
-    int32_t min_cov;
-    int64_t min_len;
-    double min_score;
-    double min_idt;
-    bool use_id_for_output;
-    std::string job_str;
+    int32_t min_cov = 0;
+    int64_t min_len = 0;
+    double min_score = 0.0;
+    double min_idt = 0.0;
+    bool use_id_for_output = false;
+    std::string job_str = "fetch";
 
    private:
-    ParamsRaptorFetch();
+    ParamsRaptorFetch() = default;
     ParamsRaptorFetch(const ParamsRaptorFetch&) = delete;
     ParamsRaptorFetch& operator=(const ParamsRaptorFetch&) = delete;
 };
+
+inline std::shared_ptr<raptor::ParamsRaptorFetch> createParamsRaptorFetch() {
+    return std::shared_ptr<raptor::ParamsRaptorFetch>(new raptor::ParamsRaptorFetch);
+}
 
 }  // namespace raptor
 
