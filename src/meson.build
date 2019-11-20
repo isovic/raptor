@@ -73,6 +73,11 @@ raptor_cpp_sources = files([
   'raptor_fetch/overlaps/overlap_compact.cc',
   'raptor_fetch/overlaps/overlap_file.cc',
 
+  'raptor_sova/args_raptor_sova.cc',
+  'raptor_sova/raptor_sova_worker_queue.cc',
+  'raptor_sova/ses_distance_banded.cc',
+  'raptor_sova/sova_mapper.cc',
+
   'sequences/sequence_file_parser_factory.cc',
   'sequences/sequence_file_parser_fastx.cc',
   'sequences/sequence_file_parser_gfa1.cc',
