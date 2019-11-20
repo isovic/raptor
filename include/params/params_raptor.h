@@ -21,7 +21,11 @@
 
 namespace raptor {
 
-struct ParamsRaptor {
+class ParamsRaptor {
+  public:
+    friend std::shared_ptr<raptor::ParamsRaptor> createParamsRaptor();
+    ~ParamsRaptor() = default;
+
     /*
       Command-line related options.
     */
@@ -108,9 +112,16 @@ struct ParamsRaptor {
     bool do_diff = false;
 
     std::string composite;
+
+  private:
+    ParamsRaptor() = default;
+    ParamsRaptor(const ParamsRaptor&) = delete;
+    ParamsRaptor& operator=(const ParamsRaptor&) = delete;
 };
 
-std::shared_ptr<raptor::ParamsRaptor> createParamsRaptor();
+inline std::shared_ptr<raptor::ParamsRaptor> createParamsRaptor() {
+    return std::shared_ptr<raptor::ParamsRaptor>(new raptor::ParamsRaptor());
+}
 
 } /* namespace raptor */
 
