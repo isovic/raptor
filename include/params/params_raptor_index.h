@@ -17,10 +17,6 @@
 
 namespace raptor {
 
-class ParamsRaptorIndex;
-
-std::shared_ptr<raptor::ParamsRaptorIndex> createParamsRaptorIndex();
-
 class ParamsRaptorIndex {
    public:
     friend std::shared_ptr<raptor::ParamsRaptorIndex> createParamsRaptorIndex();
@@ -32,20 +28,26 @@ class ParamsRaptorIndex {
     std::string subprogram = "";
     std::string command_line = "";
 
-    std::shared_ptr<mindex::IndexParams> index_params;
-    int64_t verbose_level;
+    std::shared_ptr<mindex::IndexParams> index_params = nullptr;
+    int64_t verbose_level = 0;
     std::vector<std::string> ref_paths;
     // SequenceFormat ref_fmt;
     std::string out_path = "";
-    double batch_size;
+    double batch_size = 400;
     int64_t num_threads = 1;
     bool keep_lowercase = false;
 
    private:
-    ParamsRaptorIndex();
+    ParamsRaptorIndex() {
+        index_params = mindex::createIndexParams();
+    }
     ParamsRaptorIndex(const ParamsRaptorIndex&) = delete;
     ParamsRaptorIndex& operator=(const ParamsRaptorIndex&) = delete;
 };
+
+inline std::shared_ptr<raptor::ParamsRaptorIndex> createParamsRaptorIndex() {
+    return std::shared_ptr<raptor::ParamsRaptorIndex>(new raptor::ParamsRaptorIndex);
+}
 
 }  // namespace raptor
 

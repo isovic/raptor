@@ -56,8 +56,6 @@ raptor_cpp_sources = files([
   'index/index_util.cc',
   'index/minimizer_index.cc',
 
-  'params/params_raptor_index.cc',
-
   'raptor/backtrack_list_node.cc',
 #  'raptor/chain_aligner.cc',
   'raptor/dp_chain.cc',
