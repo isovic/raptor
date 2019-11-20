@@ -1,5 +1,5 @@
 /*
- * index_params.h
+ * params_index.h
  *
  *  Created on: Oct 04, 2017
  *      Author: Ivan Sovic

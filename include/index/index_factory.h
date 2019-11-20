@@ -9,7 +9,7 @@
 #define SRC_INDEX_INDEX_FACTORY_H_
 
 #include <index/index_base.h>
-#include <index/index_params.h>
+#include <index/params_index.h>
 #include <index/index_types.h>
 #include <memory>
 

@@ -14,7 +14,7 @@
 #include <sequences/sequence_file_enums.h>
 #include <graph/segment_graph_parser_enums.h>
 #include <writer/output_formatter_enums.h>
-#include <index/index_params.h>
+#include <index/params_index.h>
 #include <index/index_types.h>
 #include <params/params_mapper.h>
 #include <params/params_aligner.h>

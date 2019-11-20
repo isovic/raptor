@@ -12,7 +12,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <index/index_params.h>
+#include <index/params_index.h>
 #include <sequences/sequence_file_enums.h>
 
 namespace raptor {

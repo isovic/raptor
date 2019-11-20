@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <index/index_params.h>
+#include <index/params_index.h>
 #include <index/dense_index.h>
 #include <index/seed.hpp>
 

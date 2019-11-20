@@ -16,7 +16,7 @@
 #include <memory>
 
 #include <index/index_base.h>
-#include <index/index_params.h>
+#include <index/params_index.h>
 #include <index/index_types.h>
 #include <index/seed.hpp>
 #include <index/seed_hit.hpp>
