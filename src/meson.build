@@ -57,7 +57,6 @@ raptor_cpp_sources = files([
   'index/minimizer_index.cc',
 
   'params/params_aligner.cc',
-  'params/params_mapper.cc',
   'params/params_raptor.cc',
   'params/params_raptor_index.cc',
 

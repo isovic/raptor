@@ -15,50 +15,54 @@
 
 namespace raptor {
 
-class ParamsMapper;
-
-std::shared_ptr<raptor::ParamsMapper> createParamsMapper();
+// class ParamsMapper;
+// inline std::shared_ptr<raptor::ParamsMapper> createParamsMapper();
 
 class ParamsMapper {
    public:
     friend std::shared_ptr<raptor::ParamsMapper> createParamsMapper();
     ~ParamsMapper() = default;
 
-    int64_t verbose_level;
-    int64_t debug_qid;
-    std::string debug_qname;
+    int64_t verbose_level = 0;
+    int64_t debug_qid = -1;
+    std::string debug_qname = "";
 
-    int32_t min_qlen;
-    bool overlap_skip_self_hits;
-    bool overlap_single_arc;
+    int32_t min_qlen = 50;
+    bool overlap_skip_self_hits = false;
+    bool overlap_single_arc = false;
     bool is_rna = false;
-    int32_t diag_margin;
-    int32_t seed_join_dist;
-    int32_t min_num_seeds;
-    int32_t min_cov_bases;
-    int32_t min_dp_score;
-    bool score_anchors;
-    bool graph_score_anchors;
-    int32_t chain_max_skip;
-    int32_t chain_max_predecessors;
-    int32_t chain_max_dist;
-    int32_t chain_max_bandwidth;
-    double chain_penalty_gap;
-    double chain_penalty_match;
-    int32_t graph_max_path_edges;
-    bool add_symmetric_arcs;
-    int32_t max_hits;
-    bool graph_chain_inversions;
-    bool ref_and_reads_path_same;          // Applicable for overlapping. If true, and "is_overlapper == true", then any overlap with t_id >= q_id will be ignored. Only overlaps with t_id < q_id will be output. Although it may seem redundant, there might be use cases when we want a sanity check that the mapper will find perfect mappings of a set onto itself. Or map only to reverse complement, in which case inputs are the same.
-    double graph_allowed_score_diff_frac;
-    int32_t flank_ext_len;
-    bool no_graph_mapping;
+    int32_t diag_margin = 500;
+    int32_t seed_join_dist = 5000;
+    int32_t min_num_seeds = 3;
+    int32_t min_cov_bases = 30;
+    int32_t min_dp_score = 60;
+    bool score_anchors = false;
+    bool graph_score_anchors = false;
+    int32_t chain_max_skip = 50;
+    int32_t chain_max_predecessors = 500;
+    int32_t chain_max_dist = 10000;
+    int32_t chain_max_bandwidth = 3000;
+    int32_t chain_min_span = 0;
+    double chain_penalty_gap = 1.0;
+    double chain_penalty_match = 0.20;
+    int32_t graph_max_path_edges = 2;
+    bool add_symmetric_arcs = false;
+    int32_t max_hits = -1;
+    bool graph_chain_inversions = false;
+    bool ref_and_reads_path_same = false;          // Applicable for overlapping. If true, and "is_overlapper == true", then any overlap with t_id >= q_id will be ignored. Only overlaps with t_id < q_id will be output. Although it may seem redundant, there might be use cases when we want a sanity check that the mapper will find perfect mappings of a set onto itself. Or map only to reverse complement, in which case inputs are the same.
+    double graph_allowed_score_diff_frac = 0.95;
+    int32_t flank_ext_len = 200;
+    bool no_graph_mapping = false;
 
    private:
-    ParamsMapper();
+    ParamsMapper() = default;
     ParamsMapper(const ParamsMapper&) = delete;
     ParamsMapper& operator=(const ParamsMapper&) = delete;
 };
+
+inline std::shared_ptr<raptor::ParamsMapper> createParamsMapper() {
+    return std::shared_ptr<raptor::ParamsMapper>(new raptor::ParamsMapper);
+}
 
 }  // namespace raptor
 
