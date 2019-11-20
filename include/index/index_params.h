@@ -15,13 +15,13 @@
 
 namespace mindex {
 
-class IndexParams {
+class ParamsIndex {
    public:
-    friend std::shared_ptr<mindex::IndexParams> createIndexParams();
-    friend std::shared_ptr<mindex::IndexParams> createIndexParams(
+    friend std::shared_ptr<mindex::ParamsIndex> createParamsIndex();
+    friend std::shared_ptr<mindex::ParamsIndex> createParamsIndex(
         int32_t _k, int32_t _w, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
         int32_t _min_occ_cutoff, bool _index_only_fwd_strand, int64_t _min_tlen);
-    ~IndexParams() = default;
+    ~ParamsIndex() = default;
 
     int32_t k = 15;
     int32_t w = 5;
@@ -37,23 +37,23 @@ class IndexParams {
     int64_t min_tlen = 0;
 
    private:
-    IndexParams() = default;
-    IndexParams(int32_t _k, int32_t _w, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
+    ParamsIndex() = default;
+    ParamsIndex(int32_t _k, int32_t _w, bool _hp_supp, int32_t _max_hp_len, double _freq_percentile,
                 int32_t _min_occ_cutoff, bool _index_only_fwd_strand, int64_t _min_tlen);
-    IndexParams(const IndexParams&) = delete;
-    IndexParams& operator=(const IndexParams&) = delete;
+    ParamsIndex(const ParamsIndex&) = delete;
+    ParamsIndex& operator=(const ParamsIndex&) = delete;
 };
 
-inline std::shared_ptr<mindex::IndexParams> createIndexParams() {
-    return std::shared_ptr<mindex::IndexParams>(new mindex::IndexParams());
+inline std::shared_ptr<mindex::ParamsIndex> createParamsIndex() {
+    return std::shared_ptr<mindex::ParamsIndex>(new mindex::ParamsIndex());
 }
 
-inline std::shared_ptr<mindex::IndexParams> createIndexParams(int32_t _k, int32_t _w, bool _hp_supp,
+inline std::shared_ptr<mindex::ParamsIndex> createParamsIndex(int32_t _k, int32_t _w, bool _hp_supp,
                                                        int32_t _max_hp_len, double _freq_percentile,
                                                        int32_t _min_occ_cutoff,
                                                        bool _index_only_fwd_strand,
                                                        int64_t _min_tlen) {
-    return std::shared_ptr<mindex::IndexParams>(new mindex::IndexParams(
+    return std::shared_ptr<mindex::ParamsIndex>(new mindex::ParamsIndex(
         _k, _w, _hp_supp, _max_hp_len, _freq_percentile, _min_occ_cutoff, _index_only_fwd_strand, _min_tlen));
 }
 

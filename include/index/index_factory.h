@@ -18,7 +18,7 @@ namespace mindex {
 /** @brief A factory function for a concrete index object.
  *
  */
-std::unique_ptr<mindex::IndexBase> createIndex(mindex::IndexType index_type, std::shared_ptr<mindex::IndexParams> params);
+std::unique_ptr<mindex::IndexBase> createIndex(mindex::IndexType index_type, std::shared_ptr<mindex::ParamsIndex> params);
 
 } /* namespace mindex */
 

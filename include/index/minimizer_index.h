@@ -26,12 +26,12 @@ namespace mindex {
 
 class MinimizerIndex;
 
-std::unique_ptr<mindex::IndexBase> createMinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
+std::unique_ptr<mindex::IndexBase> createMinimizerIndex(std::shared_ptr<mindex::ParamsIndex> params);
 
 class MinimizerIndex : mindex::IndexBase {
    public:
     friend std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
-        std::shared_ptr<mindex::IndexParams> params);
+        std::shared_ptr<mindex::ParamsIndex> params);
 
     ~MinimizerIndex();
 
@@ -65,7 +65,7 @@ class MinimizerIndex : mindex::IndexBase {
     /*
      * Getters.
     */
-    const std::shared_ptr<mindex::IndexParams> params() const override { return params_; }
+    const std::shared_ptr<mindex::ParamsIndex> params() const override { return params_; }
 
     // const std::vector<int8_t>& data() const { return data_; }
 
@@ -128,7 +128,7 @@ class MinimizerIndex : mindex::IndexBase {
     double spacing() const { return spacing_; }
 
    private:
-    MinimizerIndex(std::shared_ptr<mindex::IndexParams> params);
+    MinimizerIndex(std::shared_ptr<mindex::ParamsIndex> params);
     MinimizerIndex(const MinimizerIndex&) = delete;
     MinimizerIndex& operator=(const MinimizerIndex&) = delete;
 
@@ -251,7 +251,7 @@ class MinimizerIndex : mindex::IndexBase {
 
     void VerboseSeeds_(std::ostream& os);
 
-    std::shared_ptr<mindex::IndexParams> params_;
+    std::shared_ptr<mindex::ParamsIndex> params_;
 
     mindex::SequenceFilePtr seqs_;
 

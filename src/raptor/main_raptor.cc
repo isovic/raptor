@@ -32,7 +32,7 @@ void APIExample() {
     std::string reads_path("test_data_link/ecoli-public-p6c4/m141013_011508_sherri_c100709962550000001823135904221533_s1_p0.subreads.fasta");
 
     // Create an index.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index = raptor::YieldIndex(ref_paths, mindex::SequenceFormat::Auto, std::string("temp.rai"), true,
                                 true, true, -1, mindex::IndexType::Minimizer, index_params);
 

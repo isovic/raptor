@@ -48,7 +48,7 @@ TEST(APIExamples, APITest1) {
 	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     // Create the index parameters;
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     index_params->k = 5;
     index_params->w = 1;
 
@@ -117,7 +117,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
     /// Construct the Index. ///
     ////////////////////////////
     // Create the index parameters;
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     index_params->k = 5;
     index_params->w = 1;
     // Create the index.

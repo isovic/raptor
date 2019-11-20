@@ -26,12 +26,12 @@ namespace mindex {
 
 class DenseIndex;
 
-std::unique_ptr<mindex::IndexBase> createDenseIndex(std::shared_ptr<mindex::IndexParams> params);
+std::unique_ptr<mindex::IndexBase> createDenseIndex(std::shared_ptr<mindex::ParamsIndex> params);
 
 class DenseIndex : mindex::IndexBase {
    public:
     friend std::unique_ptr<mindex::IndexBase> createDenseIndex(
-        std::shared_ptr<mindex::IndexParams> params);
+        std::shared_ptr<mindex::ParamsIndex> params);
 
     ~DenseIndex();
 
@@ -65,7 +65,7 @@ class DenseIndex : mindex::IndexBase {
     /*
      * Getters.
     */
-    const std::shared_ptr<mindex::IndexParams> params() const override { return params_; }
+    const std::shared_ptr<mindex::ParamsIndex> params() const override { return params_; }
 
     // const std::vector<int8_t>& data() const { return data_; }
 
@@ -128,7 +128,7 @@ class DenseIndex : mindex::IndexBase {
     double spacing() const { return spacing_; }
 
    private:
-    DenseIndex(std::shared_ptr<mindex::IndexParams> params);
+    DenseIndex(std::shared_ptr<mindex::ParamsIndex> params);
     DenseIndex(const DenseIndex&) = delete;
     DenseIndex& operator=(const DenseIndex&) = delete;
 
@@ -251,7 +251,7 @@ class DenseIndex : mindex::IndexBase {
 
     void VerboseSeeds_(std::ostream& os);
 
-    std::shared_ptr<mindex::IndexParams> params_;
+    std::shared_ptr<mindex::ParamsIndex> params_;
 
     mindex::SequenceFilePtr seqs_;
 

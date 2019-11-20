@@ -13,7 +13,7 @@
 #include <tests/unit/test_index_common.h>
 
 TEST(MinimizerIndexTest, AddSequenceTest1) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index = mindex::createMinimizerIndex(index_params);
 
     // Define the reference sequences and their headers.
@@ -44,7 +44,7 @@ TEST(MinimizerIndexTest, AddSequenceTest1) {
 }
 
 TEST(MinimizerIndexTest, AddSequenceTest2) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index = mindex::createMinimizerIndex(index_params);
 
     // Define the reference sequences and their headers.
@@ -75,7 +75,7 @@ TEST(MinimizerIndexTest, AddSequenceTest2) {
 }
 
 TEST(MinimizerIndexTest, AddSequencesTest1) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index1 = mindex::createMinimizerIndex(index_params);
     auto index2 = mindex::createMinimizerIndex(index_params);
 
@@ -102,7 +102,7 @@ TEST(MinimizerIndexTest, AddSequencesTest1) {
 }
 
 TEST(MinimizerIndexTest, FetchSeqAsStringTest1) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index = mindex::createMinimizerIndex(index_params);
 
     // Define the reference sequences and their headers.
@@ -173,7 +173,7 @@ TEST(MinimizerIndexTest, FetchSeqAsStringTest1) {
 }
 
 TEST(MinimizerIndexTest, FetchRawSeqTest1) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
     auto index = mindex::createMinimizerIndex(index_params);
 
     // Define the reference sequences and their headers.
@@ -192,7 +192,7 @@ TEST(MinimizerIndexTest, FetchRawSeqTest1) {
 }
 
 TEST(MinimizerIndexTest, TestBuild1) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -238,7 +238,7 @@ TEST(MinimizerIndexTest, TestBuild1) {
 }
 
 TEST(MinimizerIndexTest, TestBuild2) {
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -291,7 +291,7 @@ TEST(MinimizerIndexTest, TestBuild3) {
     /*
      * Tests building on a more complex sequence.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -350,7 +350,7 @@ TEST(MinimizerIndexTest, TestBuild4) {
     /*
      * Test building the index from only a selected region.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -403,7 +403,7 @@ TEST(MinimizerIndexTest, TestBuild5) {
      * If the specified region reaches beyond the end of the sequence,
      * the entire suffix of the sequence should be used, and no error should occur.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -455,7 +455,7 @@ TEST(MinimizerIndexTest, TestBuild6) {
      * If the specified region starts with a value < 0, the 0 coordinate will
      * be automatically used instead.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -506,7 +506,7 @@ TEST(MinimizerIndexTest, TestBuild7) {
      * but the entire region is out of bounds for the reference.
      * The sequence should not be indexed.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -551,7 +551,7 @@ TEST(MinimizerIndexTest, TestBuild8) {
      * but the reference specified by the region does not exist.
      * No sequences should be indexed in this scenario.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -595,7 +595,7 @@ TEST(MinimizerIndexTest, TestBuild9) {
     /*
      * Test a larger k-mer size and a minimizer window.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 15;
     index_params->w = 5;
@@ -661,7 +661,7 @@ TEST(MinimizerIndexTest, TestBuild10) {
     /*
      * Tests building on a small sequence with w > 1.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 4;
@@ -754,7 +754,7 @@ TEST(MinimizerIndexTest, TestBuild11) {
     /*
      * Tests building on a small sequence with w > 1.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 4;
@@ -816,7 +816,7 @@ TEST(MinimizerIndexTest, TestCollectHits1) {
     */
 
     // Create the parameters.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     // Create the index.
     auto index = mindex::createMinimizerIndex(index_params);
@@ -849,7 +849,7 @@ TEST(MinimizerIndexTest, TestCollectHits2) {
     */
 
     // Create the parameters.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     // Create the index.
     auto index = mindex::createMinimizerIndex(index_params);
@@ -880,7 +880,7 @@ TEST(MinimizerIndexTest, TestCollectHits3) {
 	/// LogSystem::GetInstance().SetProgramVerboseLevelFromInt(0);
 
     // Create the parameters.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     // Create the index.
     auto index = mindex::createMinimizerIndex(index_params);
@@ -925,7 +925,7 @@ TEST(MinimizerIndexTest, TestCollectHits4) {
     */
 
     // Create the parameters.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     // Create the index.
     auto index = mindex::createMinimizerIndex(index_params);
@@ -972,7 +972,7 @@ TEST(MinimizerIndexTest, TestCollectHits5) {
     */
 
     // Create the parameters.
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     // Create the index.
     auto index = mindex::createMinimizerIndex(index_params);
@@ -1030,7 +1030,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression1) {
     /*
      * Tests building on a more complex sequence.
     */
-    auto index_params = mindex::createIndexParams();
+    auto index_params = mindex::createParamsIndex();
 
     index_params->k = 5;
     index_params->w = 1;
@@ -1077,7 +1077,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
     */
 
     // Index params and index for homopolymer suppresed sequence (unit under test).
-    auto index_params_hp = mindex::createIndexParams();
+    auto index_params_hp = mindex::createParamsIndex();
     index_params_hp->k = 5;
     index_params_hp->w = 1;
     index_params_hp->homopolymer_suppression = true;
@@ -1100,7 +1100,7 @@ TEST(MinimizerIndexTest, TestBuildHomopolymerSuppression2) {
 
     // Index params for deactivated homopolymer suppression and reference sequences
     // which have no homopolymers. This should result in the same index as the above.
-    auto index_params_no_hp = mindex::createIndexParams();
+    auto index_params_no_hp = mindex::createParamsIndex();
     index_params_no_hp->k = 5;
     index_params_no_hp->w = 1;
     index_params_no_hp->homopolymer_suppression = false;

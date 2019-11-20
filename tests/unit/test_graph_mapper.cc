@@ -19,7 +19,7 @@
 //     int32_t min_occ_cutoff = -1;
 //     bool index_only_fwd_strand = false;
 
-//     auto index_params = mindex::createIndexParams(k, w, hp_supp,max_hp_len, freq_percentile, min_occ_cutoff, index_only_fwd_strand);
+//     auto index_params = mindex::createParamsIndex(k, w, hp_supp,max_hp_len, freq_percentile, min_occ_cutoff, index_only_fwd_strand);
 
 //     auto index = mindex::createMinimizerIndex(index_params);
 

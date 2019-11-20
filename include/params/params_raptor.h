@@ -60,7 +60,7 @@ class ParamsRaptor {
     /*
       Index options.
     */
-    std::shared_ptr<mindex::IndexParams> index_params = mindex::createIndexParams();
+    std::shared_ptr<mindex::ParamsIndex> index_params = mindex::createParamsIndex();
 
     bool rebuild_index = false;
     bool auto_rebuild_index = false;

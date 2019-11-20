@@ -12,7 +12,7 @@
 
 namespace mindex {
 
-std::unique_ptr<mindex::IndexBase> createIndex(mindex::IndexType index_type, std::shared_ptr<mindex::IndexParams> params) {
+std::unique_ptr<mindex::IndexBase> createIndex(mindex::IndexType index_type, std::shared_ptr<mindex::ParamsIndex> params) {
     switch (index_type) {
     case mindex::IndexType::Minimizer:
         return mindex::createMinimizerIndex(params);

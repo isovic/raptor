@@ -28,7 +28,7 @@ class ParamsRaptorIndex {
     std::string subprogram = "";
     std::string command_line = "";
 
-    std::shared_ptr<mindex::IndexParams> index_params = nullptr;
+    std::shared_ptr<mindex::ParamsIndex> index_params = nullptr;
     int64_t verbose_level = 0;
     std::vector<std::string> ref_paths;
     // SequenceFormat ref_fmt;
@@ -39,7 +39,7 @@ class ParamsRaptorIndex {
 
    private:
     ParamsRaptorIndex() {
-        index_params = mindex::createIndexParams();
+        index_params = mindex::createParamsIndex();
     }
     ParamsRaptorIndex(const ParamsRaptorIndex&) = delete;
     ParamsRaptorIndex& operator=(const ParamsRaptorIndex&) = delete;

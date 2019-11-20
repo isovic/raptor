@@ -41,7 +41,7 @@ class IndexBase {
     /*
      * Getters.
     */
-    virtual const std::shared_ptr<mindex::IndexParams> params() const = 0;
+    virtual const std::shared_ptr<mindex::ParamsIndex> params() const = 0;
     virtual std::string header(size_t seq_id) const = 0;
     virtual ind_t len(size_t seq_id) const = 0;
     virtual const mindex::SequenceFilePtr& seqs() const = 0;

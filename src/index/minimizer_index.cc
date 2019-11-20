@@ -25,13 +25,13 @@ static const int32_t NUM_HASH_BUCKETS = pow(2, NUM_HASH_BUCKET_BITS);
 namespace mindex {
 
 std::unique_ptr<mindex::IndexBase> createMinimizerIndex(
-    std::shared_ptr<mindex::IndexParams> params) {
+    std::shared_ptr<mindex::ParamsIndex> params) {
     auto ret = std::unique_ptr<mindex::IndexBase>(new MinimizerIndex(params));
     ret->seqs(mindex::createSequenceFile());
     return std::move(ret);
 }
 
-MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::IndexParams> params)
+MinimizerIndex::MinimizerIndex(std::shared_ptr<mindex::ParamsIndex> params)
     : params_(params),
       seqs_(nullptr),
       dummy_nullptr_seqs_(nullptr),
