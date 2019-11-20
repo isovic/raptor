@@ -18,34 +18,36 @@ namespace raptor {
 
 class ParamsAligner;
 
-typedef std::shared_ptr<raptor::ParamsAligner> ParamsAlignerPtr;
-
-std::shared_ptr<raptor::ParamsAligner> createParamsAligner();
+using ParamsAlignerPtr = std::shared_ptr<raptor::ParamsAligner>;
 
 class ParamsAligner {
    public:
     friend std::shared_ptr<raptor::ParamsAligner> createParamsAligner();
     ~ParamsAligner() = default;
 
-    int64_t verbose_level;
-    int64_t debug_qid;
-    std::string debug_qname;
+    int64_t verbose_level = 0;
+    int64_t debug_qid = -1;
+    std::string debug_qname = "";
 
     // Contains match, mismatch and gap penalties, bandwidth and more.
     raptor::AlignmentOptions aligner_opt;
-    double min_identity;
-    double max_evalue;
-    bool use_basic_cigar;
-    raptor::AlignerType aligner_type;
+    double min_identity = 65.0;
+    double max_evalue = 1e0;
+    bool use_basic_cigar = false;
+    raptor::AlignerType aligner_type = raptor::AlignerType::Edlib;
 
-    bool no_extend_alignment;
-    bool is_rna;
+    bool no_extend_alignment = false;
+    bool is_rna = false;
 
    private:
-    ParamsAligner();
+    ParamsAligner() = default;
     ParamsAligner(const ParamsAligner&) = delete;
     ParamsAligner& operator=(const ParamsAligner&) = delete;
 };
+
+inline std::shared_ptr<raptor::ParamsAligner> createParamsAligner() {
+    return std::shared_ptr<raptor::ParamsAligner>(new raptor::ParamsAligner);
+}
 
 }  // namespace raptor
 
