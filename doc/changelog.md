@@ -1,5 +1,12 @@
 # Raptor Changelog
 
+## 0.19.2 -> 0.19.3.
+- Fixed a bug during the AnchorGraph construction, where predecessors of the anchors on reverse strand segments weren't properly detected.
+- Added a test to capture this issue. The test demonstrates unrolled alignment of a polymerase read around an interesting graph construct.
+- Updated TicToc to measure the CPU time as well.
+- The executable now prints out more detailed timing information.
+- Refactored all the params data structures to be consistent and header only. There are plenty of diffs because I renamed the IndexParam class to ParamsIndex to be consistent.
+
 ## 0.19.1 -> 0.19.2.
 - IMPORTANT update: Updated the IntervalTree library. It turns out that the old version had a bug with certain type of overlaps (when one interval was equal or contained in another). The upstream of the library was updated in the meantime, and this required adjusting the interfaces.
 - Minor refactor of the argument parsing cpp files (extracting common functions).
