@@ -74,7 +74,8 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> FormDiagonalAnchors(
             const std::vector<mindex128_t>& sorted_dh,
             const mindex::SequencePtr& qseq,
             const mindex::IndexPtr& index,
-            int32_t bandwidth, int32_t min_num_seeds, int32_t min_span,
+            int32_t chain_bandwidth, double align_bandwidth, double align_max_diff,
+            int32_t min_num_seeds, int32_t min_span,
             bool overlap_skip_self_hits, bool overlap_single_arc) {
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> target_anchors;
 
@@ -103,7 +104,7 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> FormDiagonalAnchors(
 
             if (curr_shp.TargetId() != prev_shp.TargetId() ||
                     curr_shp.TargetRev() != prev_shp.TargetRev() ||
-                    diag_diff > bandwidth) {
+                    diag_diff > chain_bandwidth) {
 
                 // Sort the seeds on the same diagonal bandwidth.
                 // Since the diagonal has been set to the same value for all seeds
@@ -161,12 +162,14 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> FormDiagonalAnchors(
                     // if (tanchors_ref->env()->t_rev) {
                     //     std::cerr << qseq_str << "\n" << tseq << "\n";
                     // }
-                    int32_t num_diffs = raptor::ses::BandedSESDistance(
+                    int32_t num_diffs = -1;
+                    num_diffs = raptor::ses::BandedSESDistance(
                                 qseq_str.c_str(),
                                 qspan,
                                 tseq.c_str(),
                                 tspan,
-                                0.10 * qspan);
+                                align_max_diff,
+                                align_bandwidth);
                     edit_dist = num_diffs;
                     score = num_seeds;
 
@@ -278,7 +281,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::sova::SovaMapper::Map(const
 
     TicToc tt_chain;
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> anchors =
-                        FormDiagonalAnchors(seed_hits_diag, qseq, index_, params_->diag_margin, params_->min_num_seeds, params_->chain_min_span,
+                        FormDiagonalAnchors(seed_hits_diag, qseq, index_,
+                                params_->chain_bandwidth, params_->align_bandwidth, params_->align_max_diff,
+                                params_->min_num_seeds, params_->chain_min_span,
                                 params_->ref_and_reads_path_same && params_->overlap_skip_self_hits,
                                 params_->ref_and_reads_path_same && params_->overlap_single_arc);
     tt_chain.stop();
