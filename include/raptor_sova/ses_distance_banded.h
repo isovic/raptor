@@ -15,12 +15,8 @@ const int32_t MINUS_INF = std::numeric_limits<int32_t>::min() + 10000;  // We ne
  * These routines implement a banded diff calculation.
  * They are fast, but do not offer traceback.
 */
-int32_t AutoBandedSESDistance(const std::string& q, const std::string& t, float max_q_err);
-int32_t AutoBandedSESDistance(const std::string& q, const std::string& t);
-int32_t AutoBandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen);
-int32_t AutoBandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, float max_err);
-int32_t BandedSESDistance(const std::string& q, const std::string& t, int32_t band_w);
-int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, int32_t band_w);
+int32_t BandedSESDistance(const std::string& q, const std::string& t, double maxd_frac, double bandw_frac);
+int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac);
 
 }
 }

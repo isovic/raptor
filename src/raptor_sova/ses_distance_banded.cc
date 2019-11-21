@@ -5,44 +5,16 @@
 
 namespace raptor {
 namespace ses {
-int32_t AutoBandedSESDistance(const std::string& q, const std::string& t) {
-    return AutoBandedSESDistance(q.c_str(), q.size(), t.c_str(), t.size());
+
+int32_t BandedSESDistance(const std::string& q, const std::string& t, double maxd_frac, double bandw_frac) {
+    return BandedSESDistance(q.c_str(), q.size(), t.c_str(), t.size(), maxd_frac, bandw_frac);
 }
 
-int32_t AutoBandedSESDistance(const std::string& q, const std::string& t, float max_q_err) {
-    return AutoBandedSESDistance(q.c_str(), q.size(), t.c_str(), t.size(), max_q_err);
-}
-
-int32_t AutoBandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen) {
-    int32_t dist = -1;
-    int32_t band_w = 4;
-    int32_t max_band = qlen + tlen;
-    while (dist < 0 && band_w < max_band) {
-        dist = BandedSESDistance(q, t, band_w);
-        band_w *= 2;
-    }
-    return dist;
-}
-
-int32_t AutoBandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, float max_err) {
-    int32_t dist = -1;
-    int32_t band_w = 4;
-    int32_t max_band = (int32_t) ceil((qlen + tlen) * max_err) * 2;
-    while (dist < 0 && band_w < max_band) {
-        dist = BandedSESDistance(q, t, band_w);
-        band_w *= 2;
-    }
-    return dist;
-}
-
-int32_t BandedSESDistance(const std::string& q, const std::string& t, int32_t band_w) {
-    return BandedSESDistance(q.c_str(), q.size(), t.c_str(), t.size(), band_w);
-}
-
-int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, int32_t band_w) {
+int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac) {
     int32_t N = qlen;
     int32_t M = tlen;
-    int32_t d_max = (N + M);
+    int32_t d_max = std::min(N + M, static_cast<int32_t>(maxd_frac * (N + M)));
+    int32_t band_w = qlen * bandw_frac;
 
     int32_t zero_offset = d_max + 1;
     std::vector<int32_t> v(2 * d_max + 3, MINUS_INF);
@@ -88,7 +60,7 @@ int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen
             u[kz] = x + y;
             best_u = std::max(u[kz], best_u);
 
-            if (x >= N && y >= M) {
+            if (x >= N || y >= M) {
                 return d;
             }
         }
