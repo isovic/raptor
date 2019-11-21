@@ -43,15 +43,6 @@ class SovaMapper {
     SovaMapper(const SovaMapper&) = delete;
     SovaMapper& operator=(const SovaMapper&) = delete;
 
-
-    std::vector<std::shared_ptr<raptor::TargetAnchorType>> DeduplicateAnchors_(
-        const std::vector<std::shared_ptr<raptor::TargetAnchorType>>& anchors,
-        double max_allowed_overlap_frac);
-
-    std::vector<raptor::ChainPtr> LISFilterAndGroupByTarget_(
-        std::vector<mindex::SeedHitPacked>& seed_hits, indid_t q_id, ind_t q_len,
-        ind_t diag_margin, ind_t min_cov_bases, int32_t min_num_hits);
-
     template <class T>
     std::vector<std::shared_ptr<raptor::TargetHits<T>>> FilterForOverlapping_(
         const std::vector<std::shared_ptr<raptor::TargetHits<T>>>& target_hits, const mindex::SequencePtr& qseq);
