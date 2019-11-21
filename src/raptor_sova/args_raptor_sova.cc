@@ -180,10 +180,6 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
                           "value can be lowered if the reads are known to be accurate.",
                           0, "Mapping options");
 
-    argparser.AddArgument(
-        &parameters->mapper_params->diag_margin, VALUE_TYPE_INT32, "", "max-diag-margin", "32",
-        "Maximum diagonal shift between two seeds to not include them in the same LIS frame.", 0,
-        "Mapping options");
     argparser.AddArgument(&parameters->mapper_params->seed_join_dist, VALUE_TYPE_INT32, "",
                           "max-seed-dist", "5000",
                           "Maximum distance between two seeds to combine in an anchor after LIS.",
@@ -199,6 +195,19 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
     argparser.AddArgument(&parameters->mapper_params->chain_min_span, VALUE_TYPE_INT32, "", "min-chain-span",
                           "1000",
                           "Minimum chain span to ratain it.",
+                          0, "Mapping options");
+
+    argparser.AddArgument(&parameters->mapper_params->chain_bandwidth, VALUE_TYPE_INT32, "", "chain-bw",
+                          "100",
+                          "Diagonal bandwidth to merge seeds into chains.",
+                          0, "Mapping options");
+    argparser.AddArgument(&parameters->mapper_params->align_bandwidth, VALUE_TYPE_DOUBLE, "", "aln-bw",
+                          "0.01",
+                          "Bandwidth for alignment, fraction of the query span.",
+                          0, "Mapping options");
+    argparser.AddArgument(&parameters->mapper_params->align_max_diff, VALUE_TYPE_DOUBLE, "", "aln-maxd",
+                          "0.03",
+                          "Expected maximum diff rate between sequences.",
                           0, "Mapping options");
 
     argparser.AddArgument(
