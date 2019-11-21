@@ -39,14 +39,15 @@ void PrintAsM4(FILE *fp_out, const mindex::IndexPtr& index, const mindex::Sequen
 
     double qspan = q_end - q_start;
     double tspan = t_end - t_start;
-    double identity_q = (qspan != 0.0) ? (static_cast<double>(cov_bases_q)) / (qspan) : -1.0;
-    double identity_t = (tspan != 0.0) ? (static_cast<double>(cov_bases_t)) / (tspan) : -1.0;
-    double identity = std::min(identity_q, identity_t);
+	double identity = 0.0;
+    // double identity_q = (qspan != 0.0) ? (static_cast<double>(cov_bases_q)) / (qspan) : -1.0;
+    // double identity_t = (tspan != 0.0) ? (static_cast<double>(cov_bases_t)) / (tspan) : -1.0;
+    // double identity = std::min(identity_q, identity_t);
 
     if (edit_dist >= 0) {
         double edit_dist_double = edit_dist;
-        identity_q = (qspan != 0) ? ((qspan  - edit_dist_double) / qspan) : -2.0;
-        identity_t = (tspan != 0) ? ((tspan - edit_dist_double) / tspan) : -2.0;
+        double identity_q = (qspan != 0) ? ((qspan  - edit_dist_double) / qspan) : -2.0;
+        double identity_t = (tspan != 0) ? ((tspan - edit_dist_double) / tspan) : -2.0;
         identity = std::min(identity_q, identity_t);
     }
 
