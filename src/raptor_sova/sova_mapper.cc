@@ -89,107 +89,105 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> FormDiagonalAnchors(
     std::unordered_map<int32_t, int32_t> tid_map;
     int32_t num_anchors = 0;
 
-    { // First pass to flatten out the diagonals
-        int32_t begin_id = 0;
-        auto prev_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
-        int32_t begin_diag = prev_shp.TargetPos() - prev_shp.QueryPos();
-        // int32_t begin_tid = prev_shp.TargetId();
-        // int32_t begin_trev = prev_shp.TargetRev();
-        // int32
+    int32_t begin_id = 0;
+    auto prev_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
+    int32_t begin_diag = prev_shp.TargetPos() - prev_shp.QueryPos();
+    // int32_t begin_tid = prev_shp.TargetId();
+    // int32_t begin_trev = prev_shp.TargetRev();
+    // int32
 
-        for (int32_t i = 0; i < static_cast<int32_t>(internal_dh.size()); ++i) {
-            auto curr_shp = mindex::SeedHitDiagPacked(internal_dh[i]);
-            int32_t curr_diag = curr_shp.TargetPos() - curr_shp.QueryPos();
-            int32_t diag_diff = abs(curr_diag - begin_diag);
+    for (int32_t i = 0; i < static_cast<int32_t>(internal_dh.size()); ++i) {
+        auto curr_shp = mindex::SeedHitDiagPacked(internal_dh[i]);
+        int32_t curr_diag = curr_shp.TargetPos() - curr_shp.QueryPos();
+        int32_t diag_diff = abs(curr_diag - begin_diag);
 
-            if (curr_shp.TargetId() != prev_shp.TargetId() ||
-                    curr_shp.TargetRev() != prev_shp.TargetRev() ||
-                    diag_diff > chain_bandwidth) {
+        if (curr_shp.TargetId() != prev_shp.TargetId() ||
+                curr_shp.TargetRev() != prev_shp.TargetRev() ||
+                diag_diff > chain_bandwidth) {
 
-                // Sort the seeds on the same diagonal bandwidth.
-                // Since the diagonal has been set to the same value for all seeds
-                // in this stretch, they will be sorted by the TargetPos and then QueryPos.
-                kx::radix_sort(internal_dh.begin() + begin_id, internal_dh.begin() + i);
-                auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
-                auto end_shp = mindex::SeedHitDiagPacked(internal_dh[i-1]);
-                int32_t tid = begin_shp.TargetId();
-                int32_t num_seeds = i - begin_id;
-                int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
-                int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
-                begin_id = i;
-                begin_diag = curr_diag;
+            // Sort the seeds on the same diagonal bandwidth.
+            // Since the diagonal has been set to the same value for all seeds
+            // in this stretch, they will be sorted by the TargetPos and then QueryPos.
+            kx::radix_sort(internal_dh.begin() + begin_id, internal_dh.begin() + i);
+            auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
+            auto end_shp = mindex::SeedHitDiagPacked(internal_dh[i-1]);
+            int32_t tid = begin_shp.TargetId();
+            int32_t num_seeds = i - begin_id;
+            int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
+            int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
+            begin_id = i;
+            begin_diag = curr_diag;
 
-                if ((overlap_skip_self_hits && tid == qseq->abs_id()) ||
-                    (overlap_single_arc && tid > qseq->abs_id())) {
-                    continue;
-                }
-
-                // if (num_seeds < min_num_seeds || qspan < min_span || tspan < min_span) {
-                //     continue;
-                // }
-
-                if (num_seeds >= min_num_seeds && qspan > min_span && tspan > min_span &&
-                        (overlap_skip_self_hits == false || (overlap_skip_self_hits && tid != qseq->abs_id())) &&
-                        (overlap_single_arc == false || (overlap_single_arc && tid < qseq->abs_id()))) {
-                    /////////////////////////
-                    /// Add a new anchor. ///
-                    /////////////////////////
-                    // The t_id of a chain could have clashes with rev cmp. Encoding
-                    // it again with the rev cmp flag will avoid this.
-                    int32_t tkey = prev_shp.TargetIdRev() << 1;
-                    auto it = tid_map.find(tkey);
-                    if (it == tid_map.end()) {
-                        tid_map[tkey] = target_anchors.size();
-                        auto new_env = raptor::createMappingEnv(
-                                tid, 0, index->len(tid), begin_shp.TargetRev(),
-                                qseq->abs_id(), qseq->len(), false);
-                        auto anchor = std::shared_ptr<raptor::TargetAnchorType>(
-                            new raptor::TargetAnchorType(new_env));
-                        target_anchors.emplace_back(anchor);
-                        it = tid_map.find(tkey);
-                    }
-                    auto& tanchors_ref = target_anchors[it->second];
-                    int32_t cov_bases_q = 0, cov_bases_t = 0;
-                    int32_t edit_dist = -1, score = 0;
-
-                    int32_t tstart = tanchors_ref->env()->t_rev ? (tanchors_ref->env()->t_len - end_shp.TargetPos()) : begin_shp.TargetPos();
-                    int32_t tend = tanchors_ref->env()->t_rev ? (tanchors_ref->env()->t_len - begin_shp.TargetPos()) : end_shp.TargetPos();
-
-                    auto tseq = index->FetchSeqAsString(tanchors_ref->env()->t_id, tstart, tend, tanchors_ref->env()->t_rev);
-                    auto qseq_str = qseq->GetSubsequenceAsString(begin_shp.QueryPos(), end_shp.QueryPos());
-                    int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
-                    int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
-                    // if (tanchors_ref->env()->t_rev) {
-                    //     std::cerr << qseq_str << "\n" << tseq << "\n";
-                    // }
-                    int32_t num_diffs = -1;
-                    num_diffs = raptor::ses::BandedSESDistance(
-                                qseq_str.c_str(),
-                                qspan,
-                                tseq.c_str(),
-                                tspan,
-                                align_max_diff,
-                                align_bandwidth);
-                    edit_dist = num_diffs;
-                    score = num_seeds;
-
-                    tanchors_ref->hits().emplace_back(
-                        raptor::createRegionMapped(
-                                    num_anchors, -1, tanchors_ref->env(),
-                                    begin_shp.QueryPos(), end_shp.QueryPos(),
-                                    begin_shp.TargetPos(), end_shp.TargetPos(),
-                                    cov_bases_q, cov_bases_t, num_seeds,
-                                    edit_dist, score, -1, -1, -1, -1));
-
-                    ++num_anchors;
-                }
+            if ((overlap_skip_self_hits && tid == qseq->abs_id()) ||
+                (overlap_single_arc && tid > qseq->abs_id())) {
+                continue;
             }
 
-            // Set the same diagonal value to any seed within the bandwidth.
-            // This will enable sorting by TargetPos.
-            mindex::SeedHitDiagPacked::EncodeDiagonal(internal_dh[i], begin_diag);
-            prev_shp = curr_shp;
+            // if (num_seeds < min_num_seeds || qspan < min_span || tspan < min_span) {
+            //     continue;
+            // }
+
+            if (num_seeds >= min_num_seeds && qspan > min_span && tspan > min_span &&
+                    (overlap_skip_self_hits == false || (overlap_skip_self_hits && tid != qseq->abs_id())) &&
+                    (overlap_single_arc == false || (overlap_single_arc && tid < qseq->abs_id()))) {
+                /////////////////////////
+                /// Add a new anchor. ///
+                /////////////////////////
+                // The t_id of a chain could have clashes with rev cmp. Encoding
+                // it again with the rev cmp flag will avoid this.
+                int32_t tkey = prev_shp.TargetIdRev() << 1;
+                auto it = tid_map.find(tkey);
+                if (it == tid_map.end()) {
+                    tid_map[tkey] = target_anchors.size();
+                    auto new_env = raptor::createMappingEnv(
+                            tid, 0, index->len(tid), begin_shp.TargetRev(),
+                            qseq->abs_id(), qseq->len(), false);
+                    auto anchor = std::shared_ptr<raptor::TargetAnchorType>(
+                        new raptor::TargetAnchorType(new_env));
+                    target_anchors.emplace_back(anchor);
+                    it = tid_map.find(tkey);
+                }
+                auto& tanchors_ref = target_anchors[it->second];
+                int32_t cov_bases_q = 0, cov_bases_t = 0;
+                int32_t edit_dist = -1, score = 0;
+
+                int32_t tstart = tanchors_ref->env()->t_rev ? (tanchors_ref->env()->t_len - end_shp.TargetPos()) : begin_shp.TargetPos();
+                int32_t tend = tanchors_ref->env()->t_rev ? (tanchors_ref->env()->t_len - begin_shp.TargetPos()) : end_shp.TargetPos();
+
+                auto tseq = index->FetchSeqAsString(tanchors_ref->env()->t_id, tstart, tend, tanchors_ref->env()->t_rev);
+                auto qseq_str = qseq->GetSubsequenceAsString(begin_shp.QueryPos(), end_shp.QueryPos());
+                int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
+                int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
+                // if (tanchors_ref->env()->t_rev) {
+                //     std::cerr << qseq_str << "\n" << tseq << "\n";
+                // }
+                int32_t num_diffs = -1;
+                num_diffs = raptor::ses::BandedSESDistance(
+                            qseq_str.c_str(),
+                            qspan,
+                            tseq.c_str(),
+                            tspan,
+                            align_max_diff,
+                            align_bandwidth);
+                edit_dist = num_diffs;
+                score = num_seeds;
+
+                tanchors_ref->hits().emplace_back(
+                    raptor::createRegionMapped(
+                                num_anchors, -1, tanchors_ref->env(),
+                                begin_shp.QueryPos(), end_shp.QueryPos(),
+                                begin_shp.TargetPos(), end_shp.TargetPos(),
+                                cov_bases_q, cov_bases_t, num_seeds,
+                                edit_dist, score, -1, -1, -1, -1));
+
+                ++num_anchors;
+            }
         }
+
+        // Set the same diagonal value to any seed within the bandwidth.
+        // This will enable sorting by TargetPos.
+        mindex::SeedHitDiagPacked::EncodeDiagonal(internal_dh[i], begin_diag);
+        prev_shp = curr_shp;
     }
 
     return target_anchors;
