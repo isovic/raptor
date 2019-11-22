@@ -212,6 +212,7 @@ raptor::sova::OverlapPtr AlignOverlap(
                             tspan,
                             align_max_diff,
                             align_bandwidth);
+
     ret->edit_dist = num_diffs;
     ret->score = ret->num_seeds;
 
@@ -253,6 +254,16 @@ raptor::sova::OverlapPtr ExtendAlignOverlap(
     ret->score = ret->num_seeds;
 
     return ret;
+}
+
+void AlignOverlaps(
+                const mindex::IndexPtr& index,
+                const mindex::SequencePtr& qseq,
+                std::vector<raptor::sova::OverlapPtr>& overlaps,
+                double align_bandwidth, double align_max_diff) {
+    for (size_t i = 0; i < overlaps.size(); ++i) {
+        overlaps[i] = AlignOverlap(index, qseq, overlaps[i], align_bandwidth, align_max_diff);
+    }
 }
 
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> OverlapsToTargetAnchors(const std::vector<raptor::sova::OverlapPtr>& overlaps) {
@@ -410,6 +421,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::sova::SovaMapper::Map(const
                         params_->min_num_seeds, params_->chain_min_span,
                         params_->ref_and_reads_path_same && params_->overlap_skip_self_hits,
                         params_->ref_and_reads_path_same && params_->overlap_single_arc);
+    AlignOverlaps(index_, qseq, overlaps, params_->align_bandwidth, params_->align_max_diff);
     auto anchors = OverlapsToTargetAnchors(overlaps);
     // std::vector<std::shared_ptr<raptor::TargetAnchorType>> anchors;
     tt_chain.stop();
