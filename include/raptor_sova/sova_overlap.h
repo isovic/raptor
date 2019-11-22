@@ -68,6 +68,11 @@ public:
             type(_type), a_id(_a_id), b_id(_b_id),
             edit_dist(_edit_dist), num_seeds(_num_seeds)
     { }
+
+public:
+    int32_t ASpan() const { return (a_end - a_start); }
+    int32_t BSpan() const { return (b_end - b_start); }
+
 };
 
 inline std::unique_ptr<raptor::sova::Overlap> createOverlap() {
