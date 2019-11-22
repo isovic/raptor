@@ -68,6 +68,42 @@ SovaMapper::~SovaMapper() {}
 //     return ret;
 // }
 
+raptor::sova::OverlapPtr MakeOverlap(std::vector<mindex128_t>& hits,
+            const mindex::SequencePtr& qseq,
+            const mindex::IndexPtr& index,
+            int32_t begin_id, int32_t end_id,
+            int32_t min_tpos_id, int32_t max_tpos_id) {
+
+    // Sort the seeds on the same diagonal bandwidth.
+    // Since the diagonal has been set to the same value for all seeds
+    // in this stretch, they will be sorted by the TargetPos and then QueryPos.
+    kx::radix_sort(hits.begin() + begin_id, hits.begin() + end_id);
+    auto begin_shp = mindex::SeedHitDiagPacked(hits[begin_id]);
+    auto end_shp = mindex::SeedHitDiagPacked(hits[end_id-1]);
+
+    // auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[min_tpos_id]);
+    // auto end_shp = mindex::SeedHitDiagPacked(internal_dh[max_tpos_id]);
+
+    int32_t tid = begin_shp.TargetId();
+    int32_t num_seeds = end_id - begin_id;
+    int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
+    int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
+
+    if (end_shp.TargetId() != tid) {
+        return nullptr;
+    }
+
+    float score = num_seeds;
+    float idt = 0.0;
+    int32_t edit_dist = -1;
+    return raptor::sova::createOverlap(
+        qseq->header(), index->header(tid), score, idt,
+        0, begin_shp.QueryPos(), end_shp.QueryPos(), qseq->len(),
+        begin_shp.TargetRev(), begin_shp.TargetPos(), end_shp.TargetPos(), index->len(tid),
+        "local", qseq->abs_id(), tid, edit_dist, num_seeds
+    );
+}
+
 /*
  * Forms anchors simply by binning seeds to narrow diagonals.
  * sorted_dh = sorted diagonal hits
@@ -100,49 +136,27 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
         auto curr_tpos = curr_shp.TargetPos();
         int32_t diag_diff = abs(curr_diag - begin_diag);
 
-        if (((i + 1) == num_hits) || curr_shp.TargetId() != prev_shp.TargetId() ||
+        if (curr_shp.TargetId() != prev_shp.TargetId() ||
                 curr_shp.TargetRev() != prev_shp.TargetRev() ||
                 diag_diff > chain_bandwidth) {
 
-            // Sort the seeds on the same diagonal bandwidth.
-            // Since the diagonal has been set to the same value for all seeds
-            // in this stretch, they will be sorted by the TargetPos and then QueryPos.
-            kx::radix_sort(internal_dh.begin() + begin_id, internal_dh.begin() + i);
-            auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
-            auto end_shp = mindex::SeedHitDiagPacked(internal_dh[i-1]);
-
-            // auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[min_tpos_id]);
-            // auto end_shp = mindex::SeedHitDiagPacked(internal_dh[max_tpos_id]);
-
-            int32_t tid = begin_shp.TargetId();
-            int32_t num_seeds = i - begin_id;
-            int32_t qspan = end_shp.QueryPos() - begin_shp.QueryPos();
-            int32_t tspan = end_shp.TargetPos() - begin_shp.TargetPos();
+            auto ovl = MakeOverlap(internal_dh, qseq, index, begin_id, i, min_tpos_id, max_tpos_id);
             begin_id = i;
             begin_diag = curr_diag;
 
-            if ((overlap_skip_self_hits && tid == qseq->abs_id()) ||
-                (overlap_single_arc && tid > qseq->abs_id())) {
+            if ((overlap_skip_self_hits && ovl->b_id == qseq->abs_id()) ||
+                (overlap_single_arc && ovl->b_id > qseq->abs_id())) {
                 continue;
             }
 
-            if (num_seeds >= min_num_seeds && qspan > min_span && tspan > min_span &&
-                    (overlap_skip_self_hits == false || (overlap_skip_self_hits && tid != qseq->abs_id())) &&
-                    (overlap_single_arc == false || (overlap_single_arc && tid < qseq->abs_id()))) {
-                //////////////////////////
-                /// Add a new overlap. ///
-                //////////////////////////
-                float score = num_seeds;
-                float idt = 0.0;
-                int32_t edit_dist = -1;
-                auto new_ovl = raptor::sova::createOverlap(
-                    qseq->header(), index->header(tid), score, idt,
-                    0, begin_shp.QueryPos(), end_shp.QueryPos(), qseq->len(),
-                    begin_shp.TargetRev(), begin_shp.TargetPos(), end_shp.TargetPos(), index->len(tid),
-                    "local", qseq->abs_id(), tid, edit_dist, num_seeds
-                );
-                overlaps.emplace_back(std::move(new_ovl));
+        // Add a new overlap.
+            if (ovl->num_seeds >= min_num_seeds && ovl->ASpan() > min_span && ovl->BSpan() > min_span &&
+                    (overlap_skip_self_hits == false || (overlap_skip_self_hits && ovl->b_id != qseq->abs_id())) &&
+                    (overlap_single_arc == false || (overlap_single_arc && ovl->b_id < qseq->abs_id()))) {
+
+                overlaps.emplace_back(std::move(ovl));
             }
+
             min_tpos = max_tpos = curr_tpos;
             min_tpos_id = max_tpos_id = i;
         }
@@ -159,6 +173,17 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
         // This will enable sorting by TargetPos.
         mindex::SeedHitDiagPacked::EncodeDiagonal(internal_dh[i], begin_diag);
         prev_shp = curr_shp;
+    }
+
+    if ((num_hits - begin_id) > 0) {
+        auto ovl = MakeOverlap(internal_dh, qseq, index, begin_id, num_hits, min_tpos_id, max_tpos_id);
+        // Add a new overlap.
+        if (ovl->num_seeds >= min_num_seeds && ovl->ASpan() > min_span && ovl->BSpan() > min_span &&
+                (overlap_skip_self_hits == false || (overlap_skip_self_hits && ovl->b_id != qseq->abs_id())) &&
+                (overlap_single_arc == false || (overlap_single_arc && ovl->b_id < qseq->abs_id()))) {
+
+            overlaps.emplace_back(std::move(ovl));
+        }
     }
 
     return overlaps;
