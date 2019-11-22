@@ -92,14 +92,15 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
     int32_t begin_diag = prev_shp.TargetPos() - prev_shp.QueryPos();
     int32_t min_tpos_id = 0, min_tpos = prev_shp.TargetPos();
     int32_t max_tpos_id = 0, max_tpos = prev_shp.TargetPos();
+    int32_t num_hits = static_cast<int32_t>(internal_dh.size());
 
-    for (int32_t i = 0; i < static_cast<int32_t>(internal_dh.size()); ++i) {
+    for (int32_t i = 0; i < num_hits; ++i) {
         auto curr_shp = mindex::SeedHitDiagPacked(internal_dh[i]);
         int32_t curr_diag = curr_shp.TargetPos() - curr_shp.QueryPos();
         auto curr_tpos = curr_shp.TargetPos();
         int32_t diag_diff = abs(curr_diag - begin_diag);
 
-        if (curr_shp.TargetId() != prev_shp.TargetId() ||
+        if (((i + 1) == num_hits) || curr_shp.TargetId() != prev_shp.TargetId() ||
                 curr_shp.TargetRev() != prev_shp.TargetRev() ||
                 diag_diff > chain_bandwidth) {
 
@@ -154,7 +155,9 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
             max_tpos_id = i;
             max_tpos = curr_tpos;
         }
-
+        // Set the same diagonal value to any seed within the bandwidth.
+        // This will enable sorting by TargetPos.
+        mindex::SeedHitDiagPacked::EncodeDiagonal(internal_dh[i], begin_diag);
         prev_shp = curr_shp;
     }
 
