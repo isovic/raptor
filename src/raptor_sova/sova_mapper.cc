@@ -74,15 +74,8 @@ raptor::sova::OverlapPtr MakeOverlap(std::vector<mindex128_t>& hits,
             int32_t begin_id, int32_t end_id,
             int32_t min_tpos_id, int32_t max_tpos_id) {
 
-    // Sort the seeds on the same diagonal bandwidth.
-    // Since the diagonal has been set to the same value for all seeds
-    // in this stretch, they will be sorted by the TargetPos and then QueryPos.
-    kx::radix_sort(hits.begin() + begin_id, hits.begin() + end_id);
-    auto begin_shp = mindex::SeedHitDiagPacked(hits[begin_id]);
-    auto end_shp = mindex::SeedHitDiagPacked(hits[end_id-1]);
-
-    // auto begin_shp = mindex::SeedHitDiagPacked(internal_dh[min_tpos_id]);
-    // auto end_shp = mindex::SeedHitDiagPacked(internal_dh[max_tpos_id]);
+    auto begin_shp = mindex::SeedHitDiagPacked(hits[min_tpos_id]);
+    auto end_shp = mindex::SeedHitDiagPacked(hits[max_tpos_id]);
 
     int32_t tid = begin_shp.TargetId();
     int32_t num_seeds = end_id - begin_id;
@@ -126,15 +119,18 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
     int32_t begin_id = 0;
     auto prev_shp = mindex::SeedHitDiagPacked(internal_dh[begin_id]);
     int32_t begin_diag = prev_shp.TargetPos() - prev_shp.QueryPos();
-    int32_t min_tpos_id = 0, min_tpos = prev_shp.TargetPos();
-    int32_t max_tpos_id = 0, max_tpos = prev_shp.TargetPos();
+    int32_t min_tpos_id = 0;
+    int32_t max_tpos_id = 0;
     int32_t num_hits = static_cast<int32_t>(internal_dh.size());
+    uint64_t min_pos = internal_dh[begin_id] & mindex::MASK_SEED_HIT_DIAG_LOWER_64;
+    uint64_t max_pos = internal_dh[begin_id] & mindex::MASK_SEED_HIT_DIAG_LOWER_64;
 
     for (int32_t i = 0; i < num_hits; ++i) {
         auto curr_shp = mindex::SeedHitDiagPacked(internal_dh[i]);
         int32_t curr_diag = curr_shp.TargetPos() - curr_shp.QueryPos();
         auto curr_tpos = curr_shp.TargetPos();
         int32_t diag_diff = abs(curr_diag - begin_diag);
+        uint64_t tq_pos = internal_dh[i] & mindex::MASK_SEED_HIT_DIAG_LOWER_64;
 
         if (curr_shp.TargetId() != prev_shp.TargetId() ||
                 curr_shp.TargetRev() != prev_shp.TargetRev() ||
@@ -144,12 +140,7 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
             begin_id = i;
             begin_diag = curr_diag;
 
-            if ((overlap_skip_self_hits && ovl->b_id == qseq->abs_id()) ||
-                (overlap_single_arc && ovl->b_id > qseq->abs_id())) {
-                continue;
-            }
-
-        // Add a new overlap.
+            // Add a new overlap.
             if (ovl->num_seeds >= min_num_seeds && ovl->ASpan() > min_span && ovl->BSpan() > min_span &&
                     (overlap_skip_self_hits == false || (overlap_skip_self_hits && ovl->b_id != qseq->abs_id())) &&
                     (overlap_single_arc == false || (overlap_single_arc && ovl->b_id < qseq->abs_id()))) {
@@ -157,17 +148,17 @@ std::vector<raptor::sova::OverlapPtr> FormDiagonalAnchors(
                 overlaps.emplace_back(std::move(ovl));
             }
 
-            min_tpos = max_tpos = curr_tpos;
             min_tpos_id = max_tpos_id = i;
+            min_pos = max_pos = tq_pos;
         }
         // Track the minimum and maximum target positions for each diagonal.
-        if (curr_tpos < min_tpos) {
+        if (tq_pos < min_pos) {
             min_tpos_id = i;
-            min_tpos = curr_tpos;
+            min_pos = tq_pos;
         }
-        if (curr_tpos > max_tpos) {
+        if (tq_pos > max_pos) {
             max_tpos_id = i;
-            max_tpos = curr_tpos;
+            max_pos = tq_pos;
         }
         // Set the same diagonal value to any seed within the bandwidth.
         // This will enable sorting by TargetPos.
