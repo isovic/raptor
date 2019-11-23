@@ -19,6 +19,7 @@ class SesResults {
     int32_t max_q = 0;
     int32_t max_t = 0;
     int32_t max_score = MINUS_INF;
+    int32_t max_score_diffs = MINUS_INF;
     int32_t diffs = 0;
     bool valid = false;
 };
@@ -29,7 +30,7 @@ class SesResults {
 */
 int32_t BandedSESDistance(const std::string& q, const std::string& t, double maxd_frac, double bandw_frac);
 int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac);
-SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac);
+SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac, int32_t match_score, int32_t indel_penalty);
 
 }
 }
