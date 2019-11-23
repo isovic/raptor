@@ -205,16 +205,56 @@ raptor::sova::OverlapPtr AlignOverlap(
     auto qseq_str = qseq->GetSubsequenceAsString(ovl->a_start, ovl->a_end);
     int32_t qspan = ovl->a_end - ovl->a_start;
     int32_t tspan = ovl->b_end - ovl->b_start;
-    int32_t num_diffs = raptor::ses::BandedSESDistance(
+    // std::string tseq;
+    // if (ovl->b_rev) {
+    //     tseq = index->FetchSeqAsString(ovl->b_id, 0, tend, ovl->b_rev);
+    // } else {
+    //     tseq = index->FetchSeqAsString(ovl->b_id, tstart, ovl->b_len, ovl->b_rev);
+    // }
+    // auto qseq_str = qseq->GetSubsequenceAsString(ovl->a_start, ovl->a_len);
+    // int32_t qspan = qseq_str.size();
+    // int32_t tspan = tseq.size();
+
+    // int32_t num_diffs = raptor::ses::BandedSESDistance(
+    //                         qseq_str.c_str(),
+    //                         qspan,
+    //                         tseq.c_str(),
+    //                         tspan,
+    //                         align_max_diff,
+    //                         align_bandwidth);
+    auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
                             qseq_str.c_str(),
                             qspan,
                             tseq.c_str(),
                             tspan,
                             align_max_diff,
-                            align_bandwidth);
-
+                            align_bandwidth, 2, -1);
+    int32_t num_diffs = ses_result.diffs;
     ret->edit_dist = num_diffs;
     ret->score = ret->num_seeds;
+    if (ses_result.valid) {
+        ret->a_end = ses_result.last_q + ovl->a_start;
+        ret->b_end = ses_result.last_t + ovl->b_start; // Ovo je krivo ako je target reverzan, zato jer uzimam cijeli suffix za alignment ovdje.
+    } else {
+        ret->a_end = ses_result.max_q + ovl->a_start;
+        ret->b_end = ses_result.max_t + ovl->b_start;
+        ret->score = ses_result.diffs;
+        ret->edit_dist = -1;
+    }
+
+    std::cerr << qseq->header() << "\t"
+        << "last(" << ses_result.last_q + ovl->a_start << ", " << ses_result.last_t + ovl->b_start << ", " << ses_result.last_score << ")" << "\t"
+        << "max(" << ses_result.max_q + ovl->a_start << ", " << ses_result.max_t + ovl->b_start << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
+        << ovl->a_name << "\t" << ovl->b_name << "\t" << ovl->score << "\t" << ovl->identity << "\t"
+        << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
+        << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
+        << "\n";
+
+    // // if (ovl->b_name == "m64030_190330_071939/101909380/ccs") {
+    // if (ovl->b_name == "m64030_190330_071939/163841050/ccs") {
+    // // if (ovl->b_name == "m64030_190330_071939/179504890/ccs") {
+    //     exit(1);
+    // }
 
     return ret;
 }
