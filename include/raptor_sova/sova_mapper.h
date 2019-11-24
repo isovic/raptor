@@ -19,6 +19,7 @@
 #include <raptor/yield_index.h>
 #include <types/typedefs.h>
 #include <raptor_sova/params_sova_mapper.h>
+#include <raptor_sova/sova_overlap.h>
 
 namespace raptor {
 namespace sova {
@@ -37,6 +38,9 @@ class SovaMapper {
     ~SovaMapper();
 
     std::shared_ptr<raptor::LinearMappingResult> Map(const mindex::SequencePtr& qseq);
+
+    static void PrintOverlapAsM4(FILE *fp_out, const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
+                            const raptor::sova::OverlapPtr& ovl);
 
    private:
     SovaMapper(const mindex::IndexPtr index, const std::shared_ptr<raptor::sova::ParamsSovaMapper> params);
