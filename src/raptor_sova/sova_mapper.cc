@@ -32,6 +32,7 @@
 #include <raptor_sova/sova_overlap.h>
 
 // #define USE_LIS_FILTER
+#define DEBUG_EXTEND_ALIGNMENT
 
 namespace raptor {
 namespace sova {
@@ -201,6 +202,10 @@ raptor::sova::OverlapPtr AlignOverlap(
     auto qseq_str = qseq->GetSequenceAsString();
     auto qseq_str_rev = ReverseComplement(qseq_str);
 
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ovl);
+    #endif
+
     ///////////////////////////
     /// Align forward pass. ///
     ///////////////////////////
@@ -236,17 +241,20 @@ raptor::sova::OverlapPtr AlignOverlap(
         ret->edit_dist = num_diffs;
         ret->score = ret->num_seeds;
 
-        // std::cerr << "[1] " << qseq->header() << "\t"
-        //     << "last(" << ses_result.last_q + ovl->a_start << ", " << ses_result.last_t + ovl->b_start << ", " << ses_result.last_score << ")" << "\t"
-        //     << "max(" << ses_result.max_q + ovl->a_start << ", " << ses_result.max_t + ovl->b_start << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
-        //     << ovl->a_name << "\t" << ovl->b_name << "\t" << ovl->score << "\t" << ovl->identity << "\t"
-        //     << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
-        //     << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
-        //     << "\n";
+        #ifdef DEBUG_EXTEND_ALIGNMENT
+            std::cerr << "[1] " << qseq->header() << "\t"
+                << "last(" << ses_result.last_q + ovl->a_start << ", " << ses_result.last_t + ovl->b_start << ", " << ses_result.last_score << ")" << "\t"
+                << "max(" << ses_result.max_q + ovl->a_start << ", " << ses_result.max_t + ovl->b_start << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
+                << qseq->header() << "\t" << index->header(ovl->b_id) << "\t" << ovl->score << "\t" << ovl->identity << "\t"
+                << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
+                << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
+                << "\n";
+        #endif
     }
 
-    // raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ovl);
-    // raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
+    #endif
 
     ///////////////////////////
     /// Align reverse pass. ///
@@ -272,14 +280,16 @@ raptor::sova::OverlapPtr AlignOverlap(
                                 align_max_diff,
                                 align_bandwidth, 2, -1);
 
-        // std::cerr << "    tspan = " << tspan << "\n";
-        // std::cerr << "[2] " << qseq->header() << "\t"
-        //     << "last(" << ses_result.last_q << ", " << ses_result.last_t << ", " << ses_result.last_score << ", " << ses_result.diffs << ")" << "\t"
-        //     << "max(" << ses_result.max_q << ", " << ses_result.max_t << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
-        //     << ovl->a_name << "\t" << ovl->b_name << "\t" << ovl->score << "\t" << ovl->identity << "\t"
-        //     << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
-        //     << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
-        //     << "\n";
+        #ifdef DEBUG_EXTEND_ALIGNMENT
+            // std::cerr << "    tspan = " << tspan << "\n";
+            std::cerr << "[2] " << qseq->header() << "\t"
+                << "last(" << ses_result.last_q << ", " << ses_result.last_t << ", " << ses_result.last_score << ", " << ses_result.diffs << ")" << "\t"
+                << "max(" << ses_result.max_q << ", " << ses_result.max_t << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
+                << qseq->header() << "\t" << index->header(ovl->b_id) << "\t" << ovl->score << "\t" << ovl->identity << "\t"
+                << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
+                << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
+                << "\n";
+        #endif
 
         // ret->a_start = ret->a_end - ((ses_result.valid) ? ses_result.last_q : ses_result.max_q);
         // ret->b_start = ret->b_end - ((ses_result.valid) ? ses_result.last_t : ses_result.max_t);
@@ -291,8 +301,10 @@ raptor::sova::OverlapPtr AlignOverlap(
         ret->score = ret->num_seeds;
     }
 
-    // raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
-    // std::cerr << "\n";
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
+        std::cerr << "\n";
+    #endif
 
     return ret;
 }
