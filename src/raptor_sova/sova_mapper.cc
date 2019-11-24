@@ -90,10 +90,11 @@ raptor::sova::OverlapPtr MakeOverlap(std::vector<mindex128_t>& hits,
     float idt = 0.0;
     int32_t edit_dist = -1;
     return raptor::sova::createOverlap(
-        qseq->header(), index->header(tid), score, idt,
+        qseq->abs_id(), tid,
+        score, idt,
         0, begin_shp.QueryPos(), end_shp.QueryPos(), qseq->len(),
         begin_shp.TargetRev(), begin_shp.TargetPos(), end_shp.TargetPos(), index->len(tid),
-        "local", qseq->abs_id(), tid, edit_dist, num_seeds
+        edit_dist, num_seeds
     );
 }
 
@@ -564,7 +565,8 @@ void SovaMapper::PrintOverlapAsM4(FILE *fp_out, const mindex::IndexPtr& index, c
     }
 
 	fprintf(fp_out, "%s %s %d %.2lf %d %d %d %d %d %d %d %d\n",
-			ovl->a_name.c_str(), ovl->b_name.c_str(), static_cast<int32_t>(ovl->score), 100.0 * identity,
+			qseq->header().c_str(), index->header(ovl->b_id).c_str(),
+            static_cast<int32_t>(ovl->score), 100.0 * identity,
 			static_cast<int32_t>(ovl->a_rev), ovl->a_start, ovl->a_end, ovl->a_len,
 			static_cast<int32_t>(t_is_rev), t_start, t_end, t_len);
 
