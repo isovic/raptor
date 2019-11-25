@@ -64,6 +64,7 @@ test-data/demos/demo-1-circular-synth/*
 !test-data/graph-mapping
 !test-data/raptor-fetch
 !test-data/bugfixes
+!test-data/hifi-ovl
 
 tool*
 callgrind.*
