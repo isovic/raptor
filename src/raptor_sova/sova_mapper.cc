@@ -282,6 +282,8 @@ raptor::sova::OverlapPtr AlignOverlap(
 
         #ifdef DEBUG_EXTEND_ALIGNMENT
             // std::cerr << "    tspan = " << tspan << "\n";
+            std::cerr << "[50bp front qseq]: " << qseq_str_rev.substr(qstart, 150) << "\n";
+            std::cerr << "[50bp front tseq]: " << tseq.substr(0, 150) << "\n";
             std::cerr << "[2] " << qseq->header() << "\t"
                 << "last(" << ses_result.last_q << ", " << ses_result.last_t << ", " << ses_result.last_score << ", " << ses_result.diffs << ")" << "\t"
                 << "max(" << ses_result.max_q << ", " << ses_result.max_t << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
