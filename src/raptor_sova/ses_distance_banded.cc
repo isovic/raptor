@@ -109,11 +109,12 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
         ret.max_score_diffs = 0;
         ret.diffs = 0;
 
+        ret.last_score = ret.max_score;
+        ret.last_q = x;
+        ret.last_t = y;
+
         if (x >= N || y >= M) {
             ret.valid = true;
-            ret.last_score = ret.max_score;
-            ret.last_q = x;
-            ret.last_t = y;
             return ret;
         }
     }
@@ -156,6 +157,12 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
             v[kz] = x;
             u[kz] = x + y;
             best_u = std::max(u[kz], best_u);
+
+            if (best_u == u[kz]) {
+                ret.last_score = scores[kz];
+                ret.last_q = x;
+                ret.last_t = y;
+            }
 
             if (scores[kz] > ret.max_score) {
                 ret.max_score = scores[kz];
