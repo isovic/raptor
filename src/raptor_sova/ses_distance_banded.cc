@@ -82,13 +82,13 @@ int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen
     return -1;
 }
 
-SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac, int32_t match_score, int32_t indel_penalty) {
+SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, int32_t d_max, int32_t bandwidth, int32_t match_score, int32_t indel_penalty) {
     SesResults ret;
 
     int32_t N = qlen;
     int32_t M = tlen;
-    int32_t d_max = std::min(N + M, static_cast<int32_t>(maxd_frac * (N + M)));
-    int32_t band_w = qlen * bandw_frac;
+    // int32_t d_max = std::min(N + M, static_cast<int32_t>(maxd_frac * (N + M)));
+    // int32_t band_w = qlen * bandw_frac;
     int32_t score = 0;
 
     // std::cerr << "d_max = " << d_max << ", band_w = " << band_w << "\n";
@@ -124,7 +124,7 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
     std::vector<int32_t> u(2 * d_max + 3, MINUS_INF);
     std::vector<int32_t> scores(2 * d_max + 3, 0);
 
-    int32_t band_tolerance = band_w / 2 + 1;
+    int32_t band_tolerance = bandwidth / 2 + 1;
     int32_t min_k = -1, max_k = 1;  // +- 1 because we handled the '0' case above.
     int32_t best_u = 0;
 
@@ -132,7 +132,7 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
 
     for (int32_t d = 1; d < d_max; d++) {
         ret.diffs = d;
-        if ((max_k - min_k) > band_w) {
+        if ((max_k - min_k) > bandwidth) {
             ret.valid = false;
             break;
         }

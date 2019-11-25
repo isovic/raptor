@@ -30,7 +30,7 @@ class SesResults {
 */
 int32_t BandedSESDistance(const std::string& q, const std::string& t, double maxd_frac, double bandw_frac);
 int32_t BandedSESDistance(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac);
-SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, double maxd_frac, double bandw_frac, int32_t match_score, int32_t indel_penalty);
+SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, size_t tlen, int32_t d_max, int32_t bandwidth, int32_t match_score, int32_t indel_penalty);
 
 }
 }
