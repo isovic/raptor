@@ -91,6 +91,8 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
     int32_t band_w = qlen * bandw_frac;
     int32_t score = 0;
 
+    // std::cerr << "d_max = " << d_max << ", band_w = " << band_w << "\n";
+
     int32_t zero_offset = d_max + 1;
     std::vector<int32_t> v(2 * d_max + 3, MINUS_INF);
 
@@ -156,21 +158,22 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
 
             v[kz] = x;
             u[kz] = x + y;
-            best_u = std::max(u[kz], best_u);
+            // best_u = std::max(u[kz], best_u);
 
-            if (best_u == u[kz]) {
+            if (best_u <= u[kz]) {
+                best_u = u[kz];
                 ret.last_score = scores[kz];
                 ret.last_q = x;
                 ret.last_t = y;
             }
 
-            if (scores[kz] > ret.max_score) {
-                ret.max_score = scores[kz];
-                ret.max_q = x;
-                ret.max_t = y;
-                ret.max_score_diffs = d;
-                // std::cerr << "    [x = " << x << ", y = " << y << ", k = " << k << ", min_k = " << min_k << ", max_k = " << max_k << ", band_w = " << band_w << ", d = " << d << ", d_max = " << d_max << "]: max_score = " << ret.max_score << "\n";
-            }
+            // if (scores[kz] > ret.max_score) {
+            //     ret.max_score = scores[kz];
+            //     ret.max_q = x;
+            //     ret.max_t = y;
+            //     ret.max_score_diffs = d;
+            //     // std::cerr << "    [x = " << x << ", y = " << y << ", k = " << k << ", min_k = " << min_k << ", max_k = " << max_k << ", band_w = " << band_w << ", d = " << d << ", d_max = " << d_max << "]: max_score = " << ret.max_score << "\n";
+            // }
 
             if (x >= N || y >= M) {
                 ret.valid = true;
