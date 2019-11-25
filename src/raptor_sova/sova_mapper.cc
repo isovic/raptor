@@ -32,7 +32,7 @@
 #include <raptor_sova/sova_overlap.h>
 
 // #define USE_LIS_FILTER
-#define DEBUG_EXTEND_ALIGNMENT
+// #define DEBUG_EXTEND_ALIGNMENT
 
 namespace raptor {
 namespace sova {
@@ -229,8 +229,9 @@ raptor::sova::OverlapPtr AlignOverlap(
                                 qspan,
                                 tseq.c_str(),
                                 tspan,
-                                align_max_diff,
-                                align_bandwidth, 2, -1);
+                                qseq->len() * align_max_diff,
+                                qspan * align_bandwidth,
+                                2, -1);
 
         // ret->a_end = (ses_result.valid) ? ses_result.last_q : ses_result.max_q;
         // ret->b_end = (ses_result.valid) ? ses_result.last_t : ses_result.max_t;
@@ -284,8 +285,9 @@ raptor::sova::OverlapPtr AlignOverlap(
                                 qspan,
                                 tseq.c_str(),
                                 tspan,
-                                align_max_diff,
-                                align_bandwidth, 2, -1);
+                                qseq->len() * align_max_diff,
+                                qspan * align_bandwidth,
+                                2, -1);
 
         #ifdef DEBUG_EXTEND_ALIGNMENT
             // std::cerr << "    tspan = " << tspan << "\n";
