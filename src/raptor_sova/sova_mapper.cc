@@ -30,6 +30,7 @@
 #include <raptor_sova/ses_distance_banded.h>
 
 #include <raptor_sova/sova_overlap.h>
+#include <utility/range_tools.hpp>
 
 // #define USE_LIS_FILTER
 // #define DEBUG_EXTEND_ALIGNMENT
@@ -309,7 +310,7 @@ raptor::sova::OverlapPtr AlignOverlap(
         ret->a_start = ret->a_end - ses_result.last_q;
         ret->b_start = ret->b_end - ses_result.last_t;
 
-        int32_t num_diffs = (ses_result.valid) ? ses_result.diffs : ses_result.max_score_diffs;
+        int32_t num_diffs = ses_result.diffs;
         ret->edit_dist = num_diffs;
         ret->score = ret->num_seeds;
     }
@@ -370,6 +371,51 @@ void AlignOverlaps(
     for (size_t i = 0; i < overlaps.size(); ++i) {
         overlaps[i] = AlignOverlap(index, qseq, overlaps[i], align_bandwidth, align_max_diff, verbose);
     }
+}
+
+std::vector<raptor::sova::OverlapPtr> SovaMapper::FilterOverlaps_(
+        const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
+        const std::vector<raptor::sova::OverlapPtr>& overlaps, int32_t min_seeds, float min_idt) const {
+
+    std::vector<raptor::sova::OverlapPtr> ret;
+    // std::vector<raptor::sova::OverlapPtr> bucket;
+    std::vector<int32_t> bucket;
+
+    if (overlaps.empty()) {
+        return ret;
+    }
+
+    std::vector<std::pair<size_t, size_t>> ranges =
+            istl::FindRanges<raptor::sova::OverlapPtr, std::vector<raptor::sova::OverlapPtr>>(overlaps,
+                        [](const auto& a, const auto& b) { return (a->b_id == b->b_id && a->b_rev == b->b_rev); });
+
+
+    for (const auto& group: ranges) {
+        int32_t start = std::get<0>(group);
+        int32_t end = std::get<1>(group);
+        // std::cerr << "start = " << start << ", end = " << end << "\n";
+
+        int32_t max_i = -1;
+        for (int32_t i = start; i < end; ++i) {
+            if (overlaps[i]->num_seeds < min_seeds || overlaps[i]->identity < min_idt) {
+                continue;
+            }
+            if (max_i < 0 || overlaps[i]->num_seeds >= overlaps[max_i]->num_seeds) {
+                max_i = i;
+            }
+        }
+        if (max_i >= 0) {
+            int32_t max_seeds = overlaps[max_i]->num_seeds;
+            for (int32_t i = start; i < end; ++i) {
+                if (overlaps[i]->num_seeds >= max_seeds) {
+                    ret.emplace_back(raptor::sova::createOverlap(overlaps[i]));
+                }
+            }
+        }
+
+    }
+
+    return ret;
 }
 
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> OverlapsToTargetAnchors(const std::vector<raptor::sova::OverlapPtr>& overlaps) {
@@ -527,6 +573,7 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::sova::SovaMapper::Map(const
                         params_->min_num_seeds, params_->chain_min_span,
                         params_->ref_and_reads_path_same && params_->overlap_skip_self_hits,
                         params_->ref_and_reads_path_same && params_->overlap_single_arc);
+    overlaps = FilterOverlaps_(index_, qseq, overlaps, 0, 0.0);
     AlignOverlaps(index_, qseq, overlaps, params_->align_bandwidth, params_->align_max_diff, params_->verbose_level == 9);
     auto anchors = OverlapsToTargetAnchors(overlaps);
     // std::vector<std::shared_ptr<raptor::TargetAnchorType>> anchors;

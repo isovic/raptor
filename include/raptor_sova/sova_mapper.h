@@ -51,6 +51,10 @@ class SovaMapper {
     std::vector<std::shared_ptr<raptor::TargetHits<T>>> FilterForOverlapping_(
         const std::vector<std::shared_ptr<raptor::TargetHits<T>>>& target_hits, const mindex::SequencePtr& qseq);
 
+    std::vector<raptor::sova::OverlapPtr> FilterOverlaps_(
+                                const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
+                                const std::vector<raptor::sova::OverlapPtr>& overlaps, int32_t min_seeds, float min_idt) const;
+
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::sova::ParamsSovaMapper> params_;
 };
