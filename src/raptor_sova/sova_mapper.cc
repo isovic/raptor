@@ -33,7 +33,7 @@
 #include <utility/range_tools.hpp>
 
 // #define USE_LIS_FILTER
-// #define DEBUG_EXTEND_ALIGNMENT
+#define DEBUG_EXTEND_ALIGNMENT
 
 namespace raptor {
 namespace sova {
@@ -210,6 +210,8 @@ raptor::sova::OverlapPtr AlignOverlap(
         }
     #endif
 
+    int32_t diffs_right = 0;
+
     ///////////////////////////
     /// Align forward pass. ///
     ///////////////////////////
@@ -225,13 +227,19 @@ raptor::sova::OverlapPtr AlignOverlap(
                                 index->FetchSeqAsString(ovl->b_id, tstart_fwd, ovl->b_len, ovl->b_rev);
         int32_t tspan = tseq.size();
 
+        int32_t d_max = qseq->len() * align_max_diff;
+        // int32_t bandwidth = ovl->a_len * align_bandwidth;
+        // int32_t bandwidth = qspan * align_bandwidth;
+        // int32_t bandwidth = std::max(100.0, qspan * align_bandwidth);
+        int32_t bandwidth = qseq->len() * align_bandwidth;
+
         auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
                                 qseq_str.c_str() + qstart,
                                 qspan,
                                 tseq.c_str(),
                                 tspan,
-                                qseq->len() * align_max_diff,
-                                qspan * align_bandwidth,
+                                d_max,
+                                bandwidth,
                                 2, -1);
 
         // ret->a_end = (ses_result.valid) ? ses_result.last_q : ses_result.max_q;
@@ -244,10 +252,14 @@ raptor::sova::OverlapPtr AlignOverlap(
 
         int32_t num_diffs = ses_result.diffs;
         ret->edit_dist = num_diffs;
-        ret->score = ret->num_seeds;
+        ret->score = -ret->ASpan();
+        diffs_right = num_diffs;
 
         #ifdef DEBUG_EXTEND_ALIGNMENT
             if (verbose) {
+                std::cerr << "num_diffs = " << ses_result.diffs << "\n";
+                std::cerr << "d_max = " << d_max << "\n";
+                std::cerr << "bandwidth = " << bandwidth << "\n";
                 std::cerr << "[1] " << qseq->header() << "\t"
                     << "last(" << ses_result.last_q + ovl->a_start << ", " << ses_result.last_t + ovl->b_start << ", " << ses_result.last_score << ")" << "\t"
                     << "max(" << ses_result.max_q + ovl->a_start << ", " << ses_result.max_t + ovl->b_start << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
@@ -281,18 +293,30 @@ raptor::sova::OverlapPtr AlignOverlap(
                                 index->FetchSeqAsString(ret->b_id, 0, tend_fwd, !ret->b_rev);
         int32_t tspan = tseq.size();
 
+        int32_t d_max = qseq->len() * align_max_diff;
+        // int32_t bandwidth = ovl->a_len * align_bandwidth;
+        // int32_t bandwidth = qspan * align_bandwidth;
+        // int32_t bandwidth = std::max(100.0, qspan * align_bandwidth + diffs_right);
+        // int32_t a_flank_left = ret->a_start;
+        // int32_t b_flank_left = (ret->b_rev) ? (ret->b_len - ret->b_end) : ret->b_start;
+        // bandwidth = std::max(qspan * align_bandwidth, diffs_right + std::min(a_flank_left, b_flank_left) * align_bandwidth);
+        int32_t bandwidth = qseq->len() * align_bandwidth;
+
         auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
                                 qseq_str_rev.c_str() + qstart,
                                 qspan,
                                 tseq.c_str(),
                                 tspan,
-                                qseq->len() * align_max_diff,
-                                qspan * align_bandwidth,
+                                d_max,
+                                bandwidth,
                                 2, -1);
 
         #ifdef DEBUG_EXTEND_ALIGNMENT
             // std::cerr << "    tspan = " << tspan << "\n";
             if (verbose) {
+                std::cerr << "num_diffs = " << ses_result.diffs << "\n";
+                std::cerr << "d_max = " << d_max << "\n";
+                std::cerr << "bandwidth = " << bandwidth << "\n";
                 std::cerr << "[50bp front qseq]: " << qseq_str_rev.substr(qstart, 150) << "\n";
                 std::cerr << "[50bp front tseq]: " << tseq.substr(0, 150) << "\n";
                 std::cerr << "[2] " << qseq->header() << "\t"
