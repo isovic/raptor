@@ -64,8 +64,6 @@ struct ParamsRaptorSova {
     /*
      * Filtering options.
     */
-    double min_identity = 65.0;
-    double max_evalue = 1e0;
     bool one_hit_per_target = false;
 
     /*
@@ -86,10 +84,7 @@ struct ParamsRaptorSova {
      These need to be classified in categories:
     */
     int64_t bestn = 0;
-    int64_t min_map_len = 0;
-    bool do_align = false;
     bool strict_format = false;
-    bool do_diff = false;
 
     std::string composite;
 };

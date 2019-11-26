@@ -209,6 +209,13 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
                           "0.03",
                           "Expected maximum diff rate between sequences.",
                           0, "Mapping options");
+    argparser.AddArgument(&parameters->mapper_params->min_identity, VALUE_TYPE_DOUBLE, "",
+                          "min-idt", "98",
+                          "Minimum percent alignment identity allowed to report the alignment.",
+                          0, "Mapping options");
+    argparser.AddArgument(&parameters->mapper_params->min_map_len, VALUE_TYPE_INT64, "", "min-map-len", "1000",
+                          "Output only alignments/mappings/overlaps above this length.", 0,
+                          "Mapping options");
 
     argparser.AddArgument(
         &parameters->mapper_params->overlap_skip_self_hits, VALUE_TYPE_BOOL, "", "overlap-skip-self", "0",
@@ -223,17 +230,10 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
         0, "Overlapping options");
 
     // Filtering options.
-    argparser.AddArgument(&parameters->min_identity, VALUE_TYPE_DOUBLE, "",
-                          "min-idt", "65",
-                          "Minimum percent alignment identity allowed to report the alignment.",
-                          0, "Filtering options");
     argparser.AddArgument(&parameters->bestn, VALUE_TYPE_INT64, "", "bestn", "0",
                           "Output best N alignments/mappings/overlaps. If <= 0 all mappings within "
                           "bestn-threshold from best score will be output.",
                           0, "Filtering options");
-    argparser.AddArgument(&parameters->min_map_len, VALUE_TYPE_INT64, "", "min-map-len", "0",
-                          "Output only alignments/mappings/overlaps above this length.", 0,
-                          "Filtering options");
     argparser.AddArgument(&parameters->one_hit_per_target, VALUE_TYPE_BOOL, "",
                           "one-hit-per-target", "0",
                           "Only one query-target pair will be reported. Useful for overlapping.",
@@ -455,11 +455,6 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
     } else {
         parameters->index_type = mindex::IndexType::Undefined;
         fprintf(stderr, "Unknown index type.\n");
-        VerboseShortHelpRaptorSovaAndExit(argc, argv);
-    }
-
-    if (parameters->do_align && parameters->do_diff) {
-        fprintf (stderr, "Both '--align' and '--diff' options are specified. These are mutually exclusive.\n");
         VerboseShortHelpRaptorSovaAndExit(argc, argv);
     }
 

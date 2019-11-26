@@ -36,6 +36,8 @@ class ParamsSovaMapper {
     int32_t chain_bandwidth = 100;
     double align_bandwidth = 0.01;
     double align_max_diff = 0.03;
+    double min_identity = 0.98;
+    int32_t min_map_len = 1000;
 
    private:
     ParamsSovaMapper() = default;
