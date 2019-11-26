@@ -353,6 +353,172 @@ raptor::sova::OverlapPtr AlignOverlap(
     return ret;
 }
 
+raptor::sova::OverlapPtr AlignOverlap2(
+                const mindex::IndexPtr& index,
+                const mindex::SequencePtr& qseq,
+                const raptor::sova::OverlapPtr& ovl,
+                double align_bandwidth, double align_max_diff,
+                bool verbose) {
+    if (ovl == nullptr) {
+        return nullptr;
+    }
+
+    raptor::sova::OverlapPtr ret = raptor::sova::createOverlap(ovl);
+    int32_t edit_dist = -1, score = 0;
+    auto qseq_str = qseq->GetSequenceAsString();
+    auto qseq_str_rev = ReverseComplement(qseq_str);
+
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        if (verbose) {
+            raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ovl);
+        }
+    #endif
+
+    int32_t diffs_right = 0;
+
+    ///////////////////////////
+    /// Align forward pass. ///
+    ///////////////////////////
+    {
+        int32_t qstart = ovl->a_start;
+        int32_t qend = ovl->a_len;
+        int32_t qspan = qend - qstart;
+
+        int32_t tstart_fwd = ovl->b_rev ? (ovl->b_len - ovl->b_end) : ovl->b_start;
+        int32_t tend_fwd = ovl->b_rev ? (ovl->b_len - ovl->b_start) : ovl->b_end;
+        std::string tseq = (ovl->b_rev) ?
+                                index->FetchSeqAsString(ovl->b_id, 0, tend_fwd, ovl->b_rev) :
+                                index->FetchSeqAsString(ovl->b_id, tstart_fwd, ovl->b_len, ovl->b_rev);
+        int32_t tspan = tseq.size();
+
+        int32_t d_max = qseq->len() * align_max_diff;
+        // int32_t bandwidth = ovl->a_len * align_bandwidth;
+        // int32_t bandwidth = qspan * align_bandwidth;
+        // int32_t bandwidth = std::max(100.0, qspan * align_bandwidth);
+        int32_t bandwidth = std::min(ovl->b_len, ovl->a_len) * align_bandwidth;
+
+        auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
+                                qseq_str.c_str() + qstart,
+                                qspan,
+                                tseq.c_str(),
+                                tspan,
+                                d_max,
+                                bandwidth,
+                                2, -1);
+
+        // ret->a_end = (ses_result.valid) ? ses_result.last_q : ses_result.max_q;
+        // ret->b_end = (ses_result.valid) ? ses_result.last_t : ses_result.max_t;
+        ret->a_end = ses_result.last_q;
+        ret->b_end = ses_result.last_t;
+
+        ret->a_end += ovl->a_start;
+        ret->b_end += ovl->b_start; // I think this is fine for both fwd and rev. For fwd it's definitely good. For rev, the alignment begins at "tend_fwd" (because it's reverse complemented), and the distance from tend_fwd to ovl->b_len is (ovl->b_len - tend_fwd) == ovl->b_start;
+
+        int32_t num_diffs = ses_result.diffs;
+        ret->edit_dist = num_diffs;
+        ret->score = -ret->ASpan();
+        diffs_right = num_diffs;
+
+        #ifdef DEBUG_EXTEND_ALIGNMENT
+            if (verbose) {
+                std::cerr << "num_diffs = " << ses_result.diffs << "\n";
+                std::cerr << "d_max = " << d_max << "\n";
+                std::cerr << "bandwidth = " << bandwidth << "\n";
+                std::cerr << "[1] " << qseq->header() << "\t"
+                    << "last(" << ses_result.last_q + ovl->a_start << ", " << ses_result.last_t + ovl->b_start << ", " << ses_result.last_score << ")" << "\t"
+                    << "max(" << ses_result.max_q + ovl->a_start << ", " << ses_result.max_t + ovl->b_start << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
+                    << qseq->header() << "\t" << index->header(ovl->b_id) << "\t" << ovl->score << "\t" << ovl->identity << "\t"
+                    << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
+                    << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
+                    << "\n";
+            }
+        #endif
+    }
+
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        if (verbose) {
+            raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
+        }
+    #endif
+
+    ///////////////////////////
+    /// Align reverse pass. ///
+    ///////////////////////////
+    {
+        // Reverse query coordinates.
+        int32_t qstart = ret->a_len - ret->a_start;
+        int32_t qend = ret->a_len;
+        int32_t qspan = qend - qstart;
+
+        int32_t tstart_fwd = ret->b_rev ? (ret->b_len - ret->b_end) : ret->b_start;
+        int32_t tend_fwd = ret->b_rev ? (ret->b_len - ret->b_start) : ret->b_end;
+        std::string tseq = (ovl->b_rev) ?
+                                index->FetchSeqAsString(ret->b_id, tend_fwd, ret->b_len, !ret->b_rev) :
+                                index->FetchSeqAsString(ret->b_id, 0, tstart_fwd, !ret->b_rev);
+        int32_t tspan = tseq.size();
+
+        int32_t d_max = qseq->len() * align_max_diff;
+        // int32_t bandwidth = ovl->a_len * align_bandwidth;
+        // int32_t bandwidth = qspan * align_bandwidth;
+        // int32_t bandwidth = std::max(100.0, qspan * align_bandwidth + diffs_right);
+        // int32_t a_flank_left = ret->a_start;
+        // int32_t b_flank_left = (ret->b_rev) ? (ret->b_len - ret->b_end) : ret->b_start;
+        // bandwidth = std::max(qspan * align_bandwidth, diffs_right + std::min(a_flank_left, b_flank_left) * align_bandwidth);
+        int32_t bandwidth = std::min(ovl->b_len, ovl->a_len) * align_bandwidth;
+
+        d_max -= diffs_right;
+
+        auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
+                                qseq_str_rev.c_str() + qstart,
+                                qspan,
+                                tseq.c_str(),
+                                tspan,
+                                d_max,
+                                bandwidth,
+                                2, -1);
+
+        #ifdef DEBUG_EXTEND_ALIGNMENT
+            // std::cerr << "    tspan = " << tspan << "\n";
+            if (verbose) {
+                std::cerr << "num_diffs = " << ses_result.diffs << "\n";
+                std::cerr << "d_max = " << d_max << "\n";
+                std::cerr << "bandwidth = " << bandwidth << "\n";
+                std::cerr << "[50bp front qseq]: " << qseq_str_rev.substr(qstart, 150) << "\n";
+                std::cerr << "[50bp front tseq]: " << tseq.substr(0, 150) << "\n";
+                std::cerr << "[2] " << qseq->header() << "\t"
+                    << "last(" << ses_result.last_q << ", " << ses_result.last_t << ", " << ses_result.last_score << ", " << ses_result.diffs << ")" << "\t"
+                    << "max(" << ses_result.max_q << ", " << ses_result.max_t << ", " << ses_result.max_score << ", " << ses_result.max_score_diffs << ")" << "\t"
+                    << qseq->header() << "\t" << index->header(ovl->b_id) << "\t" << ovl->score << "\t" << ovl->identity << "\t"
+                    << ovl->a_rev << "\t" << ovl->a_start << "\t" << ovl->a_end << "\t" << ovl->a_len << "\t"
+                    << ovl->b_rev << "\t" << ovl->b_start << "\t" << ovl->b_end << "\t" << ovl->b_len << "\t"
+                    << "\n";
+            }
+        #endif
+
+        // ret->a_start = ret->a_end - ((ses_result.valid) ? ses_result.last_q : ses_result.max_q);
+        // ret->b_start = ret->b_end - ((ses_result.valid) ? ses_result.last_t : ses_result.max_t);
+        ret->a_start = ovl->a_start - ses_result.last_q;
+        ret->b_start = ovl->b_start - ses_result.last_t;
+
+        int32_t num_diffs = ses_result.diffs;
+        ret->edit_dist = diffs_right + num_diffs;
+        ret->score = -std::max(ret->ASpan(), ret->BSpan());
+        ret->score = -ret->ASpan();
+
+        float span = std::max(ret->ASpan(), ret->BSpan());
+        ret->identity = 100.0 * ((span != 0) ? ((span - static_cast<float>(ret->edit_dist)) / span): -2.0f);
+    }
+
+    #ifdef DEBUG_EXTEND_ALIGNMENT
+        if (verbose) {
+            raptor::sova::SovaMapper::PrintOverlapAsM4(stderr, index, qseq, ret);
+            std::cerr << "\n";
+        }
+    #endif
+
+    return ret;
+}
+
 /*
  * ExtendAlignOverlap will take an overlap and attempt to align it beyond
  * the start and end positions, "extending" it on both ends.
@@ -397,7 +563,7 @@ void AlignOverlaps(
                 double align_bandwidth, double align_max_diff,
                 bool verbose) {
     for (size_t i = 0; i < overlaps.size(); ++i) {
-        overlaps[i] = AlignOverlap(index, qseq, overlaps[i], align_bandwidth, align_max_diff, verbose);
+        overlaps[i] = AlignOverlap2(index, qseq, overlaps[i], align_bandwidth, align_max_diff, verbose);
     }
 }
 
