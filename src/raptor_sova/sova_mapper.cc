@@ -33,7 +33,7 @@
 #include <utility/range_tools.hpp>
 
 // #define USE_LIS_FILTER
-// #define DEBUG_EXTEND_ALIGNMENT
+#define DEBUG_EXTEND_ALIGNMENT
 
 namespace raptor {
 namespace sova {
@@ -231,7 +231,7 @@ raptor::sova::OverlapPtr AlignOverlap(
         // int32_t bandwidth = ovl->a_len * align_bandwidth;
         // int32_t bandwidth = qspan * align_bandwidth;
         // int32_t bandwidth = std::max(100.0, qspan * align_bandwidth);
-        int32_t bandwidth = qseq->len() * align_bandwidth;
+        int32_t bandwidth = std::min(ovl->b_len, ovl->a_len) * align_bandwidth;
 
         auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
                                 qseq_str.c_str() + qstart,
@@ -300,7 +300,7 @@ raptor::sova::OverlapPtr AlignOverlap(
         // int32_t a_flank_left = ret->a_start;
         // int32_t b_flank_left = (ret->b_rev) ? (ret->b_len - ret->b_end) : ret->b_start;
         // bandwidth = std::max(qspan * align_bandwidth, diffs_right + std::min(a_flank_left, b_flank_left) * align_bandwidth);
-        int32_t bandwidth = qseq->len() * align_bandwidth;
+        int32_t bandwidth = std::min(ovl->b_len, ovl->a_len) * align_bandwidth;
 
         auto ses_result = raptor::ses::BandedSESDistanceAdvanced(
                                 qseq_str_rev.c_str() + qstart,
