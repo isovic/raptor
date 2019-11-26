@@ -53,7 +53,12 @@ class SovaMapper {
 
     std::vector<raptor::sova::OverlapPtr> FilterOverlaps_(
                                 const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
-                                const std::vector<raptor::sova::OverlapPtr>& overlaps, int32_t min_seeds, float min_idt) const;
+                                const std::vector<raptor::sova::OverlapPtr>& overlaps,
+                                int32_t min_seeds, double min_idt, int32_t min_map_span) const;
+    std::vector<raptor::sova::OverlapPtr> FilterAlignments_(
+            const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
+            const std::vector<raptor::sova::OverlapPtr>& overlaps,
+            double min_idt, int32_t min_map_span) const;
 
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::sova::ParamsSovaMapper> params_;
