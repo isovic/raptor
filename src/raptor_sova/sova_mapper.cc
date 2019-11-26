@@ -312,7 +312,8 @@ raptor::sova::OverlapPtr AlignOverlap(
 
         int32_t num_diffs = ses_result.diffs;
         ret->edit_dist = num_diffs;
-        ret->score = ret->num_seeds;
+        ret->score = -std::max(ret->ASpan(), ret->BSpan());
+        ret->score = -ret->ASpan();
     }
 
     #ifdef DEBUG_EXTEND_ALIGNMENT
