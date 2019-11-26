@@ -201,6 +201,9 @@ SesResults BandedSESDistanceAdvanced(const char* q, size_t qlen, const char* t, 
         max_k = new_max_k + 1;
     }
 
+    ret.min_k = min_k;
+    ret.max_k = max_k;
+
     return ret;
 }
 

@@ -21,6 +21,8 @@ class SesResults {
     int32_t max_score = MINUS_INF;
     int32_t max_score_diffs = MINUS_INF;
     int32_t diffs = 0;
+    int32_t min_k = 0;
+    int32_t max_k = 0;
     bool valid = false;
 };
 
