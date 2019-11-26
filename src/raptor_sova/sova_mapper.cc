@@ -33,7 +33,7 @@
 #include <utility/range_tools.hpp>
 
 // #define USE_LIS_FILTER
-#define DEBUG_EXTEND_ALIGNMENT
+// #define DEBUG_EXTEND_ALIGNMENT
 
 namespace raptor {
 namespace sova {
