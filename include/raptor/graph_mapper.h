@@ -128,6 +128,18 @@ class GraphMapper {
                         std::vector<raptor::SplitSegmentGraphNameType>& ret_nodes,
                         std::vector<raptor::SplitSegmentGraphNameType>& ret_edges);
 
+    /*
+     * LabelSupplementaryAndSecondary_ assigns  he priority of each mapping and marks
+     * secondary and supplementary alignments.
+     * It also computes the number of alterntives for each fragment, which is used
+     * to calculate the mapping quality.
+     *
+     * This function edits paths in place.
+    */
+    void LabelSupplementaryAndSecondary_(
+                        std::vector<std::shared_ptr<raptor::LocalPath>>& paths,
+                        bool do_relabel_sec_supp);
+
     const mindex::IndexPtr index_;
     const raptor::GraphPtr graph_;
     const raptor::SplitSegmentGraphPtr ssg_;

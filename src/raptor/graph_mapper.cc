@@ -8,6 +8,7 @@
 #include <raptor/graph_mapper.h>
 #include <raptor/graph_mapper_tools.h>
 #include <raptor/mapper_tools.h>
+#include <containers/mapping_result/mapping_result_common.h>
 
 #include <cmath>
 #include <algorithm/graph.hpp>
@@ -58,8 +59,9 @@ GraphMapper::~GraphMapper() {
 
 }
 
-std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(const mindex::SequencePtr& qseq,
-                                                         const std::shared_ptr<raptor::LinearMappingResult> input_mapping_result) {
+std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(
+                        const mindex::SequencePtr& qseq,
+                        const std::shared_ptr<raptor::LinearMappingResult> input_mapping_result) {
 
     bool verbose_debug_qid = false;
     DEBUG_QSEQ(params_, qseq, verbose_debug_qid = true);
@@ -163,6 +165,8 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(const mindex::Seque
 
     tt_graph_dp.stop();
 
+    LabelSupplementaryAndSecondary_(paths, params_->relabel_secondary_supp);
+
     result->paths(paths);
     result->SetReturnValue(raptor::MapperReturnValueBase::OK);
 
@@ -175,6 +179,45 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(const mindex::Seque
     result->timings()["gmap_graph_dp"] = tt_graph_dp.get_microsecs();
 
     return result;
+}
+
+void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::LocalPath>>& paths, bool do_relabel_sec_supp) {
+
+    int32_t num_paths = static_cast<int32_t>(paths.size());
+
+    // Sort the paths by score, but preserve the original order.
+    // Each path can have multiple aligned regions.
+    std::vector<std::pair<int64_t, size_t>> path_scores;
+    for (size_t path_id = 0; path_id < paths.size(); ++path_id) {
+        const auto& path_aln = paths[path_id];
+        path_scores.emplace_back(std::make_pair(path_aln->score(), path_id));
+    }
+    std::sort(path_scores.begin(), path_scores.end());
+    std::reverse(path_scores.begin(), path_scores.end());
+
+    // Secondary and SecondarySupplementary alignments.
+    std::vector<std::shared_ptr<raptor::RegionBase>> sorted_regions;
+    for (int64_t i = 0; i < static_cast<int64_t>(path_scores.size()); ++i) {
+        auto path_score = std::get<0>(path_scores[i]);
+        auto path_id = std::get<1>(path_scores[i]);
+        auto& curr_path = paths[path_id];
+        int32_t num_segments = static_cast<int32_t>(curr_path->nodes().size());
+        // Annotate all chunks as either Secondary or SecondarySupplementary.
+        for (size_t aln_id = 0; aln_id < curr_path->nodes().size(); ++aln_id) {
+            auto& aln = curr_path->nodes()[aln_id]->data();
+            aln->SetRegionPriority(i);
+            aln->SetRegionIsSupplementary(aln_id > 0);
+            aln->path_id(static_cast<int32_t>(path_id));
+            aln->num_paths(num_paths);
+            aln->segment_id(static_cast<int32_t>(aln_id));
+            aln->num_segments(num_segments);
+            sorted_regions.emplace_back(aln);
+        }
+    }
+
+    if (do_relabel_sec_supp) {
+        raptor::RelabelSupplementary(sorted_regions);
+    }
 }
 
 std::shared_ptr<raptor::GraphMappingResult> GraphMapper::MapBetter(const mindex::SequencePtr& qseq,
@@ -1263,7 +1306,7 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
         int64_t max_path_score = leaf_score;
         int64_t max_path_node = v_name;
 
-        // Find the maximum node in the path.
+        // Find the maximum node in the path before any forks are hit.
         while (out_edges.size() == 1) {
             const auto& edge_item = out_edges[0];
             auto w_name = edge_item->sink_name();
@@ -1275,6 +1318,11 @@ std::vector<std::shared_ptr<raptor::LocalPath>> GraphMapper::GraphToPaths2_(
                 max_path_node = w_name;
             }
             out_edges = graph->GetOutEdges(w_name);
+        }
+
+        if (out_edges.size() > 1) {
+            WARNING_REPORT(ERR_UNEXPECTED_VALUE, "The graph provided to GraphToPaths2_ is not a path graph. Found a node with out_edges.size() = %ld.\n",
+                out_edges.size());
         }
 
         // Extract the path up to the maximum node.
@@ -1314,6 +1362,25 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                                             const double allowed_score_diff_frac,
                                             std::unordered_map<int64_t, int64_t>& node_to_path_score,    // For a node with multiple out edges, pick all those with score >= (max_score * allowed_score_diff_frac).
                                             const bool verbose_debug_qid) {
+    /*
+     * This function takes an anchor graph and does the following:
+     *  1. Finds the actual number of paths discovered during GraphDP. Those are annotated in the graph.
+     *  2. Iterates through all nodes, and for each node it counts the number of out edges which correspond to the same path.
+     *  3. If the num_valid_out_edges == 0 for a node, that's a sink node (leaf node). Append the leaf node for the current pid.
+     *      Store the score for the current node. Check if it's larger than the maximum for that pid, and set the max if so.
+     *  4. For every pid:
+     *      4.1 Find all leafs which have the score >= max_pid_leaf_score * edge_retain_frac and add
+     *          them to the fork_queue (each element of the queue is composed of <v_name, v_score>).
+     *      4.2 Pop a leaf node from the fork_queue.
+     *      4.3 Backtrack from the popped node by running a for loop from that node until there are either no more
+     *          input edges, or all input edges were visited, or there are no input edges on the same path.
+     *              4.3.1 Create an empty backtrack graph.
+     *              4.3.2 Find the maximum scoring input edge (`max_in_score`).
+     *              4.3.3 Calculate min_allowed_in_edge_score = max_in_score * edge_retain_frac
+     *              4.3.4 Find all alternate input edges within the min_allowed_in_edge_score to the fork_queue.
+     *              4.3.5 The source of the maximum scoring edge is added to the backtrack graph.
+     *              4.3.6 When there are no more nodes to backtrack through, jump to step 4.2.
+    */
 
     std::vector<raptor::AnchorGraphPtr> ret_graphs;
 
@@ -1346,6 +1413,8 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
             continue;
         }
 
+        // Count the number of valid out edges (edges in the same path ID),
+        // to determine if this node is a sink node or not.
         auto out_edges = graph->GetOutEdges(v);
         int64_t num_valid_out_edges = 0;
         for (const auto& e_item: out_edges) {
@@ -1358,10 +1427,9 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
             ++num_valid_out_edges;
         }
 
-        // Take only sources.
+        // Take only sinks.
         if (num_valid_out_edges == 0) {
             pid_leafs[pid].emplace_back(v);
-            node_to_path_score[v] = v_data->score();
             if (v_data->score() > max_pid_leaf_scores[pid]) {
                 max_pid_leaf_scores[pid] = v_data->score();
                 max_pid_leaf_nodes[pid] = v;
@@ -1405,7 +1473,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
         // Add the maximum leaf node to the queue. Backtrack will start from there.
         // The path score will be propagated with the queue, so that alternative bubbles
         // will appear in the output.
-        std::deque<std::pair<int64_t, int64_t>> fork_queue;
+        std::deque<std::pair<int64_t, int64_t>> fork_queue;     // The pair is: <v_name, v_score>
 
         // Emplace all leafs. We expect that the filtering was applied on the outside.
         double min_leaf_score = max_pid_leaf_scores[pid] - std::abs(max_pid_leaf_scores[pid]) * (1.0 - allowed_score_diff_frac);
@@ -1415,7 +1483,6 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                 continue;
             }
             fork_queue.emplace_back(std::make_pair(v, v_data->score()));
-            node_to_path_score[v] = v_data->score();
         }
 
         // Create a graph, where supplementary mappings will be individual
@@ -1427,8 +1494,9 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
 
             // Pop the queue to get the first node.
             std::pair<int64_t, int64_t> name_score_pair = fork_queue.front();
-            int64_t v_name = std::get<0>(name_score_pair);
-            int64_t leaf_score = std::get<1>(name_score_pair);  // This score will be propagated to all successive nodes recursively.
+            int64_t v_name = std::get<0>(name_score_pair);  // This is the same as v->score if it's a leaf node, otherwise it's the out edge which connects v to the primary path.
+            int64_t path_exit_score = std::get<1>(name_score_pair);  // This score will be propagated to all successive nodes recursively.
+            int64_t path_entry_score = 0;
             auto v_data = graph->GetNode(v_name);
             int64_t score = v_data->score();
             fork_queue.pop_front();
@@ -1445,16 +1513,18 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
             int64_t w_name = v_name;
             auto w_data = v_data;
             backtrack_graph->AddNode(w_name, w_data);
-            node_to_path_score[w_name] = leaf_score;
+
+            std::vector<int64_t> nodes_on_path;
 
             #ifdef RAPTOR_TESTING_MODE
-                DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\tStarting with: curr_node_name = %ld\n", w_name));
+                DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\tStarting with: curr_node_name = %ld, path_exit_score = %ld\n", w_name, path_exit_score));
             #endif
 
             // Backtrack the best path, and add the nodes and edges to the backtrack_graph.
             while (true) {
                 // Mark the node as visited.
                 visited_nodes[w_name] = 1;
+                nodes_on_path.push_back(w_name);
 
                 // Find the best incomming edges.
                 std::vector<raptor::EdgeItemAnchorGraphPtr>in_edges = graph->GetInEdges(w_name);
@@ -1475,11 +1545,10 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                         // Skip if the source is not of the same path.
                         continue;
                     }
-                    if (visited_nodes.find(e_item->source_name()) != visited_nodes.end()) {
-                        // Skip if visited.
-                        continue;
-                    }
-                    // Finally, check max.
+                    // Find max. We don't care about visited nodes here. The maximum
+                    // input edge is the correct source, and if it was already visited,
+                    // then this will just stop extension of this path. All other nodes
+                    // will be added as alts to the fork_queue below.
                     double score = e_item->data()->score();
                     if (e_in_max == nullptr || e_item->data()->score() > max_in_score) {
                         e_in_max = e_item;
@@ -1492,10 +1561,21 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                     DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t  - in_edges.size() = %ld\n", in_edges.size()));
                 #endif
 
+                bool e_in_max_visited = (e_in_max == nullptr) ? false : (visited_nodes.find(e_in_max->source_name()) != visited_nodes.end());
                 if (e_in_max == nullptr) {
                     // There are either no input edges, or all are visited.
+                    path_entry_score = 0;
                     #ifdef RAPTOR_TESTING_MODE
                         DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t  - Break: e_in_max == nullptr\n"));
+                    #endif
+                    break;
+                }
+                if (e_in_max_visited) {
+                    // The source node of the input edge is already visited.
+                    const auto in_node = graph->GetNode(e_in_max->source_name());
+                    path_entry_score = in_node->score();
+                    #ifdef RAPTOR_TESTING_MODE
+                        DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t  - Break: e_in_max source node is already visited.\n"));
                     #endif
                     break;
                 }
@@ -1505,6 +1585,7 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                 // Reiterate over all edges, and add all alternate paths to the queue.
                 // This expects that all edges which are not of interest are already
                 // filtered prior to entering this function.
+                // Add them to the fork_queue.
                 for (const auto& e_item: in_edges) {
                     if (e_item->is_removed()) {
                         // Skip if edge is marked as removed.
@@ -1531,7 +1612,8 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                         continue;
                     }
                     // Finally, add to the queue.
-                    fork_queue.push_back(std::make_pair(e_item->source_name(), leaf_score));
+                    fork_queue.push_back(std::make_pair(e_item->source_name(), e_item->data()->score()));
+                    // fork_queue.push_back(std::make_pair(e_item->source_name(), leaf_score));
                 }
 
                 w_name = e_in_max->source_name();
@@ -1540,14 +1622,32 @@ std::vector<raptor::AnchorGraphPtr> GraphMapper::BacktrackReducedMappedAnchorGra
                 backtrack_graph->AddNode(w_name, w_data);
                 backtrack_graph->AddEdge(e_in_max->source_name(), e_in_max->sink_name(), e_in_max->data());
 
-                // Set the new node to have a score of the leaf.
-                // backtrack_graph->GetNode(w_name)->score(leaf_score);
-                node_to_path_score[w_name] = leaf_score;
-
                 #ifdef RAPTOR_TESTING_MODE
                     DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\tMoving to: w_name = %ld\n", w_name));
                 #endif
             }
+
+            // A path was found. Compute it's score and set the score for all nodes.
+            if (nodes_on_path.size() > 0) {
+                // The path score is computed by subtracting the path_entry score from path_exit_score.
+                // The "path_exit_score": last edge's score (edge connecting the
+                // last node in the path to the primary path), if such an edge exists, otherwise the score
+                // of the last node on the path.
+                // The "path_entry_score": score of the predecessor to the first node on
+                // the path, reachable via the maximum scoring in edge. If there are no in edges on the path
+                // then the path_entry_score is 0. If the maximum in edge's source node is already visited,
+                // then path_entry_score is the score of that predecessor node.
+                #ifdef RAPTOR_TESTING_MODE
+                    DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t-> path_entry_score = %ld\n", path_entry_score));
+                    DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\t-> path_exit_score = %ld\n", path_exit_score));
+                #endif
+                int64_t path_score = path_exit_score - path_entry_score;
+                // Set the score lookup for each node on the path.
+                for (const auto& w: nodes_on_path) {
+                    node_to_path_score[w] = path_score;
+                }
+            }
+
             #ifdef RAPTOR_TESTING_MODE
                 DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\t\tbacktrack_graph.nodes().size() = %d\n", backtrack_graph->nodes().size()));
                 DEBUG_RUN(verbose_debug_qid, LOG_NOHEADER("\n"));
