@@ -45,6 +45,7 @@ test-data/ecoli-small/*
 test-data/test-no-duplicates/*
 !test-data/test-no-duplicates/target.fasta
 !test-data/test-no-duplicates/query.fasta
+!test-data/secondary-suppl
 !test-data/demos
 test-data/demos/demo-1-circular-synth/*
 !test-data/demos/demo-1-circular-synth/synth-circular.fasta.gz
