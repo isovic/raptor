@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <aligner/cigar.h>
 #include <containers/sam_tag.h>
+#include <containers/region/region_type.h>
 
 namespace raptor {
 
@@ -47,6 +48,7 @@ public:
     virtual int32_t CoveredBasesTarget() const = 0;
     virtual int32_t EditDistance() const = 0;
     virtual std::vector<raptor::CigarOp> Cigar() const = 0;
+
     virtual bool IsPrimary() const = 0;
     virtual bool IsSecondary() const = 0;
     virtual bool IsSupplementary() const = 0;
@@ -58,6 +60,12 @@ public:
     virtual int32_t PathsNum() const = 0;       // Total number of alternative paths.
     virtual int32_t SegmentId() const = 0;      // ID of the supplementary alignment.
     virtual int32_t SegmentsNum() const = 0;    // Number of supplementary alignments for the path.
+
+    virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (Primary, PrimarySupplementary, Secondary, SecondarySupplementary, Undefined).
+    virtual int32_t GetRegionPriority() const = 0;
+    virtual bool GetRegionIsSupplementary() const = 0;
+    virtual void SetRegionPriority(int32_t val) = 0;
+    virtual void SetRegionIsSupplementary(bool val) = 0;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

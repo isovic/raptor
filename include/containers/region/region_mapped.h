@@ -13,6 +13,7 @@
 #include <string>
 #include <containers/region/region_base.h>
 #include <containers/mapping_env.h>
+#include <containers/region/region_type.h>
 
 namespace raptor {
 
@@ -130,16 +131,41 @@ public:
         return num_segments_;
     }
     bool IsPrimary() const {
-        return (path_id_ == 0 && segment_id_ == 0);
+        return (region_priority_ == 0 && region_is_supplementary_ == false);
     }
     bool IsSecondary() const {
-        return (path_id_ > 0);
+        return (region_priority_ > 0);
     }
     bool IsSupplementary() const {
-        return (segment_id_ > 0);
+        return region_is_supplementary_;
     }
     const std::unordered_map<std::string, raptor::SamTag>& ExtraTags() const {
         return extra_tags_;
+    }
+
+    void SetRegionPriority(int32_t val) {
+        region_priority_ = val;
+    }
+    void SetRegionIsSupplementary(bool val) {
+        region_is_supplementary_ = val;
+    }
+    int32_t GetRegionPriority() const {
+        return region_priority_;
+    }
+    bool GetRegionIsSupplementary() const {
+        return region_is_supplementary_;
+    }
+    raptor::RegionType GetRegionType() const {
+        if (region_priority_ == 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Primary;
+        } else if (region_priority_ == 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::PrimarySupplementary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == false) {
+            return raptor::RegionType::Secondary;
+        } else if (region_priority_ > 0 && region_is_supplementary_ == true) {
+            return raptor::RegionType::SecondarySupplementary;
+        }
+        return raptor::RegionType::Undefined;
     }
 
     /*
@@ -241,6 +267,9 @@ private:
     int32_t num_paths_;
     int32_t segment_id_;
     int32_t num_segments_;
+
+    int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
+    bool region_is_supplementary_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
