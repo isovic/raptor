@@ -1,0 +1,6 @@
+H	VN:Z:2.0
+S	ref-a	5000	*
+S	ref-b	5000	*
+S	ref-c	25000	*
+E	edge-ab	ref-a+	ref-b+	10000$	10000$	0	0	*
+E	edge-bc	ref-b+	ref-c+	5000$	5000$	0	0	*
