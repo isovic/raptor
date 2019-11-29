@@ -93,6 +93,7 @@ class ParamsRaptor {
     int64_t verbose_level = 1;
     int64_t start_read = 0;
     int64_t num_reads_to_process = -1;
+    bool relabel_secondary_supp = true;
 
     /*
       Debug options.

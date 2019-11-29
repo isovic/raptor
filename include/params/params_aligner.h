@@ -38,6 +38,7 @@ class ParamsAligner {
 
     bool no_extend_alignment = false;
     bool is_rna = false;
+    bool relabel_secondary_supp = true;
 
    private:
     ParamsAligner() = default;

@@ -54,16 +54,17 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     std::string index_type_string;
     std::string index_region_string;
     std::string batch_size_str("0");
+    bool no_relabel_secondary_supp = false;
 
     // Define the composite options which can be expanded internally.
     // std::string composite_str_overlap("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0");
-    std::string composite_str_ovl_raw("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10");
+    std::string composite_str_ovl_raw("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10 --no-relabel");
     argparser.AddCompositeArgument("ovl-raw", composite_str_ovl_raw);
 
-    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
+    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs --no-relabel");
     argparser.AddCompositeArgument("ovl-hifi", composite_str_ovl_hifi);
 
-    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target");
+    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target --no-relabel");
     argparser.AddCompositeArgument("ovl-miniasm", composite_str_ovl_miniasm);
 
     // std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
@@ -433,6 +434,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
         &parameters->num_reads_to_process, VALUE_TYPE_INT64, "n", "num-reads", "-1",
         "Number of reads to process per batch. Value of '-1' processes all reads.", 0,
         "Other options");
+    argparser.AddArgument(&no_relabel_secondary_supp, VALUE_TYPE_BOOL, "", "no-relabel", "0",
+                          "Do not to relabel supplementary alignments.", 0,
+                          "Other options");
 
     argparser.AddArgument(&parameters->debug_qid, VALUE_TYPE_INT64, "y", "debug-read", "-1",
                           "ID of the read to give the detailed verbose output.", 0,
@@ -742,6 +746,10 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     parameters->aligner_params->debug_qid = parameters->debug_qid;
     parameters->aligner_params->debug_qname = parameters->debug_qname;
     parameters->aligner_params->is_rna = parameters->mapper_params->is_rna;
+
+    parameters->relabel_secondary_supp = !no_relabel_secondary_supp;
+    parameters->mapper_params->relabel_secondary_supp = !no_relabel_secondary_supp;
+    parameters->aligner_params->relabel_secondary_supp = !no_relabel_secondary_supp;
 
 #ifdef RAPTOR_TESTING_MODE
     if (parameters->verbose_level >= 5) {

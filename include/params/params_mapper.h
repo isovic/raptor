@@ -53,6 +53,7 @@ class ParamsMapper {
     double graph_allowed_score_diff_frac = 0.95;
     int32_t flank_ext_len = 200;
     bool no_graph_mapping = false;
+    bool relabel_secondary_supp = true;
 
    private:
     ParamsMapper() = default;
