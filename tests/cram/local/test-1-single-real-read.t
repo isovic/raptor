@@ -20,11 +20,11 @@ Writing to BAM.
 
 Writing to MHAP.
   $ ${BIN_DIR}/raptor --align --out-fmt mhap -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fasta -v 0
-  0 0 0.899389 22267 0 314 24292 24292 0 24804 47863 100000
+  0 0 0.928643 22267 0 314 24292 24292 0 24804 47863 100000
 
 Writing to M4.
   $ ${BIN_DIR}/raptor --align --out-fmt m4 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fasta -v 0
-  m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 gi|545778205|gb|U00096.3| -35824 89.9389 0 314 24292 24292 0 24804 47863 100000
+  m141013_011508_sherri_c100709962550000001823135904221533_s1_p0/3820/0_24292 gi|545778205|gb|U00096.3| -35824 92.8643 0 314 24292 24292 0 24804 47863 100000
 
 Simple mapping and alignment but to a reference with lowercase bases.
   $ ${BIN_DIR}/raptor --align --out-fmt paf -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.lowercase.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fasta -v 0 --strict-fmt

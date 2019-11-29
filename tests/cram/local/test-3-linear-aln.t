@@ -1,7 +1,7 @@
 Mappping the same pair of reads where one is query and the other target, and then reversing the pair (i.e. overlapping with symmetric arcs). This should return identical results.
   $ ${BIN_DIR}/raptor -x ovl-raw --align --min-map-len 100 --out-fmt m4 -r ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -q ${PROJECT_DIR}/test-data/consistent-query-target-results/reads.14183.and.16026.fasta -v 0
-  14183 16026 -1742 98.6652 0 0 899 19004 0 8788 9689 9689
-  16026 14183 -1742 98.6652 0 8788 9689 9689 0 0 899 19004
+  14183 16026 -1742 99.2231 0 0 899 19004 0 8788 9689 9689
+  16026 14183 -1742 99.2231 0 8788 9689 9689 0 0 899 19004
 
 Mapping first 100 reads, all of which should be in fwd. Removing the AS column so that modifications to the Edlib AS calculation don't play an effect on the rest of the results here.
   $ ${BIN_DIR}/raptor --align -n 100 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/reads.6x.fwd.fasta -v 0 | sed -E 's/AS:i:[0-9]+[[:space:]]//g'
