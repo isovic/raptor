@@ -58,13 +58,13 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     // Define the composite options which can be expanded internally.
     // std::string composite_str_overlap("--overlap-skip-self --overlap-single-arc -B 1000 --min-map-len 1000 --bestn 0 --bestn-threshold 1.0");
-    std::string composite_str_ovl_raw("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 15 -w 10 --no-relabel");
+    std::string composite_str_ovl_raw("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --sec-ratio 0.0 --one-hit-per-target -k 15 -w 10 --no-relabel");
     argparser.AddCompositeArgument("ovl-raw", composite_str_ovl_raw);
 
-    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs --no-relabel");
+    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --sec-ratio 0.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs --no-relabel");
     argparser.AddCompositeArgument("ovl-hifi", composite_str_ovl_hifi);
 
-    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target --no-relabel");
+    std::string composite_str_ovl_miniasm("--overlap-skip-self --overlap-single-arc --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --sec-ratio 0.0 --one-hit-per-target --no-relabel");
     argparser.AddCompositeArgument("ovl-miniasm", composite_str_ovl_miniasm);
 
     // std::string composite_str_ovl_ipa("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target "
@@ -397,17 +397,17 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "Threshold for mapping quality. If mapq < INT, read will be called unmapped.",
                           0,"Filtering options");
     argparser.AddArgument(&parameters->min_identity, VALUE_TYPE_DOUBLE, "",
-                          "min-idt", "65",
+                          "min-idt", "65.0",
                           "Minimum percent alignment identity allowed to report the alignment.",
                           0, "Filtering options");
-    argparser.AddArgument(&parameters->bestn, VALUE_TYPE_INT64, "", "bestn", "0",
-                          "Output best N alignments/mappings/overlaps. If <= 0 all mappings within "
-                          "bestn-threshold from best score will be output.",
+    argparser.AddArgument(&parameters->bestn, VALUE_TYPE_INT64, "", "bestn", "5",
+                          "Output best N alignments/mappings/overlaps. If <= 0 all secondary "
+                          "mappings will be output. If 1, only primary will be output.",
                           0, "Filtering options");
     argparser.AddArgument(&parameters->bestn_threshold, VALUE_TYPE_DOUBLE, "",
                           "bestn-threshold", "0.01",
-                          "If bestn <= 0, all mappings with a score within this fraction from the "
-                          "best score will be ouptut.",
+                          "If bestn != 1, all mappings with a score within this fraction from the "
+                          "best score will be retained.",
                           0, "Filtering options");
     argparser.AddArgument(&parameters->min_map_len, VALUE_TYPE_INT64, "", "min-map-len", "0",
                           "Output only alignments/mappings/overlaps above this length.", 0,
