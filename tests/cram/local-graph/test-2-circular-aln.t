@@ -28,9 +28,5 @@ The 4 short alignments are all secondary alignments, and are correctly marked as
   $ ${BIN_DIR}/raptor --out-fmt m4 -r ${PROJECT_DIR}/test-data/graph-mapping/real-1-plasmid/asm.plasmids.fa -g ${PROJECT_DIR}/test-data/graph-mapping/real-1-plasmid/contig.s2.gfa2 -q ${PROJECT_DIR}/test-data/graph-mapping/real-1-plasmid/ref.plasmids.fa -v 0 --align
   gi|386611788|ref|NC_017637.1| ctg.s2.000000F -25018 99.7935 0 0 12593 102536 1 0 12571 102273
   gi|386611788|ref|NC_017637.1| ctg.s2.000000F -177984 99.6731 0 12593 102536 102536 1 12571 102273 102273
-  gi|386611788|ref|NC_017637.1| ctg.s2.000000F -644 86.8231 0 6484 7038 102536 1 11903 12439 102273
-  gi|386611788|ref|NC_017637.1| ctg.s2.000000F -628 89.8488 0 132 595 102536 1 5648 6101 102273
-  gi|386611788|ref|NC_017637.1| ctg.s2.000000F -518 89.418 0 5403 5781 102536 1 13738 14099 102273
-  gi|386611788|ref|NC_017637.1| ctg.s2.000000F -486 95.7597 0 101080 101362 102536 1 6806 7089 102273
   gi|386607294|ref|NC_017636.1| 1 -7798 99.2974 0 0 3985 5360 0 1372 5332 5332
   gi|386607294|ref|NC_017636.1| 1 -2716 99.6364 0 3985 5360 5360 0 0 1372 5332
