@@ -281,8 +281,12 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
             DEBUG_QSEQ(params, qseq, LOG_ALL("Filtering mappings...\n"));
 
             // Filter mappings, but leave room for error and mapq calculation.
-            graph_mapping_result->Filter(-1,
-                                            std::max(0.20, params->bestn_threshold),
+            // The bestn value of 2 will allow for secondary alignments to come through if their score is close enough to the primary. Important because region with lower mapping score might align better.
+            // In case params->bestn == 1, this will be applied after alignment.
+            int64_t prefilter_bestn = (params->bestn <= 0) ? params->bestn : std::max(params->bestn, static_cast<int64_t>(2));
+            graph_mapping_result->Filter(
+                                            prefilter_bestn,
+                                            params->bestn_threshold,
                                             params->min_map_len / 2,  // Ideally we wouldn't filter by min_map_len here because alignment can extend it, but realistically that can cause many short mappings to be aligned and thus slow down the process.
                                             0,                        // Don't filter by mapq, scores may change after alignment.
                                             false);
