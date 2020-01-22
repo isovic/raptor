@@ -78,7 +78,7 @@ std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq, bool w
 
 std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t mapq, bool write_custom_tags,
+                            int32_t /*mapq*/, bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 
@@ -95,6 +95,7 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
     std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
     int32_t edit_dist = mapping->EditDistance();
     int32_t score = mapping->Score();
+    int32_t mapq = mapping->MappingQuality();
 
     int64_t path_id = mapping->PathId();
     int64_t num_paths = mapping->PathsNum();
@@ -174,7 +175,7 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
 
 std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t mapq, bool write_custom_tags,
+                            int32_t /*mapq*/, bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 
@@ -193,6 +194,7 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
     int32_t score = mapping->Score();
     int32_t cov_bases_q = mapping->CoveredBasesQuery();
     int32_t num_seeds = mapping->NumSeeds();
+    int32_t mapq = mapping->MappingQuality();
 
     int64_t path_id = mapping->PathId();
     int64_t num_paths = mapping->PathsNum();
@@ -264,7 +266,7 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
 
 std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                               const std::shared_ptr<raptor::RegionBase> mapping,
-                              int32_t mapq) {
+                              int32_t /*mapq*/) {
     std::stringstream ss;
 
     int32_t q_id = mapping->QueryID();
@@ -315,7 +317,7 @@ std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::
 
 std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t mapq) {
+                            int32_t /*mapq*/) {
     std::stringstream ss;
 
     // int32_t q_id = mapping->QueryID();
@@ -369,7 +371,7 @@ std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::Se
 
 std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t mapq, bool write_custom_tags,
+                            int32_t /*mapq*/, bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 
