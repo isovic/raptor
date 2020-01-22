@@ -44,6 +44,7 @@ RegionMapped::RegionMapped(
             segment_id_(-1), num_segments_(-1),
             region_priority_(0), region_is_supplementary_(false),
             alt_region_count_(0),
+            mapq_{0},
             extra_tags_{} {
 
 }
@@ -71,6 +72,7 @@ RegionMapped::RegionMapped(
             segment_id_(_segment_id), num_segments_(_num_segments),
             region_priority_(0), region_is_supplementary_(false),
             alt_region_count_(0),
+            mapq_{0},
             extra_tags_{} {
 
 }

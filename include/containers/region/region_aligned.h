@@ -129,6 +129,9 @@ class RegionAligned : public raptor::RegionBase {
     int32_t DeletionBases() const {
         return aln_->op_counts().d;
     }
+    virtual int32_t MappingQuality() const {
+        return mapq_;
+    }
 
     int32_t PathId() const {
         return path_id_;
@@ -206,6 +209,9 @@ class RegionAligned : public raptor::RegionBase {
     void SetAltRegionCount(int32_t val) {
         alt_region_count_ = val;
     }
+    void SetMappingQuality(int32_t val) {
+        mapq_ = val;
+    }
 
     /*
      * Getters.
@@ -235,6 +241,7 @@ class RegionAligned : public raptor::RegionBase {
                                 segment_id_(-1), num_segments_(-1),
                                 region_priority_(0), region_is_supplementary_(false),
                                 alt_region_count_(0),
+                                mapq_(0),
                                 extra_tags_{}
     {
     }
@@ -249,6 +256,7 @@ class RegionAligned : public raptor::RegionBase {
                                 segment_id_(_segment_id), num_segments_(_num_segments),
                                 region_priority_(0), region_is_supplementary_(false),
                                 alt_region_count_(0),
+                                mapq_(0),
                                 extra_tags_{}
     {
     }
@@ -263,6 +271,7 @@ class RegionAligned : public raptor::RegionBase {
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
     int32_t alt_region_count_;
+    int32_t mapq_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

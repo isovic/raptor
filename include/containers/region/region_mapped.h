@@ -130,6 +130,9 @@ public:
     int32_t DeletionBases() const {
         return 0;
     }
+    virtual int32_t MappingQuality() const {
+        return mapq_;
+    }
 
     int32_t PathId() const {
         return path_id_;
@@ -214,6 +217,9 @@ public:
     void SetAltRegionCount(int32_t val) {
         alt_region_count_ = val;
     }
+    void SetMappingQuality(int32_t val) {
+        mapq_ = val;
+    }
 
     /*
      * Getters.
@@ -291,6 +297,7 @@ private:
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
     int32_t alt_region_count_;
+    int32_t mapq_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

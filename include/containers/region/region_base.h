@@ -52,6 +52,7 @@ public:
     virtual int32_t MismatchBases() const = 0;
     virtual int32_t InsertionBases() const = 0;
     virtual int32_t DeletionBases() const = 0;
+    virtual int32_t MappingQuality() const = 0;
 
     virtual bool IsPrimary() const = 0;
     virtual bool IsSecondary() const = 0;
@@ -87,6 +88,7 @@ public:
     virtual void SetAltRegionCount(int32_t val) = 0;
     virtual void SetRegionPriority(int32_t val) = 0;
     virtual void SetRegionIsSupplementary(bool val) = 0;
+    virtual void SetMappingQuality(int32_t val) = 0;
 };
 
 }
