@@ -21,28 +21,17 @@ LinearMappingResult::LinearMappingResult(int64_t _qseq_id,
                                       index_(_index) {
 }
 
-std::vector<std::shared_ptr<raptor::RegionBase>> LinearMappingResult::CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const {
-    int32_t num_paths = static_cast<int32_t>(target_anchors_.size());
-    std::vector<std::pair<int64_t, size_t>> path_scores;
-    for (size_t path_id = 0; path_id < target_anchors_.size(); ++path_id) {
-        const auto& path_aln = target_anchors_[path_id];
-        path_scores.emplace_back(std::make_pair(path_aln->score(), path_id));
-    }
-    std::sort(path_scores.begin(), path_scores.end());
-    std::reverse(path_scores.begin(), path_scores.end());
-
+std::vector<std::shared_ptr<raptor::RegionBase>> LinearMappingResult::CollectRegions(bool one_hit_per_target) const {
     std::vector<std::shared_ptr<raptor::RegionBase>> ret;
+    std::vector<std::shared_ptr<raptor::RegionBase>> secondary;
 
-    // Used for filtering multiple hits to the same target.
-    // Also, label the alignment priorities and path IDs.
     std::unordered_map<std::string, int32_t> query_target_pairs;
-    for (int64_t i = 0; i < static_cast<int64_t>(path_scores.size()); ++i) {
-        auto path_score = std::get<0>(path_scores[i]);
-        auto path_id = std::get<1>(path_scores[i]);
-        auto& tanchors = target_anchors_[path_id];
-        for (auto& aln: tanchors->hits()) {
-            aln->SetRegionPriority(i);
-            aln->SetRegionIsSupplementary(0);
+    for (int64_t i = 0; i < static_cast<int64_t>(target_anchors_.size()); ++i) {
+        auto& tanchors = target_anchors_[i];
+        if (tanchors == nullptr) {
+            continue;
+        }
+        for (const auto& aln: tanchors->hits()) {
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
@@ -50,17 +39,20 @@ std::vector<std::shared_ptr<raptor::RegionBase>> LinearMappingResult::CollectReg
                 }
                 query_target_pairs[pair_name] = 1;
             }
-            aln->path_id(static_cast<int32_t>(path_id));
-            aln->num_paths(num_paths);
-            aln->segment_id(static_cast<int32_t>(0));
-            aln->num_segments(1);
-            ret.emplace_back(aln);
+            // Priority of 0 are the primary alignments.
+            auto priority = aln->GetRegionPriority();
+            if (priority == 0) {
+                ret.emplace_back(aln);
+            } else if (priority > 0) {
+                secondary.emplace_back(aln);
+            }
         }
     }
-
-    if (do_relabel_sec_supp) {
-        raptor::RelabelSupplementary(ret, 0.0);
-    }
+    // Sort the primary alignment before supplementary ones.
+    std::sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
+    // Sort the secondary alignments by score.
+    std::sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return a->Score() > b->Score(); });
+    ret.insert(ret.end(), secondary.begin(), secondary.end());
 
     return ret;
 }

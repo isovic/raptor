@@ -207,6 +207,8 @@ void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<ra
             auto& aln = curr_path->nodes()[aln_id]->data();
             aln->SetRegionPriority(i);
             aln->SetRegionIsSupplementary(aln_id > 0);
+            aln->SetAltRegionCount(1);
+            aln->SetMappingQuality(255);
             aln->path_id(static_cast<int32_t>(path_id));
             aln->num_paths(num_paths);
             aln->segment_id(static_cast<int32_t>(aln_id));
@@ -216,7 +218,8 @@ void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<ra
     }
 
     if (do_relabel_sec_supp) {
-        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio);
+        // The grace distance for mapq scaling is an arbitrary value.
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w));
     }
 }
 

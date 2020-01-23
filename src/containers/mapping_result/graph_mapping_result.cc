@@ -34,7 +34,7 @@ GraphMappingResult::GraphMappingResult(int64_t _qseq_id,
 }
 
 // Interface implementation.
-std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const {
+std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegions(bool one_hit_per_target) const {
 
     // // Sort paths by score.
     // auto sorted = paths_;

@@ -44,7 +44,7 @@ public:
                         mindex::IndexPtr index);
 
     // Interface implementation.
-    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const;
+    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target) const;
     int64_t QueryId() const;
     int64_t QueryLen() const;
     std::string QueryHeader() const;

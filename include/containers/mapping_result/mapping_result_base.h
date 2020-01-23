@@ -33,7 +33,7 @@ public:
     virtual ~MappingResultBase() {
     }
 
-    virtual std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const = 0;
+    virtual std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target) const = 0;
     virtual int64_t QueryId() const = 0;
     virtual int64_t QueryLen() const = 0;
     virtual std::string QueryHeader() const = 0;

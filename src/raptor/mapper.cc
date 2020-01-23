@@ -7,6 +7,7 @@
 
 #include <raptor/mapper.h>
 #include <raptor/mapper_tools.h>
+#include <containers/mapping_result/mapping_result_common.h>
 
 #include <limits>
 #include <iostream>
@@ -213,6 +214,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     }
     tt_score_anchors.stop();
 
+    // Label supplementary and secondary alignments, and calculate the mapping quality.
+    LabelSupplementaryAndSecondary_(anchors, params_->relabel_secondary_supp, params_->min_secondary_to_primary_ratio);
+
     // Store the results.
     result->target_anchors(anchors);
     result->target_hits(filtered_hits);
@@ -268,6 +272,39 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
 #endif
 
     return result;
+}
+
+void Mapper::LabelSupplementaryAndSecondary_(const raptor::TargetAnchorPtrVector& ta, bool do_relabel_sec_supp, double min_sec_to_prim_ratio) {
+    std::vector<std::pair<int64_t, size_t>> path_scores;
+    for (size_t path_id = 0; path_id < ta.size(); ++path_id) {
+        const auto& path_aln = ta[path_id];
+        path_scores.emplace_back(std::make_pair(path_aln->score(), path_id));
+    }
+    std::sort(path_scores.begin(), path_scores.end());
+    std::reverse(path_scores.begin(), path_scores.end());
+
+    // Collect all regions for labeling, and mark them in a sorted order of priority.
+    std::vector<std::shared_ptr<raptor::RegionBase>> sorted_regions;
+    for (int64_t i = 0; i < static_cast<int64_t>(path_scores.size()); ++i) {
+        auto path_score = std::get<0>(path_scores[i]);
+        auto path_id = std::get<1>(path_scores[i]);
+        auto& tanchors = ta[path_id];
+        for (auto& aln: tanchors->hits()) {
+            aln->SetRegionPriority(i);
+            aln->SetRegionIsSupplementary(false);
+            aln->SetAltRegionCount(1);
+            aln->SetMappingQuality(255);
+            aln->path_id(-1);
+            aln->num_paths(-1);
+            aln->segment_id(-1);
+            aln->num_segments(-1);
+            sorted_regions.emplace_back(aln);
+        }
+    }
+
+    if (do_relabel_sec_supp) {
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w));
+    }
 }
 
 

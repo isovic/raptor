@@ -18,7 +18,7 @@ AlignedMappingResult::AlignedMappingResult(const mindex::SequencePtr& qseq, mind
       path_alignments_() {}
 
 // Interface implementation.
-std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const {
+std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target) const {
     // // Sort paths by score.
     // auto sorted = paths_;
     // std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );

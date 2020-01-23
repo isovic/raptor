@@ -60,6 +60,9 @@ class Mapper {
     std::vector<std::shared_ptr<raptor::TargetHits<T>>> FilterForOverlapping_(
         const std::vector<std::shared_ptr<raptor::TargetHits<T>>>& target_hits, const mindex::SequencePtr& qseq);
 
+    void LabelSupplementaryAndSecondary_(const raptor::TargetAnchorPtrVector& ta,
+        bool do_relabel_sec_supp, double min_sec_to_prim_ratio);
+
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::ParamsMapper> params_;
 };

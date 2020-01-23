@@ -87,7 +87,8 @@ void RaptorAligner::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<
     }
 
     if (do_relabel_sec_supp) {
-        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio);
+        // The grace distance for mapq scaling is an arbitrary value.
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w));
     }
 }
 

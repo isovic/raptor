@@ -89,7 +89,7 @@ TEST(APIExamples, APITest1) {
         // The graph can be empty.
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
-        auto regions = graph_mapping_result->CollectRegions(true, true);
+        auto regions = graph_mapping_result->CollectRegions(true);
         auto results = raptor::createRaptorResults(seq->id(), regions, {});
 
         // results.mapping_result->Filter(1, 0.01, -1, false);
@@ -165,7 +165,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
         auto mapping_result = mapper->Map(seq);
 
         // Write out all the mapped regions.
-        std::vector<std::shared_ptr<raptor::RegionBase>> mapped_regions = mapping_result->CollectRegions(false, true);
+        std::vector<std::shared_ptr<raptor::RegionBase>> mapped_regions = mapping_result->CollectRegions(false);
         for (const auto& aln: mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"
@@ -190,7 +190,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
         // Write out all the graph-mapped regions. Interfaces are the same.
-        std::vector<std::shared_ptr<raptor::RegionBase>> graph_mapped_regions = graph_mapping_result->CollectRegions(false, true);
+        std::vector<std::shared_ptr<raptor::RegionBase>> graph_mapped_regions = graph_mapping_result->CollectRegions(false);
         for (const auto& aln: graph_mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"
@@ -223,7 +223,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
                                    75,    // min_identity
                                    false);  // only sort, and ignore other filters
 
-        std::vector<std::shared_ptr<raptor::RegionBase>> aligned_graph_mapped_regions = aln_result->CollectRegions(false, true);
+        std::vector<std::shared_ptr<raptor::RegionBase>> aligned_graph_mapped_regions = aln_result->CollectRegions(false);
         for (const auto& aln: aligned_graph_mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"
