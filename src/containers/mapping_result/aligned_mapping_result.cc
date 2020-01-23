@@ -15,9 +15,7 @@ AlignedMappingResult::AlignedMappingResult(const mindex::SequencePtr& qseq, mind
     : qseq_(qseq),
       index_(_index),
       rv_(raptor::MapperReturnValueBase::NotRunYet),
-      path_alignments_(),
-      all_similar_scores_(12, 0),
-      fraction_query_covered_(0.0) {}
+      path_alignments_() {}
 
 // Interface implementation.
 std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const {
@@ -87,62 +85,6 @@ MapperReturnValueBase AlignedMappingResult::ReturnValue() const {
 
 const std::unordered_map<std::string, double>& AlignedMappingResult::Timings() const {
     return timings_;
-}
-
-
-
-
-std::vector<int32_t> AlignedMappingResult::CountSimilarMappings_(const std::vector<std::shared_ptr<raptor::PathAlignment>>& paths) {
-
-    std::vector<int32_t> score_counts(12, 0); // For the distribution between 0.00% and 10.0% in 1% steps.
-
-    if (paths.size() == 0) {
-        return score_counts;
-    }
-
-    auto sorted = paths;
-
-    std::sort(sorted.begin(), sorted.end(),
-                [](const std::shared_ptr<raptor::PathAlignment>& a,
-                    const std::shared_ptr<raptor::PathAlignment>& b) {
-                    return a->path_score() > b->path_score();
-                });
-
-    double best_score = sorted[0]->path_score();
-    double best_score_f = (double) abs(best_score);
-
-    if (best_score == 0.0) {
-        return score_counts;
-    }
-
-    for (size_t i = 0; i < sorted.size(); i++) {
-        int32_t score = sorted[i]->path_score();
-        double score_diff_f = abs((double) (best_score - score));
-        double fraction_diff = score_diff_f / best_score_f;
-        int32_t bucket = ((int32_t) std::floor(fraction_diff * 100)) + 1;
-
-        // Count all of the above ones in a single bucket.
-        if (bucket > 10) {
-            bucket = 11;
-        }
-
-        // Count only exact hits in bucket 0.
-        // All hits between <0.00, 0.01> go into bucket 1.
-        if (fraction_diff == 0.00) {
-            score_counts[0] += 1;
-
-        } else {
-            score_counts[bucket] += 1;
-
-        }
-    }
-
-    // Create the cumulative sum.
-    for (size_t i = 1; i < score_counts.size(); i++) {
-        score_counts[i] += score_counts[i - 1];
-    }
-
-    return score_counts;
 }
 
 double AlignedMappingResult::CalcBestFractionQueryCovered_(const std::vector<std::shared_ptr<raptor::PathAlignment>>& paths, int64_t qseq_len) {

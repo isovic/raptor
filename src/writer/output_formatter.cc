@@ -78,7 +78,7 @@ std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq, bool w
 
 std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t /*mapq*/, bool write_custom_tags,
+                            bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 
@@ -109,9 +109,6 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
     if (mapping->IsSecondary()) {
         flag |= 256;
     }
-
-    // The mapq is generated from the outside because we need the number of alternative
-    // alignment positions to generate it.
 
     std::string seq = qseq->GetSequenceAsString();
     std::string qual = (qseq->qual().size() > 0) ? qseq->GetQualityAsString() : std::string("*");
@@ -175,7 +172,7 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
 
 std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t /*mapq*/, bool write_custom_tags,
+                            bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 
@@ -265,8 +262,7 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
 }
 
 std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
-                              const std::shared_ptr<raptor::RegionBase> mapping,
-                              int32_t /*mapq*/) {
+                              const std::shared_ptr<raptor::RegionBase> mapping) {
     std::stringstream ss;
 
     int32_t q_id = mapping->QueryID();
@@ -316,8 +312,7 @@ std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::
 }
 
 std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
-                            const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t /*mapq*/) {
+                            const std::shared_ptr<raptor::RegionBase> mapping) {
     std::stringstream ss;
 
     // int32_t q_id = mapping->QueryID();
@@ -371,7 +366,7 @@ std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::Se
 
 std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t /*mapq*/, bool write_custom_tags,
+                            bool write_custom_tags,
                             const std::string& timings) {
     std::stringstream ss;
 

@@ -30,21 +30,19 @@ public:
 
     static std::string ToSAM(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                              const std::shared_ptr<raptor::RegionBase> mapping,
-                             int32_t mapq, bool write_custom_tags,
+                             bool write_custom_tags,
                              const std::string& timings);
     static std::string ToPAF(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                              const std::shared_ptr<raptor::RegionBase> mapping,
-                             int32_t mapq, bool write_custom_tags,
+                             bool write_custom_tags,
                              const std::string& timings);
     static std::string ToMHAP(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
-                              const std::shared_ptr<raptor::RegionBase> mapping,
-                              int32_t mapq);
+                              const std::shared_ptr<raptor::RegionBase> mapping);
     static std::string ToM4(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
-                            const std::shared_ptr<raptor::RegionBase> mapping,
-                            int32_t mapq);
+                            const std::shared_ptr<raptor::RegionBase> mapping);
     static std::string ToGFA2Edge(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                                 const std::shared_ptr<raptor::RegionBase> mapping,
-                                int32_t mapq, bool write_custom_tags,
+                                bool write_custom_tags,
                                 const std::string& timings);
 
 private:

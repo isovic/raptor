@@ -29,9 +29,7 @@ GraphMappingResult::GraphMappingResult(int64_t _qseq_id,
                                       qseq_header_(_qseq_header),
                                       index_(_index),
                                       rv_(MapperReturnValueBase::NotRunYet),
-                                      paths_(),
-                                      all_similar_scores_(12, 0),
-                                      fraction_query_covered_(0.0) {
+                                      paths_() {
 
 }
 
@@ -109,63 +107,6 @@ MapperReturnValueBase GraphMappingResult::ReturnValue() const {
 
 const std::unordered_map<std::string, double>& GraphMappingResult::Timings() const {
     return timings_;
-}
-
-
-
-// Implementation-specific interfaces.
-std::vector<int32_t> GraphMappingResult::CountSimilarMappings_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int32_t min_score_diff_margin) {
-
-    std::vector<int32_t> score_counts(12, 0); // For the distribution between 0.00% and 10.0% in 1% steps.
-
-    if (paths.size() == 0) {
-        return score_counts;
-    }
-
-    auto sorted = paths;
-
-    std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
-
-    double best_score = sorted[0]->score();
-    double best_score_f = (double) std::abs(best_score);
-
-    if (best_score == 0.0) {
-        return score_counts;
-    }
-
-    for (size_t i = 0; i < sorted.size(); i++) {
-        int32_t score = sorted[i]->score();
-        int32_t score_diff = std::abs(best_score - score);
-        double score_diff_f = (double) score_diff;
-        double fraction_diff = score_diff_f / best_score_f;
-        int32_t bucket = ((int32_t) std::floor(fraction_diff * 100)) + 1;
-
-        // Allow a small numerical margin. Should be of the order of magnitude of a seed len.
-        if (score_diff > 0 && score_diff <= min_score_diff_margin) {
-            bucket = 1;
-        }
-
-        // Count all of the above ones in a single bucket.
-        if (bucket > 10) {
-            bucket = 11;
-        }
-
-        // Count only exact hits in bucket 0.
-        // All hits between <0.00, 0.01> go into bucket 1.
-        if (fraction_diff == 0.00) {
-            score_counts[0] += 1;
-
-        } else {
-            score_counts[bucket] += 1;
-        }
-    }
-
-    // Create the cumulative sum.
-    for (size_t i = 1; i < score_counts.size(); i++) {
-        score_counts[i] += score_counts[i - 1];
-    }
-
-    return score_counts;
 }
 
 double GraphMappingResult::CalcBestFractionQueryCovered_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int64_t qseq_len) {

@@ -401,20 +401,17 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
         if (mapping_result != nullptr) {
             const auto& other_timings = mapping_result->Timings();
             timings.insert(other_timings.begin(), other_timings.end());
-            mapq = 0;
         }
         if (graph_mapping_result != nullptr) {
             const auto& other_timings = graph_mapping_result->Timings();
             timings.insert(other_timings.begin(), other_timings.end());
-            mapq = graph_mapping_result->CalcMapq();
         }
         if (aln_result != nullptr) {
             const auto& other_timings = aln_result->Timings();
             timings.insert(other_timings.begin(), other_timings.end());
-            mapq = aln_result->CalcMapq();
         }
 
-        results[i] = raptor::createRaptorResults(q_id, regions, timings, mapq);
+        results[i] = raptor::createRaptorResults(q_id, regions, timings);
     }
 
     return 0;

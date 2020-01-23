@@ -75,7 +75,6 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
 
     bool do_output = !result->regions().empty();
     std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
-    int32_t mapq = result->mapq();
     const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
     int64_t q_id = result->q_id();
 
@@ -88,15 +87,15 @@ void RaptorResultsWriterStream::WriteSingleResult(const mindex::SequenceFilePtr 
             auto& qseq = seqs->GetSeqByAbsID(aln->QueryID());
 
             if (outfmt_ == raptor::OutputFormat::SAM) {
-                *oss_ptr_ << OutputFormatter::ToSAM(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToSAM(index_, qseq, aln, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::PAF) {
-                *oss_ptr_ << OutputFormatter::ToPAF(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToPAF(index_, qseq, aln, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::GFA2) {
-                *oss_ptr_ << OutputFormatter::ToGFA2Edge(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+                *oss_ptr_ << OutputFormatter::ToGFA2Edge(index_, qseq, aln, write_custom_tags, timings_all);
             } else if (outfmt_ == raptor::OutputFormat::MHAP) {
-                *oss_ptr_ << OutputFormatter::ToMHAP(index_, qseq, aln, mapq);
+                *oss_ptr_ << OutputFormatter::ToMHAP(index_, qseq, aln);
             } else if (outfmt_ == raptor::OutputFormat::M4) {
-                *oss_ptr_ << OutputFormatter::ToM4(index_, qseq, aln, mapq);
+                *oss_ptr_ << OutputFormatter::ToM4(index_, qseq, aln);
             }
         }
     } else {

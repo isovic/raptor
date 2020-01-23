@@ -79,7 +79,6 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
 
     bool do_output = !result->regions().empty();
     std::string timings_all = OutputFormatter::TimingMapToString(result->timings());
-    int32_t mapq = result->mapq();
     const std::vector<std::shared_ptr<raptor::RegionBase>>& regions_to_write = result->regions();
     int64_t q_id = result->q_id();
 
@@ -91,11 +90,8 @@ void RaptorResultsWriterBAM::WriteSingleResult(const mindex::SequenceFilePtr seq
             bool is_supplementary = (aln->SegmentId() > 0);
             auto& qseq = seqs->GetSeqByAbsID(aln->QueryID());
 
-            auto record = ToBAM(index_, qseq, aln, mapq, write_custom_tags, timings_all);
+            auto record = ToBAM(index_, qseq, aln, aln->MappingQuality(), write_custom_tags, timings_all);
             bam_writer_->Write(record);
-
-            // std::unique_ptr<PacBio::BAM::BamRecord> record = std::move(ToBAM(index_, qseq, aln, mapq, write_custom_tags, timings_all));
-            // bam_writer_->Write(*record);
         }
     } else {
         // If the q_id < 0, it means that the result was initialized, but never

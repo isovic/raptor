@@ -21,16 +21,14 @@ class RaptorResults;
 std::unique_ptr<raptor::RaptorResults> createRaptorResults(
                         int64_t q_id,
                         const std::vector<std::shared_ptr<raptor::RegionBase>>& regions,
-                        const std::unordered_map<std::string, double>& timings,
-                        int32_t mapq);
+                        const std::unordered_map<std::string, double>& timings);
 
 class RaptorResults {
   public:
     friend std::unique_ptr<raptor::RaptorResults> createRaptorResults(
                         int64_t q_id,
                         const std::vector<std::shared_ptr<raptor::RegionBase>>& regions,
-                        const std::unordered_map<std::string, double>& timings,
-                        int32_t mapq);
+                        const std::unordered_map<std::string, double>& timings);
 
     ~RaptorResults() { }
 
@@ -43,40 +41,32 @@ class RaptorResults {
     const std::unordered_map<std::string, double>& timings() const {
         return timings_;
     }
-    int32_t mapq() const {
-        return mapq_;
-    }
 
   private:
     RaptorResults()
                     : q_id_(-1),
                     regions_(),
-                    timings_(),
-                    mapq_(0)
+                    timings_()
     { }
     RaptorResults(
                 int64_t q_id,
                 const std::vector<std::shared_ptr<raptor::RegionBase>>& regions,
-                const std::unordered_map<std::string, double>& timings,
-                int32_t mapq)
+                const std::unordered_map<std::string, double>& timings)
                 :   q_id_(q_id),
                     regions_(regions),
-                    timings_(timings),
-                    mapq_(mapq)
+                    timings_(timings)
     { }
 
     int64_t q_id_;
     std::vector<std::shared_ptr<raptor::RegionBase>> regions_;
     std::unordered_map<std::string, double> timings_;
-    int32_t mapq_;
 };
 
 inline std::unique_ptr<raptor::RaptorResults> createRaptorResults(
                         int64_t q_id,
                         const std::vector<std::shared_ptr<raptor::RegionBase>>& regions,
-                        const std::unordered_map<std::string, double>& timings,
-                        int32_t mapq) {
-    return std::unique_ptr<raptor::RaptorResults>(new raptor::RaptorResults(q_id, regions, timings, mapq));
+                        const std::unordered_map<std::string, double>& timings) {
+    return std::unique_ptr<raptor::RaptorResults>(new raptor::RaptorResults(q_id, regions, timings));
 
 }
 

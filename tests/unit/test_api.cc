@@ -90,8 +90,7 @@ TEST(APIExamples, APITest1) {
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
         auto regions = graph_mapping_result->CollectRegions(true, true);
-        auto mapq = graph_mapping_result->CalcMapq();
-        auto results = raptor::createRaptorResults(seq->id(), regions, {}, mapq);
+        auto results = raptor::createRaptorResults(seq->id(), regions, {});
 
         // results.mapping_result->Filter(1, 0.01, -1, false);
         writer->WriteSingleResult(reads, results, false, true, false);

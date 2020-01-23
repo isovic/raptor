@@ -61,36 +61,6 @@ public:
 
     void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, bool just_sort);
 
-    /*
-    * @brief Calculates the mapping quality for the alignments, based on the number
-    * of objects in the path_alignments_ vector.
-    */
-    // inline int32_t CalcMapq() const {
-    //     int32_t mapq = raptor::CalcMapqFromScoreCounts(all_similar_scores_);
-    //     int32_t augment = (fraction_query_covered_ == 1.0) ? (-256) :
-    //                       ((int32_t) std::round(log10(100 * (1.0 - fraction_query_covered_))));
-    //     mapq = (mapq > 3) ? (mapq - augment) : mapq;
-    //     mapq = std::min(mapq, 60);
-    //     mapq = std::max(0, mapq);
-    //     return mapq;
-    // }
-
-    inline int32_t CalcMapq() const {
-        int32_t mapq = raptor::CalcMapqFromScoreCounts(all_similar_scores_);
-
-        // int32_t augment = 0;
-        // if (mapq > 3 && paths_.size() > 0) {
-        //     auto& best_path = paths_[0];
-        //     double qspan = (best_path->nodes().back()->data()->QueryEnd() - best_path->nodes().front()->data()->QueryStart());
-        //     augment = -10 * log10(((double) best_path->score()) / qspan) / index_->w();
-        // }
-        // mapq = (mapq > 3) ? (mapq - augment) : mapq;
-        // mapq = std::min(mapq, 60);
-        // mapq = std::max(0, mapq);
-
-        return mapq;
-    }
-
     int64_t qseq_len() const { return qseq_len_; }
     int64_t qseq_id() const { return qseq_id_; }
     raptor::MapperReturnValueBase rv() const { return rv_; }
@@ -99,8 +69,6 @@ public:
         paths_ = new_paths;
         // Ensure that the paths are sorted. This is the only place where paths can be set.
         std::sort(paths_.begin(), paths_.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
-        all_similar_scores_ = CountSimilarMappings_(paths_, index_->params()->k * 3);
-        fraction_query_covered_ = CalcBestFractionQueryCovered_(paths_, qseq_len_);
     }
 
     const std::vector<std::shared_ptr<raptor::LocalPath>>& paths() const {
@@ -131,7 +99,6 @@ private:
     GraphMappingResult(const GraphMappingResult&) = delete;
     GraphMappingResult& operator=(const GraphMappingResult&) = delete;
 
-    static std::vector<int32_t> CountSimilarMappings_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int32_t min_score_diff_margin);
     static double CalcBestFractionQueryCovered_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int64_t qseq_len);
 
     // Interface-specific values.
@@ -144,8 +111,6 @@ private:
 
     // Implementation-specific values.
     std::vector<std::shared_ptr<raptor::LocalPath>> paths_;
-    std::vector<int32_t> all_similar_scores_;           // Distribution of similar scores. Needed to augment the mapq.
-    double fraction_query_covered_;                     // Fraction of the query covered by the best scoring path. Needed to augment the mapq.
 };
 
 }
