@@ -6,8 +6,10 @@
  */
 
 #include <containers/mapping_result/graph_mapping_result.h>
+#include <containers/mapping_result/mapping_result_common.h>
 #include <algorithm>
 #include <tuple>
+#include <limits>
 
 namespace raptor {
 
@@ -34,39 +36,52 @@ GraphMappingResult::GraphMappingResult(int64_t _qseq_id,
 }
 
 // Interface implementation.
-std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegions(bool one_hit_per_target) const {
+std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const {
+
+    // // Sort paths by score.
+    // auto sorted = paths_;
+    // std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
+
     std::vector<std::shared_ptr<raptor::RegionBase>> ret;
+    std::vector<std::pair<std::shared_ptr<raptor::RegionBase>, int32_t>> secondary;
 
     // Used for filtering multiple hits to the same target.
-    std::unordered_map<std::string, int32_t> query_target_pairs;
+    std::unordered_map<std::string, int8_t> query_target_pairs;
 
-    int32_t num_paths = static_cast<int32_t>(paths().size());
-
-    for (size_t i = 0; i < paths().size(); i++) {
-        auto& path_aln = paths()[i];
-        auto merged_path = LocalPathTools::MergeImplicitEdges(path_aln);
-
+    // Collect the PRIMARY and SECONDARY alignments separately.
+    for (size_t i = 0; i < paths_.size(); ++i) {
+        const auto& path = paths_[i];
+        if (path == nullptr) {
+            continue;
+        }
+        // Merge neighboring nodes connected with implicit paths into a single node.
+        auto merged_path = LocalPathTools::MergeImplicitEdges(path);
         if (merged_path == nullptr) {
             continue;
         }
-
-        int32_t num_segments = static_cast<int32_t>(merged_path->nodes().size());
-
-        for (size_t j = 0; j < merged_path->nodes().size(); j++) {
-            auto& aln = merged_path->nodes()[j]->data();
+        // Annotate all chunks as either Secondary or SecondarySupplementary.
+        for (size_t aln_id = 0; aln_id < merged_path->nodes().size(); ++aln_id) {
+            const auto& aln = merged_path->nodes()[aln_id]->data();
             if (one_hit_per_target) {
                 std::string pair_name = std::to_string(aln->QueryID()) + std::string("->") + std::to_string(aln->TargetID());
                 if (query_target_pairs.find(pair_name) != query_target_pairs.end()) {
-                  continue;
+                    continue;
                 }
                 query_target_pairs[pair_name] = 1;
             }
-            aln->path_id(static_cast<int32_t>(i));
-            aln->num_paths(num_paths);
-            aln->segment_id(static_cast<int32_t>(j));
-            aln->num_segments(num_segments);
-            ret.emplace_back(aln);
+            // Priority of 0 are the primary alignments.
+            auto priority = aln->GetRegionPriority();
+            if (priority == 0) {
+                ret.emplace_back(aln);
+            } else if (priority > 0) {
+                secondary.emplace_back(std::make_pair(aln, path->score()));
+            }
         }
+    }
+
+    // For now, output absolutely any alignment. Filtering should have happened earlier.
+    for (const auto& vals: secondary) {
+        ret.emplace_back(std::get<0>(vals));
     }
 
     return ret;
@@ -89,7 +104,7 @@ const mindex::IndexPtr GraphMappingResult::Index() const {
 }
 
 MapperReturnValueBase GraphMappingResult::ReturnValue() const {
-  return rv_;
+    return rv_;
 }
 
 const std::unordered_map<std::string, double>& GraphMappingResult::Timings() const {
@@ -101,169 +116,176 @@ const std::unordered_map<std::string, double>& GraphMappingResult::Timings() con
 // Implementation-specific interfaces.
 std::vector<int32_t> GraphMappingResult::CountSimilarMappings_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int32_t min_score_diff_margin) {
 
-  std::vector<int32_t> score_counts(12, 0); // For the distribution between 0.00% and 10.0% in 1% steps.
+    std::vector<int32_t> score_counts(12, 0); // For the distribution between 0.00% and 10.0% in 1% steps.
 
-  if (paths.size() == 0) {
+    if (paths.size() == 0) {
+        return score_counts;
+    }
+
+    auto sorted = paths;
+
+    std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
+
+    double best_score = sorted[0]->score();
+    double best_score_f = (double) std::abs(best_score);
+
+    if (best_score == 0.0) {
+        return score_counts;
+    }
+
+    for (size_t i = 0; i < sorted.size(); i++) {
+        int32_t score = sorted[i]->score();
+        int32_t score_diff = std::abs(best_score - score);
+        double score_diff_f = (double) score_diff;
+        double fraction_diff = score_diff_f / best_score_f;
+        int32_t bucket = ((int32_t) std::floor(fraction_diff * 100)) + 1;
+
+        // Allow a small numerical margin. Should be of the order of magnitude of a seed len.
+        if (score_diff > 0 && score_diff <= min_score_diff_margin) {
+            bucket = 1;
+        }
+
+        // Count all of the above ones in a single bucket.
+        if (bucket > 10) {
+            bucket = 11;
+        }
+
+        // Count only exact hits in bucket 0.
+        // All hits between <0.00, 0.01> go into bucket 1.
+        if (fraction_diff == 0.00) {
+            score_counts[0] += 1;
+
+        } else {
+            score_counts[bucket] += 1;
+        }
+    }
+
+    // Create the cumulative sum.
+    for (size_t i = 1; i < score_counts.size(); i++) {
+        score_counts[i] += score_counts[i - 1];
+    }
+
     return score_counts;
-  }
-
-  auto sorted = paths;
-
-  std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
-
-  double best_score = sorted[0]->score();
-  double best_score_f = (double) std::abs(best_score);
-
-  if (best_score == 0.0) {
-    return score_counts;
-  }
-
-  for (size_t i = 0; i < sorted.size(); i++) {
-    int32_t score = sorted[i]->score();
-    int32_t score_diff = std::abs(best_score - score);
-    double score_diff_f = (double) score_diff;
-    double fraction_diff = score_diff_f / best_score_f;
-    int32_t bucket = ((int32_t) std::floor(fraction_diff * 100)) + 1;
-
-    // Allow a small numerical margin. Should be of the order of magnitude of a seed len.
-    if (score_diff > 0 && score_diff <= min_score_diff_margin) {
-      bucket = 1;
-    }
-
-    // Count all of the above ones in a single bucket.
-    if (bucket > 10) {
-      bucket = 11;
-    }
-
-    // Count only exact hits in bucket 0.
-    // All hits between <0.00, 0.01> go into bucket 1.
-    if (fraction_diff == 0.00) {
-      score_counts[0] += 1;
-
-    } else {
-      score_counts[bucket] += 1;
-
-    }
-  }
-
-  // Create the cumulative sum.
-  for (size_t i = 1; i < score_counts.size(); i++) {
-    score_counts[i] += score_counts[i - 1];
-  }
-
-  return score_counts;
 }
 
 double GraphMappingResult::CalcBestFractionQueryCovered_(const std::vector<std::shared_ptr<raptor::LocalPath>>& paths, int64_t qseq_len) {
-  double ret = 0.0f;
+    double ret = 0.0f;
 
-  if (paths.size() == 0) {
-    return ret;
-  }
-
-  int32_t best_i = -1;
-  for (int32_t i = 0; i < (int32_t) paths.size(); i++) {
-    if (best_i == -1 || paths[i]->score() > paths[best_i]->score()) {
-      best_i = i;
+    if (paths.size() == 0) {
+        return ret;
     }
-  }
 
-  auto& best_path = paths[best_i];
+    int32_t best_i = -1;
+    for (int32_t i = 0; i < (int32_t) paths.size(); i++) {
+        if (best_i == -1 || paths[i]->score() > paths[best_i]->score()) {
+            best_i = i;
+        }
+    }
 
-  if (best_path->nodes().size() == 0) {
+    auto& best_path = paths[best_i];
+
+    if (best_path->nodes().size() == 0) {
+        return ret;
+    }
+
+    ret = ((double) (best_path->nodes().back()->data()->QueryEnd() - best_path->nodes().front()->data()->QueryStart())) / ((double) qseq_len);
+
     return ret;
-  }
-
-  ret = ((double) (best_path->nodes().back()->data()->QueryEnd() - best_path->nodes().front()->data()->QueryStart())) / ((double) qseq_len);
-
-  return ret;
 }
 
 std::vector<std::shared_ptr<raptor::LocalPath>> GraphMappingResult::GenerateFiltered(
                                                 const std::vector<std::shared_ptr<raptor::LocalPath>>& paths,
                                                 int32_t bestn,
                                                 double max_fraction_diff,
-                                                int32_t min_map_len,
-                                                int32_t min_mapq,
                                                 int32_t min_score_diff_margin,
-                                                bool just_sort) {
+                                                int32_t min_map_len
+                                                ) {
 
-  std::vector<std::shared_ptr<raptor::LocalPath>> sorted;
+    /*
+     * This function keeps any path which has at least one region within the bestn
+     * priority. Also, any path within the max_fraction_diff from the best scoring
+     * path is kept even if it's beyond bestn priority.
+     *
+    */
 
-  // First, filter nullptr paths.
-  for (size_t i = 0; i < paths.size(); ++i) {
-      if (paths[i] == nullptr) {
-          continue;
-      }
-      sorted.emplace_back(paths[i]);
-  }
+    std::vector<std::shared_ptr<raptor::LocalPath>> ret;
 
-  // Then, sort.
-  std::sort(sorted.begin(), sorted.end(), [](const std::shared_ptr<raptor::LocalPath>& a, const std::shared_ptr<raptor::LocalPath>& b){ return a->score() > b->score(); } );
-
-  if (sorted.size() == 0) {
-    return sorted;
-  }
-
-  /*
-   * If only sorting is needed, just return.
-  */
-  if (just_sort) {
-    return sorted;
-  }
-
-  int32_t best_score = sorted[0]->score();
-
-  auto similar_score_count = CountSimilarMappings_(sorted, min_score_diff_margin);
-
-  /*
-   * Filter the scores according to the parameters.
-  */
-  std::vector<std::shared_ptr<raptor::LocalPath>> ret;
-  ret.reserve(sorted.size());
-
-  for (size_t i = 0; i < sorted.size(); i++) {
-    if (bestn > 0 && i >= bestn) {
-      break;
+    if (paths.empty()) {
+        return ret;
     }
 
-    if (max_fraction_diff >= 0.0 && i > 0) {
-      int32_t score = sorted[i]->score();
-      int32_t score_diff = abs(best_score - score);
-
-      double fraction_diff = std::abs((double) (best_score - score)) / std::abs((double) best_score);
-
-      if (score_diff > 0 && score_diff > min_score_diff_margin && fraction_diff > max_fraction_diff) {
-        break;
-      }
-
+    // Find the best score.
+    int64_t best_score = std::numeric_limits<int32_t>::lowest();
+    for (size_t i = 0; i < paths.size(); ++i) {
+        const auto& path = paths[i];
+        if (path == nullptr) { continue; }
+        best_score = std::max(best_score, path->score());
     }
+    // Keep any score above this fraction difference even if it's above bestn regions.
+    int64_t min_score = best_score * (1.0 - max_fraction_diff);
+    bool ret_contains_primary = false;
 
-    if (sorted[i]->nodes().size() > 0 && min_map_len > 0) {
-        int32_t map_len = sorted[i]->nodes().back()->data()->QueryEnd() - sorted[i]->nodes().front()->data()->QueryStart();   // TODO: Handling query boundaries needs to be handled better.
-        if (map_len < min_map_len) {
-            continue;
+    // Filter the bestn alternative paths.
+    for (size_t i = 0; i < paths.size(); ++i) {
+        const auto& path = paths[i];
+        if (path == nullptr) { continue; }
+        if (path->nodes().empty()) { continue; }
+
+        // Keep path if any region has priority less than bestn.
+        bool keep_path = false;
+        bool contains_primary = false;
+        for (size_t aln_id = 0; aln_id < path->nodes().size(); ++aln_id) {
+            auto& aln = path->nodes()[aln_id]->data();
+            auto priority = aln->GetRegionPriority();
+            if (priority == 0) {
+                contains_primary = true;
+            }
+            // If bestn == 1, then no secondary alignments should explicitly be taken.
+            // If priority < 0, this region needs to be filtered because it's
+            // secondary-to-primary score ratio is above the limit.
+            if (bestn <= 0 || (bestn == 1 && priority == 0) || (bestn > 1 && priority >= 0 && priority < bestn)) {
+                keep_path = true;
+            }
+        }
+
+        // Keep any score above this fraction difference, but only if bestn != 1.
+        // If bestn == 1, then only primary alignments should be kept.
+        if (path->score() >= min_score && (bestn != 1 || (bestn == 1 && contains_primary))) {
+            keep_path = true;
+        }
+
+        // Keep a path if it's score is within some absolute difference from the best.
+        // This is intended to keep those paths which may differ in a k-mer or two.
+        if ((best_score - path->score()) <= min_score_diff_margin && (bestn != 1 || (bestn == 1 && contains_primary))) {
+            keep_path = true;
+        }
+
+        // Filter paths that are too short.
+        int32_t qspan = path->nodes().front()->data()->QueryEnd() - path->nodes().front()->data()->QueryStart();
+        if (qspan < min_map_len) {
+            keep_path = false;
+        }
+
+        if (keep_path) {
+            ret.emplace_back(path);
+            if (contains_primary) {
+                ret_contains_primary = true;
+            }
         }
     }
 
-    ret.emplace_back(sorted[i]);
-  }
+    // If the primary alignment was not added to the "ret" vector, then do not
+    // report any secondary or supplementary alignments either.
+    if (ret_contains_primary == false) {
+        ret = {};
+    }
 
-  // Mapping quality threshold.
-  int32_t mapq = raptor::CalcMapqFromScoreCounts(similar_score_count);
-  if (mapq < min_mapq) {
-    ret.clear();
-  }
+    return ret;
 
-  ret.shrink_to_fit();
-
-  return ret;
 }
 
 void GraphMappingResult::Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, bool just_sort) {
-  paths_ = GenerateFiltered(paths_, bestn, max_fraction_diff, min_map_len, min_mapq, index_->params()->k * 3, just_sort);
+    paths_ = GenerateFiltered(paths_, bestn, max_fraction_diff, index_->params()->k * 3, min_map_len);
 }
-
-
 
 }

@@ -325,7 +325,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering.\n"));
 
-            regions = aln_result->CollectRegions(params->one_hit_per_target);
+            regions = aln_result->CollectRegions(params->one_hit_per_target, params->relabel_secondary_supp);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done collecting regions.\n"));
 
@@ -372,7 +372,7 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Not extending the flanks because flank_ext_len == 0."));
             }
 
-            regions = graph_mapping_result->CollectRegions(params->one_hit_per_target);
+            regions = graph_mapping_result->CollectRegions(params->one_hit_per_target, params->relabel_secondary_supp);
 
             // If required, align using a diff aligner.
             if (params->do_diff) {

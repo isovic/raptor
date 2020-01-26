@@ -89,7 +89,7 @@ TEST(APIExamples, APITest1) {
         // The graph can be empty.
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
-        auto regions = graph_mapping_result->CollectRegions(true);
+        auto regions = graph_mapping_result->CollectRegions(true, true);
         auto mapq = graph_mapping_result->CalcMapq();
         auto results = raptor::createRaptorResults(seq->id(), regions, {}, mapq);
 
@@ -98,7 +98,7 @@ TEST(APIExamples, APITest1) {
     }
 
     std::ostringstream expected;
-    expected << "ecoli-120:180\t60\t0\t56\t+\tecoli-0:240\t240\t120\t176\t60\t56\t60\tcm:i:12\tNM:i:-1\tAS:i:60\tpi:i:0\tpj:i:0\tpn:i:1\tps:i:0\tcg:Z:*\n";
+    expected << "ecoli-120:180\t60\t0\t56\t+\tecoli-0:240\t240\t120\t176\t60\t56\t60\tcm:i:12\tNM:i:-1\tAS:i:60\tfg:i:0\tpi:i:0\tpj:i:0\tpn:i:1\tps:i:0\tcg:Z:*\n";
 
     ASSERT_EQ(oss.str(), expected.str());
 }
@@ -166,7 +166,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
         auto mapping_result = mapper->Map(seq);
 
         // Write out all the mapped regions.
-        std::vector<std::shared_ptr<raptor::RegionBase>> mapped_regions = mapping_result->CollectRegions(false);
+        std::vector<std::shared_ptr<raptor::RegionBase>> mapped_regions = mapping_result->CollectRegions(false, true);
         for (const auto& aln: mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"
@@ -191,7 +191,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
         auto graph_mapping_result = graph_mapper->Map(seq, mapping_result);
 
         // Write out all the graph-mapped regions. Interfaces are the same.
-        std::vector<std::shared_ptr<raptor::RegionBase>> graph_mapped_regions = graph_mapping_result->CollectRegions(false);
+        std::vector<std::shared_ptr<raptor::RegionBase>> graph_mapped_regions = graph_mapping_result->CollectRegions(false, true);
         for (const auto& aln: graph_mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"
@@ -224,7 +224,7 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
                                    75,    // min_identity
                                    false);  // only sort, and ignore other filters
 
-        std::vector<std::shared_ptr<raptor::RegionBase>> aligned_graph_mapped_regions = aln_result->CollectRegions(false);
+        std::vector<std::shared_ptr<raptor::RegionBase>> aligned_graph_mapped_regions = aln_result->CollectRegions(false, true);
         for (const auto& aln: aligned_graph_mapped_regions) {
             oss << reads->GetSeqByAbsID(aln->QueryID())->header() << "\t"
                 << aln->QueryLen() << "\t"

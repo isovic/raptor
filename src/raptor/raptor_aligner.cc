@@ -1,6 +1,7 @@
 #include <raptor/raptor_aligner.h>
 #include <raptor/path_aligner.h>
 #include <sequences/sequence.h>
+#include <containers/mapping_result/mapping_result_common.h>
 
 namespace raptor {
 
@@ -35,33 +36,59 @@ std::shared_ptr<raptor::AlignedMappingResult> RaptorAligner::AlignPaths(
     status = raptor::MapperReturnValueBase::OK;
 
     // Calculate and accumulate the alignments.
+    int32_t num_paths = paths.size();
     std::vector<std::shared_ptr<raptor::PathAlignment>> alns;
-    for (const auto& path : paths) {
-        auto aln = path_aligner->Align(qseq, path, !params_->no_extend_alignment, params_);
+    for (int32_t path_id = 0; path_id < static_cast<int32_t>(paths.size()); ++path_id) {
+        const auto& path = paths[path_id];
+        auto aln = path_aligner->Align(qseq, path, path_id, num_paths, !params_->no_extend_alignment, params_);
         alns.emplace_back(aln);
     }
 
-    // Update the alignment IDs (tracking of primary, secondary and supplementary alignments).
-    int32_t num_paths = static_cast<int32_t>(alns.size());
-    for (int32_t path_id = 0; path_id < num_paths; ++path_id) {
-        auto path_aln = alns[path_id];
-        if (path_aln == nullptr) {
-            continue;
-        }
-        int32_t num_segments = static_cast<int32_t>(path_aln->alns().size());
-        for (int32_t seg_id = 0; seg_id < path_aln->alns().size(); ++seg_id) {
-            auto& aln = path_aln->alns()[seg_id];
-            aln->path_id(static_cast<int32_t>(path_id));
-            aln->num_paths(num_paths);
-            aln->segment_id(static_cast<int32_t>(seg_id));
-            aln->num_segments(num_segments);
-        }
-    }
+    LabelSupplementaryAndSecondary_(alns, params_->relabel_secondary_supp, params_->min_secondary_to_primary_ratio);
 
     result->path_alignments(alns);
     result->SetReturnValue(status);
 
     return result;
+}
+
+void RaptorAligner::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::PathAlignment>>& paths, bool do_relabel_sec_supp, double min_sec_to_prim_ratio) {
+
+    int32_t num_paths = static_cast<int32_t>(paths.size());
+
+    // Sort the paths by score, but preserve the original order.
+    // Each path can have multiple aligned regions.
+    std::vector<std::pair<int64_t, size_t>> path_scores;
+    for (size_t path_id = 0; path_id < paths.size(); ++path_id) {
+        const auto& path_aln = paths[path_id];
+        path_scores.emplace_back(std::make_pair(path_aln->path_score(), path_id));
+    }
+    std::sort(path_scores.begin(), path_scores.end());
+    std::reverse(path_scores.begin(), path_scores.end());
+
+    // Secondary and SecondarySupplementary alignments.
+    std::vector<std::shared_ptr<raptor::RegionBase>> sorted_regions;
+    for (int64_t i = 0; i < static_cast<int64_t>(path_scores.size()); ++i) {
+        auto path_score = std::get<0>(path_scores[i]);
+        auto path_id = std::get<1>(path_scores[i]);
+        auto& curr_path = paths[path_id];
+        int32_t num_segments = static_cast<int32_t>(curr_path->alns().size());
+        // Annotate all chunks as either Secondary or SecondarySupplementary.
+        for (size_t aln_id = 0; aln_id < curr_path->alns().size(); ++aln_id) {
+            auto& aln = curr_path->alns()[aln_id];
+            aln->SetRegionPriority(i);
+            aln->SetRegionIsSupplementary(aln_id > 0);
+            aln->path_id(static_cast<int32_t>(path_id));
+            aln->num_paths(num_paths);
+            aln->segment_id(static_cast<int32_t>(aln_id));
+            aln->num_segments(num_segments);
+            sorted_regions.emplace_back(aln);
+        }
+    }
+
+    if (do_relabel_sec_supp) {
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio);
+    }
 }
 
 }  // namespace raptor

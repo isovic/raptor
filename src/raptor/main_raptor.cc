@@ -64,7 +64,7 @@ void APIExample() {
         // (otherwise, the writter will not generate output).
         auto graph_mapping_result = graph_mapper->Map((seq), mapping_result);
 
-        auto regions = graph_mapping_result->CollectRegions(false);
+        auto regions = graph_mapping_result->CollectRegions(false, true);
         auto mapq = graph_mapping_result->CalcMapq();
         auto results = raptor::createRaptorResults(seq->id(), regions, {}, mapq);
 

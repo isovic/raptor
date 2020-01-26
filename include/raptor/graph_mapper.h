@@ -138,7 +138,7 @@ class GraphMapper {
     */
     void LabelSupplementaryAndSecondary_(
                         std::vector<std::shared_ptr<raptor::LocalPath>>& paths,
-                        bool do_relabel_sec_supp);
+                        bool do_relabel_sec_supp, double min_sec_to_prim_ratio);
 
     const mindex::IndexPtr index_;
     const raptor::GraphPtr graph_;

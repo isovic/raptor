@@ -165,7 +165,7 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(
 
     tt_graph_dp.stop();
 
-    LabelSupplementaryAndSecondary_(paths, params_->relabel_secondary_supp);
+    LabelSupplementaryAndSecondary_(paths, params_->relabel_secondary_supp, params_->min_secondary_to_primary_ratio);
 
     result->paths(paths);
     result->SetReturnValue(raptor::MapperReturnValueBase::OK);
@@ -181,7 +181,7 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(
     return result;
 }
 
-void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::LocalPath>>& paths, bool do_relabel_sec_supp) {
+void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::LocalPath>>& paths, bool do_relabel_sec_supp, double min_sec_to_prim_ratio) {
 
     int32_t num_paths = static_cast<int32_t>(paths.size());
 
@@ -216,7 +216,7 @@ void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<ra
     }
 
     if (do_relabel_sec_supp) {
-        raptor::RelabelSupplementary(sorted_regions);
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio);
     }
 }
 

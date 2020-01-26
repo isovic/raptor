@@ -326,6 +326,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     int32_t zbandwidth = -1;
     int32_t end_bonus = 0;
     bool no_stop_ext_on_zero_score = false;
+    double min_secondary_to_primary_ratio = 0.80;
 
     argparser.AddArgument(&parameters->do_align, VALUE_TYPE_BOOL, "", "align", "0",
                           "If selected, alignment will be produced for the mappings.", 0,
@@ -408,6 +409,11 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "bestn-threshold", "0.01",
                           "If bestn != 1, all mappings with a score within this fraction from the "
                           "best score will be retained.",
+                          0, "Filtering options");
+    argparser.AddArgument(&min_secondary_to_primary_ratio, VALUE_TYPE_DOUBLE, "",
+                          "sec-ratio", "0.80",
+                          "Minimum secondary/primary score ratio to retain the secondary "
+                          "mapping/alignment.",
                           0, "Filtering options");
     argparser.AddArgument(&parameters->min_map_len, VALUE_TYPE_INT64, "", "min-map-len", "0",
                           "Output only alignments/mappings/overlaps above this length.", 0,
@@ -750,6 +756,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     parameters->relabel_secondary_supp = !no_relabel_secondary_supp;
     parameters->mapper_params->relabel_secondary_supp = !no_relabel_secondary_supp;
     parameters->aligner_params->relabel_secondary_supp = !no_relabel_secondary_supp;
+
+    parameters->mapper_params->min_secondary_to_primary_ratio = min_secondary_to_primary_ratio;
+    parameters->aligner_params->min_secondary_to_primary_ratio = min_secondary_to_primary_ratio;
 
 #ifdef RAPTOR_TESTING_MODE
     if (parameters->verbose_level >= 5) {

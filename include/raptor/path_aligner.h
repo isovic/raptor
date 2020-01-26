@@ -58,6 +58,7 @@ class PathAligner {
 
     std::shared_ptr<raptor::PathAlignment> Align(const mindex::SequencePtr& qseq,
                                              const std::shared_ptr<raptor::LocalPath> path,
+                                            int32_t path_id, int32_t num_paths,
                                              bool use_extend_alignment,
                                              const std::shared_ptr<raptor::ParamsAligner> params);
 

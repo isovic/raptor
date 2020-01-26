@@ -39,7 +39,7 @@ public:
     ~GraphMappingResult() = default;
 
     // Interface implementation.
-    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target) const;
+    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const;
     int64_t QueryId() const;
     int64_t QueryLen() const;
     std::string QueryHeader() const;
@@ -50,19 +50,14 @@ public:
     // Custom methods.
     /*
         * @brief Copies the vector of chains internally, sorts them, and selects the best
-        * ones to return. The best scores are selected by the following criteria:
-        *   - If just_sort is true, all other filters are ignored.
-        *   - If bestn > 0 the bestn number of best scores will be returned and the rest ignored.
-        *   - If max_fraction_diff >= 0.0, then all chains with scores within this fraction from the best one will be output and the rest ignored.
-        *   - If min_map_len > 0, only chains which span more than min_map_len will be output.
-        *  To summarize, any filter with value < 0 will turn that filter off.
-        *
-        * The min_score_diff_margin is a margin allowed between two scores to consider them almost equal. Used to overcome the numerical rounding and errors.
+        * ones to return.
     */
     static std::vector<std::shared_ptr<raptor::LocalPath>> GenerateFiltered(
-                                const std::vector<std::shared_ptr<raptor::LocalPath>>& chains,
-                                int32_t bestn, double max_fraction_diff,
-                                int32_t min_map_len, int32_t min_mapq, int32_t min_score_diff_margin, bool just_sort);
+                                const std::vector<std::shared_ptr<raptor::LocalPath>>& paths,
+                                int32_t bestn,
+                                double max_fraction_diff,
+                                int32_t min_score_diff_margin,
+                                int32_t min_map_len);
 
     void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, bool just_sort);
 

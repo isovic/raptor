@@ -41,7 +41,7 @@ public:
     ~AlignedMappingResult() = default;
 
     // Interface implementation.
-    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target) const;
+    std::vector<std::shared_ptr<raptor::RegionBase>> CollectRegions(bool one_hit_per_target, bool do_relabel_sec_supp) const;
     int64_t QueryId() const;
     int64_t QueryLen() const;
     std::string QueryHeader() const;
@@ -76,14 +76,12 @@ public:
         fraction_query_covered_ = CalcBestFractionQueryCovered_(path_alignments_, qseq_->data().size());
     }
 
-    static std::vector<std::shared_ptr<raptor::PathAlignment>> GenerateFiltered(
+    std::vector<std::shared_ptr<raptor::PathAlignment>> GenerateFiltered(
                                                     const std::vector<std::shared_ptr<raptor::PathAlignment>>& paths,
                                                     int32_t bestn,
                                                     double max_fraction_diff,
                                                     int32_t min_map_len,
-                                                    int32_t min_mapq,
-                                                    double min_idt,
-                                                    bool just_sort);
+                                                    double min_idt);
 
     void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, double min_idt, bool just_sort);
 

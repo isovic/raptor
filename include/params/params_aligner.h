@@ -39,6 +39,7 @@ class ParamsAligner {
     bool no_extend_alignment = false;
     bool is_rna = false;
     bool relabel_secondary_supp = true;
+    double min_secondary_to_primary_ratio = 0.80;
 
    private:
     ParamsAligner() = default;

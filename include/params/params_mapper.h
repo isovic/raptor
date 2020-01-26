@@ -54,6 +54,7 @@ class ParamsMapper {
     int32_t flank_ext_len = 200;
     bool no_graph_mapping = false;
     bool relabel_secondary_supp = true;
+    double min_secondary_to_primary_ratio = 0.80;
 
    private:
     ParamsMapper() = default;
