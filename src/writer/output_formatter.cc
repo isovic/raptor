@@ -10,6 +10,27 @@
 
 namespace raptor {
 
+double OutputFormatter::CalcIdentity_(
+            int32_t q_start, int32_t q_end,
+            int32_t t_start, int32_t t_end,
+            int32_t cov_bases_q, int32_t cov_bases_t,
+            int32_t edit_dist, int32_t match_bases) {
+    double qspan = q_end - q_start;
+    double tspan = t_end - t_start;
+    double identity_q = (qspan != 0.0) ? (static_cast<double>(cov_bases_q)) / (qspan) : 0.0;
+    double identity_t = (tspan != 0.0) ? (static_cast<double>(cov_bases_t)) / (tspan) : 0.0;
+    double identity_min = std::min(identity_q, identity_t);
+
+    if (edit_dist >= 0) {
+        double edit_dist_double = edit_dist;
+        identity_q = (qspan != 0) ? (match_bases / qspan) : 0.0;
+        identity_t = (tspan != 0) ? (match_bases / tspan) : 0.0;
+        identity_min = std::min(identity_q, identity_t);
+    }
+
+    return identity_min;
+}
+
 std::string OutputFormatter::TimingMapToString(const std::unordered_map<std::string, double>& timings) {
     std::ostringstream oss;
     oss << std::fixed;
@@ -261,21 +282,12 @@ std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::
     // int32_t score = mapping->Score();
     int32_t cov_bases_q = mapping->CoveredBasesQuery();
     int32_t cov_bases_t = mapping->CoveredBasesTarget();
+    int32_t match_bases = mapping->MatchBases();
     int32_t num_seeds = mapping->NumSeeds();
 
-    // double jaccard = ((q_end - q_start) != 0) ? ((double) cov_bases_q) / ((double) (q_end - q_start)) : 0.0;
-    double qspan = q_end - q_start;
-    double tspan = t_end - t_start;
-    double jaccard_q = (qspan != 0.0) ? (static_cast<double>(cov_bases_q)) / (qspan) : 0.0;
-    double jaccard_t = (tspan != 0.0) ? (static_cast<double>(cov_bases_t)) / (tspan) : 0.0;
-    double jaccard = std::min(jaccard_q, jaccard_t);
-
-    if (edit_dist >= 0) {
-        double edit_dist_double = edit_dist;
-        jaccard_q = (qspan != 0) ? ((qspan  - edit_dist_double) / qspan) : 0.0;
-        jaccard_t = (tspan != 0) ? ((tspan - edit_dist_double) / tspan) : 0.0;
-        jaccard = std::min(jaccard_q, jaccard_t);
-    }
+    double identity = CalcIdentity_(
+                    q_start, q_end, t_start, t_end,
+                    cov_bases_q, cov_bases_t, edit_dist, match_bases);
 
     if (t_is_rev) {
         std::swap(t_start, t_end);
@@ -285,7 +297,7 @@ std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::
 
     ss  << q_id << " "
         << t_id << " "
-        << jaccard << " "
+        << identity << " "
         << num_seeds << " "
         << 0 << " "
         << q_start << " "
@@ -321,20 +333,12 @@ std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::Se
     int32_t score = mapping->Score();
     int32_t cov_bases_q = mapping->CoveredBasesQuery();
     int32_t cov_bases_t = mapping->CoveredBasesTarget();
+    int32_t match_bases = mapping->MatchBases();
     // int32_t num_seeds = mapping->NumSeeds();
 
-    double qspan = q_end - q_start;
-    double tspan = t_end - t_start;
-    double jaccard_q = (qspan != 0.0) ? (static_cast<double>(cov_bases_q)) / (qspan) : 0.0;
-    double jaccard_t = (tspan != 0.0) ? (static_cast<double>(cov_bases_t)) / (tspan) : 0.0;
-    double jaccard = std::min(jaccard_q, jaccard_t);
-
-    if (edit_dist >= 0) {
-        double edit_dist_double = edit_dist;
-        jaccard_q = (qspan != 0) ? ((qspan  - edit_dist_double) / qspan) : 0.0;
-        jaccard_t = (tspan != 0) ? ((tspan - edit_dist_double) / tspan) : 0.0;
-        jaccard = std::min(jaccard_q, jaccard_t);
-    }
+    double identity = CalcIdentity_(
+                    q_start, q_end, t_start, t_end,
+                    cov_bases_q, cov_bases_t, edit_dist, match_bases);
 
     if (t_is_rev) {
         // Output in the fwd strand always.
@@ -346,7 +350,7 @@ std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::Se
     ss  << q_name << " "
         << t_name << " "
         << -score << " "
-        << 100.0 * jaccard << " "
+        << 100.0 * identity << " "
         << 0 << " "
         << q_start << " "
         << q_end << " "

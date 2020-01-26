@@ -236,7 +236,7 @@ std::vector<std::shared_ptr<raptor::PathAlignment>> AlignedMappingResult::Genera
         }
 
         if (path->entire_alignment() != nullptr &&
-            path->entire_alignment()->op_counts().identity < min_idt) {
+            path->entire_alignment()->op_counts().identity_min < min_idt) {
             keep_path = false;
         }
 

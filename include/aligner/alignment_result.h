@@ -33,38 +33,24 @@ enum class AlignmentReturnValue {  // Strongly typed enum, C++11 feature.
 
 class CigarOpCounts {
    public:
-    CigarOpCounts()
-        : eq(0),
-          x(0),
-          i(0),
-          d(0),
-          iu(0),
-          du(0),
-          n(0),
-          s(0),
-          h(0),
-          aligned_qlen(0),
-          aligned_tlen(0),
-          num_ops(0),
-          identity(0.0),
-          error_rate(0.0),
-          error_rate_u(0.0) {}
-    int64_t eq;  // Num matching bases (equal operations).
-    int64_t x;   // Mismatches.
-    int64_t i;   // Insertions.
-    int64_t d;   // Deletions.
-    int64_t
-        iu;  // Insertions, where each streak of CIGAR operations is counted as 1 (unique event).
-    int64_t du;  // Deletions, where each streak of CIGAR operations is counted as 1 (unique event).
-    int64_t n;   // Num 'N' bases.
-    int64_t s;   // Soft clipped bases.
-    int64_t h;   // Hard clipped bases.
-    int64_t aligned_qlen;  // Length of the alignment on the query sequence.
-    int64_t aligned_tlen;  // Length of the alignment on the target sequence.
-    int64_t num_ops;
-    double identity;
-    double error_rate;
-    double error_rate_u;
+    CigarOpCounts() = default;
+    int64_t eq = 0;  // Num matching bases (equal operations).
+    int64_t x = 0;   // Mismatches.
+    int64_t i = 0;   // Insertions.
+    int64_t d = 0;   // Deletions.
+    int64_t iu = 0;  // Insertions, where each streak of CIGAR operations is counted as 1 (unique event).
+    int64_t du = 0;  // Deletions, where each streak of CIGAR operations is counted as 1 (unique event).
+    int64_t n = 0;   // Num 'N' bases.
+    int64_t s = 0;   // Soft clipped bases.
+    int64_t h = 0;   // Hard clipped bases.
+    int64_t aligned_qlen = 0;  // Length of the alignment on the query sequence.
+    int64_t aligned_tlen = 0;  // Length of the alignment on the target sequence.
+    int64_t num_ops = 0;
+    double identity_q = 0.0;
+    double identity_t = 0.0;
+    double identity_min = 0.0;
+    double error_rate = 0.0;
+    double error_rate_u = 0.0;
 };
 
 std::shared_ptr<raptor::AlignmentResult> createAlignmentResult();
@@ -78,7 +64,7 @@ class AlignmentResult {
 
     /*
      * Getters.
-     */
+    */
     int64_t score() const { return score_; }
     int64_t edit_dist() const { return edit_dist_; }
     int64_t max_score() const { return max_score_; }
@@ -90,6 +76,9 @@ class AlignmentResult {
     const std::vector<raptor::CigarOp>& cigar() const { return cigar_; }
     const CigarOpCounts& op_counts() const { return op_counts_; }
 
+    /*
+     * Setters.
+    */
     void score(int64_t _score) { score_ = _score; }
     void edit_dist(int64_t _edit_dist) { edit_dist_ = _edit_dist; }
     void max_score(int64_t _max_score) { max_score_ = _max_score; }
@@ -128,8 +117,11 @@ class AlignmentResult {
             }
         }
         double max_len = (double)std::max(op_counts_.aligned_qlen, op_counts_.aligned_tlen);
-        op_counts_.identity =
-            100.0 * ((op_counts_.aligned_qlen == 0) ? 1.0 : ((double)(op_counts_.eq)) / max_len);
+        op_counts_.identity_q =
+            100.0 * ((op_counts_.aligned_qlen == 0) ? 1.0 : ((double)(op_counts_.eq)) / op_counts_.aligned_qlen);
+        op_counts_.identity_t =
+            100.0 * ((op_counts_.aligned_qlen == 0) ? 1.0 : ((double)(op_counts_.eq)) / op_counts_.aligned_tlen);
+        op_counts_.identity_min = std::min(op_counts_.identity_q, op_counts_.identity_t);
         op_counts_.error_rate = (op_counts_.num_ops == 0)
                                     ? 0.0
                                     : ((double)(op_counts_.x + op_counts_.i + op_counts_.d)) /

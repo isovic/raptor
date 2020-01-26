@@ -47,6 +47,13 @@ public:
                                 int32_t mapq, bool write_custom_tags,
                                 const std::string& timings);
 
+private:
+    static double CalcIdentity_(
+                int32_t q_start, int32_t q_end,
+                int32_t t_start, int32_t t_end,
+                int32_t cov_bases_q, int32_t cov_bases_t,
+                int32_t edit_dist, int32_t match_bases);
+
 };
 
 } /* namespace raptor */

@@ -366,7 +366,7 @@ std::vector<std::shared_ptr<raptor::RegionAligned>> PathAligner::SplitAlignment_
 
         aln->cigar(new_cigar);
 
-        if (aln->op_counts().identity >= min_idt) {
+        if (aln->op_counts().identity_min >= min_idt) {
             // fprintf (stderr, "(Split) %s; aln->op_counts().eq = %d, aln->op_counts().aligned_qlen = %d\n", aln->Verbose().c_str(), aln->op_counts().eq, aln->op_counts().aligned_qlen);
             results.emplace_back(result);
         }
@@ -760,7 +760,7 @@ std::shared_ptr<raptor::PathAlignment> PathAligner::Align(const mindex::Sequence
                 LOG_ALL("Suboptimal");
             }
 
-            LOG_ALL("Identity: %.2f\n", entire_alignment->op_counts().identity);
+            LOG_ALL("Identity: %.2f\n", entire_alignment->op_counts().identity_min);
             LOG_ALL("Error rate: %.2f\n", entire_alignment->op_counts().error_rate * 100.0f);
             LOG_ALL("Error rate unique: %.2f\n", entire_alignment->op_counts().error_rate_u * 100.0f);
             LOG_ALL("Running SplitAlignment_.\n");
@@ -785,14 +785,14 @@ std::shared_ptr<raptor::PathAlignment> PathAligner::Align(const mindex::Sequence
 
     // Sum the individual alignment scores.
     int64_t total_score = 0;
-    // fprintf (stderr, "Entire identity: %.2f\n", entire_alignment->op_counts().identity * 100.0f);
+    // fprintf (stderr, "Entire identity: %.2f\n", entire_alignment->op_counts().identity_min * 100.0f);
     for (auto& aligned_region : region_aln) {
         total_score += aligned_region->aln()->score();
 
         #ifdef RAPTOR_TESTING_MODE
             if (params->debug_qid == qseq->abs_id() ||
                 params->debug_qname == std::string(qseq->header())) {
-                LOG_ALL("Identity: %.2f\n", aligned_region->aln()->op_counts().identity * 100.0f);
+                LOG_ALL("Identity: %.2f\n", aligned_region->aln()->op_counts().identity_min * 100.0f);
                 LOG_ALL("Error rate: %.2f\n", aligned_region->aln()->op_counts().error_rate * 100.0f);
                 LOG_ALL("Error rate unique: %.2f\n", aligned_region->aln()->op_counts().error_rate_u * 100.0f);
                 LOG_ALL("\n");
