@@ -48,6 +48,10 @@ public:
     virtual int32_t CoveredBasesTarget() const = 0;
     virtual int32_t EditDistance() const = 0;
     virtual std::vector<raptor::CigarOp> Cigar() const = 0;
+    virtual int32_t MatchBases() const = 0;
+    virtual int32_t MismatchBases() const = 0;
+    virtual int32_t InsertionBases() const = 0;
+    virtual int32_t DeletionBases() const = 0;
 
     virtual bool IsPrimary() const = 0;
     virtual bool IsSecondary() const = 0;

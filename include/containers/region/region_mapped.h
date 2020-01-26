@@ -118,6 +118,19 @@ public:
     std::vector<raptor::CigarOp> Cigar() const {
         return std::vector<raptor::CigarOp>();
     }
+    int32_t MatchBases() const {
+        return 0;
+    }
+    int32_t MismatchBases() const {
+        return 0;
+    }
+    int32_t InsertionBases() const {
+        return 0;
+    }
+    int32_t DeletionBases() const {
+        return 0;
+    }
+
     int32_t PathId() const {
         return path_id_;
     }

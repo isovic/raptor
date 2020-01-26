@@ -117,6 +117,19 @@ class RegionAligned : public raptor::RegionBase {
     std::vector<raptor::CigarOp> Cigar() const {
         return aln_->cigar();
     }
+    int32_t MatchBases() const {
+        return aln_->op_counts().eq;
+    }
+    int32_t MismatchBases() const {
+        return aln_->op_counts().x;
+    }
+    int32_t InsertionBases() const {
+        return aln_->op_counts().i;
+    }
+    int32_t DeletionBases() const {
+        return aln_->op_counts().d;
+    }
+
     int32_t PathId() const {
         return path_id_;
     }
