@@ -12,7 +12,8 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                 int32_t _num_seeds, int32_t _edit_dist,
                 int32_t _score,
                 int32_t _path_id, int32_t _num_paths,
-                int32_t _segment_id, int32_t _num_segments) {
+                int32_t _segment_id, int32_t _num_segments,
+                int32_t _region_priority, bool _region_is_supplementary) {
 
     return std::shared_ptr<raptor::RegionMapped>(new raptor::RegionMapped(
                                             _id,
@@ -23,7 +24,8 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                                             _cov_bases_q, _cov_bases_t,
                                             _num_seeds, _edit_dist, _score,
                                             _path_id, _num_paths,
-                                            _segment_id, _num_segments));
+                                            _segment_id, _num_segments,
+                                            _region_priority, _region_is_supplementary));
 
 }
 
@@ -59,7 +61,8 @@ RegionMapped::RegionMapped(
         int32_t _num_seeds, int32_t _edit_dist,
         int32_t _score,
         int32_t _path_id, int32_t _num_paths,
-        int32_t _segment_id, int32_t _num_segments)
+        int32_t _segment_id, int32_t _num_segments,
+        int32_t _region_priority, bool _region_is_supplementary)
         :   id_(_id),
             target_hits_id_(_target_hits_id),
             env_(_env),
@@ -70,7 +73,7 @@ RegionMapped::RegionMapped(
             score_(_score),
             path_id_(_path_id), num_paths_(_num_paths),
             segment_id_(_segment_id), num_segments_(_num_segments),
-            region_priority_(0), region_is_supplementary_(false),
+            region_priority_(_region_priority), region_is_supplementary_(_region_is_supplementary),
             alt_region_count_(0),
             mapq_{0},
             extra_tags_{} {

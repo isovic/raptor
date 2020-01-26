@@ -63,7 +63,8 @@ raptor::AnchorPtr ConvertM4PlusToRegionMapped(
     auto new_anchor = raptor::createRegionMapped(anchor_id, target_hits_id, map_env,
                                                     qstart, qend, tstart, tend,
                                                     cov_bases_q, cov_bases_t, num_seeds,
-                                                    -1, -1, -1, -1, -1, -1);                    // Path IDs. Not used here.
+                                                    -1, -1, -1, -1, -1, -1,
+                                                    0, false);                    // Path IDs. Not used here.
     return new_anchor;
 
 }
@@ -95,7 +96,8 @@ raptor::AnchorPtr ConvertAnchorM4PlusToRegionMapped(const std::vector<int32_t>& 
     auto new_anchor = raptor::createRegionMapped(anchor_id, target_hits_id, map_env,
                                                     qstart, qend, tstart, tend,
                                                     cov_bases_q, cov_bases_t, num_seeds,
-                                                    -1, -1, -1, -1, -1, -1);                    // Path IDs. Not used here.
+                                                    -1, -1, -1, -1, -1, -1,
+                                                    0, false);                    // Path IDs. Not used here.
 
     return new_anchor;
 }

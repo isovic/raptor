@@ -109,7 +109,7 @@ std::vector<std::shared_ptr<raptor::TargetAnchorType>> MakeAnchors(
 
         target_anchors[it->second]->hits().emplace_back(
             raptor::createRegionMapped(anchor_id, target_hits_id, th->env(), qstart, qend, rstart, rend,
-                             cov_bases_q, cov_bases_t, num_seeds, -1, -1, -1, -1, -1, -1));
+                             cov_bases_q, cov_bases_t, num_seeds, -1, -1, -1, -1, -1, -1, 0, false));
 
         cov_bases_q += target_anchors[it->second]->cov_bases_q();
         cov_bases_t += target_anchors[it->second]->cov_bases_t();

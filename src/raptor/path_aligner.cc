@@ -327,7 +327,7 @@ std::vector<std::shared_ptr<raptor::RegionAligned>> PathAligner::SplitAlignment_
 
     for (size_t i = 0; i < ref_seq_regions.size(); i++) {
         auto aln = raptor::createAlignmentResult();
-        auto result = createAlignedRegion(ref_seq_regions[i].env, aln, -1, -1, -1, -1);
+        auto result = createAlignedRegion(ref_seq_regions[i].env, aln, -1, -1, -1, -1, 0, false);
 
         int64_t region_op_start = std::get<0>(region_op_pos[i]);
         int64_t region_op_end = std::get<1>(region_op_pos[i]);
@@ -444,7 +444,8 @@ std::shared_ptr<raptor::RegionMapped> PathAligner::ExtendAlignmentFront_(
                                 anchor->NumSeeds(), anchor->EditDistance(),
                                 anchor->Score(),
                                 anchor->PathId(), anchor->PathsNum(),
-                                anchor->SegmentId(), anchor->SegmentsNum());
+                                anchor->SegmentId(), anchor->SegmentsNum(),
+                                anchor->GetRegionPriority(), anchor->GetRegionIsSupplementary());
 
     const char* query = (const char*)&(qseq->data()[0]);
     int32_t qstart = 0;
@@ -520,7 +521,8 @@ std::shared_ptr<raptor::RegionMapped> PathAligner::ExtendAlignmentBack_(
                                 anchor->CoveredBasesQuery(), anchor->CoveredBasesTarget(),
                                 anchor->NumSeeds(), anchor->EditDistance(), anchor->Score(),
                                 anchor->PathId(), anchor->PathsNum(),
-                                anchor->SegmentId(), anchor->SegmentsNum());
+                                anchor->SegmentId(), anchor->SegmentsNum(),
+                                anchor->GetRegionPriority(), anchor->GetRegionIsSupplementary());
 
     // auto ret = raptor::NodeItem<int64_t, raptor::RegionMapped>::createNodeItem(node->internal_id(), node->name(), new_anchor);
 

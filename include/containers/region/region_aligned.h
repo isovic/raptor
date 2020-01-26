@@ -26,7 +26,8 @@ typedef std::shared_ptr<raptor::RegionAligned> AlignedRegionPtr;
 std::shared_ptr<raptor::RegionAligned> createAlignedRegion(std::shared_ptr<raptor::MappingEnv> env,
                                                        std::shared_ptr<raptor::AlignmentResult> aln,
                                                        int32_t _path_id, int32_t _num_paths,
-                                                       int32_t _segment_id, int32_t _num_segments);
+                                                       int32_t _segment_id, int32_t _num_segments,
+                                                       int32_t _region_priority, bool _region_is_supplementary);
 
 /*
  * Wraps the generic raptor::Alignment object in the context of a
@@ -43,7 +44,8 @@ class RegionAligned : public raptor::RegionBase {
     friend std::shared_ptr<raptor::RegionAligned> createAlignedRegion(std::shared_ptr<raptor::MappingEnv> env,
                                                                   std::shared_ptr<raptor::AlignmentResult> aln,
                                                                   int32_t _path_id, int32_t _num_paths,
-                                                                  int32_t _segment_id, int32_t _num_segments);
+                                                                  int32_t _segment_id, int32_t _num_segments,
+                                                                  int32_t _region_priority, bool _region_is_supplementary);
 
     ~RegionAligned() = default;
 
@@ -249,12 +251,13 @@ class RegionAligned : public raptor::RegionBase {
     RegionAligned(std::shared_ptr<raptor::MappingEnv> env,
                   std::shared_ptr<raptor::AlignmentResult> aln,
                   int32_t _path_id, int32_t _num_paths,
-                  int32_t _segment_id, int32_t _num_segments)
+                  int32_t _segment_id, int32_t _num_segments,
+                  int32_t _region_priority, bool _region_is_supplementary)
                             :   env_(env),
                                 aln_(aln),
                                 path_id_(_path_id), num_paths_(_num_paths),
                                 segment_id_(_segment_id), num_segments_(_num_segments),
-                                region_priority_(0), region_is_supplementary_(false),
+                                region_priority_(_region_priority), region_is_supplementary_(_region_is_supplementary),
                                 alt_region_count_(0),
                                 mapq_(0),
                                 extra_tags_{}

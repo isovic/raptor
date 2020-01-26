@@ -29,7 +29,8 @@ std::shared_ptr<raptor::RegionMapped> createRegionMapped(
                 int32_t _num_seeds, int32_t _edit_dist,
                 int32_t _score,
                 int32_t _path_id, int32_t _num_paths,
-                int32_t _segment_id, int32_t _num_segments);
+                int32_t _segment_id, int32_t _num_segments,
+                int32_t _region_priority, bool _region_is_supplementary);
 
 class RegionMapped : public raptor::RegionBase {
 public:
@@ -44,7 +45,8 @@ public:
                     int32_t _num_seeds, int32_t _edit_dist,
                     int32_t _score,
                     int32_t _path_id, int32_t _num_paths,
-                    int32_t _segment_id, int32_t _num_segments);
+                    int32_t _segment_id, int32_t _num_segments,
+                    int32_t _region_priority, bool _region_is_supplementary);
 
     std::string Verbose() const;
 
@@ -276,7 +278,8 @@ private:
             int32_t _num_seeds, int32_t _edit_dist,
             int32_t _score,
             int32_t _path_id, int32_t _num_paths,
-            int32_t _segment_id, int32_t _num_segments);
+            int32_t _segment_id, int32_t _num_segments,
+            int32_t _region_priority, bool _region_is_supplementary);
 
     // Allow copy constructors in this case, to enable copying of all data.
 
