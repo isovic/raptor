@@ -43,6 +43,7 @@ RegionMapped::RegionMapped(
             path_id_(-1), num_paths_(-1),
             segment_id_(-1), num_segments_(-1),
             region_priority_(0), region_is_supplementary_(false),
+            alt_region_count_(0),
             extra_tags_{} {
 
 }
@@ -69,6 +70,7 @@ RegionMapped::RegionMapped(
             path_id_(_path_id), num_paths_(_num_paths),
             segment_id_(_segment_id), num_segments_(_num_segments),
             region_priority_(0), region_is_supplementary_(false),
+            alt_region_count_(0),
             extra_tags_{} {
 
 }
