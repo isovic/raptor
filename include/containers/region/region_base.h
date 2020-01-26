@@ -60,12 +60,11 @@ public:
     virtual int32_t PathsNum() const = 0;       // Total number of alternative paths.
     virtual int32_t SegmentId() const = 0;      // ID of the supplementary alignment.
     virtual int32_t SegmentsNum() const = 0;    // Number of supplementary alignments for the path.
+    virtual int32_t GetAltRegionCount() const = 0;    // Number of alternative regions (secondary mappings) covering the same coordinates (either in query or target coords). Not counting this particular region.
 
     virtual raptor::RegionType GetRegionType() const = 0;   // Get the region type (Primary, PrimarySupplementary, Secondary, SecondarySupplementary, Undefined).
     virtual int32_t GetRegionPriority() const = 0;
     virtual bool GetRegionIsSupplementary() const = 0;
-    virtual void SetRegionPriority(int32_t val) = 0;
-    virtual void SetRegionIsSupplementary(bool val) = 0;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
@@ -81,6 +80,9 @@ public:
     virtual void SetEditDistance(int32_t val) = 0;
     virtual void SetScore(int32_t val) = 0;
     virtual void AddTag(const raptor::SamTag& val) = 0;
+    virtual void SetAltRegionCount(int32_t val) = 0;
+    virtual void SetRegionPriority(int32_t val) = 0;
+    virtual void SetRegionIsSupplementary(bool val) = 0;
 };
 
 }

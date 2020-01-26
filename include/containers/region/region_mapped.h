@@ -167,6 +167,10 @@ public:
         }
         return raptor::RegionType::Undefined;
     }
+    int32_t GetAltRegionCount() const {
+        // Number of alternative regions (secondary mappings) covering the same coordinates (either in query or target coords). Not counting this particular region.
+        return alt_region_count_;
+    }
 
     /*
     * Returns the score if it was initialized e.g. via alignment,
@@ -193,6 +197,9 @@ public:
     }
     void AddTag(const raptor::SamTag& val) {
         extra_tags_[val.name] = val;
+    }
+    void SetAltRegionCount(int32_t val) {
+        alt_region_count_ = val;
     }
 
     /*
@@ -270,6 +277,7 @@ private:
 
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
+    int32_t alt_region_count_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.

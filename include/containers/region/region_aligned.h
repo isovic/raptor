@@ -167,6 +167,10 @@ class RegionAligned : public raptor::RegionBase {
         }
         return raptor::RegionType::Undefined;
     }
+    int32_t GetAltRegionCount() const {
+        // Number of alternative regions (secondary mappings) covering the same coordinates (either in query or target coords). Not counting this particular region.
+        return alt_region_count_;
+    }
 
     ////////////////
     /// Setters. ///
@@ -185,6 +189,9 @@ class RegionAligned : public raptor::RegionBase {
     }
     void AddTag(const raptor::SamTag& val) {
         extra_tags_[val.name] = val;
+    }
+    void SetAltRegionCount(int32_t val) {
+        alt_region_count_ = val;
     }
 
     /*
@@ -213,7 +220,9 @@ class RegionAligned : public raptor::RegionBase {
                                 aln_(nullptr),
                                 path_id_(-1), num_paths_(-1),
                                 segment_id_(-1), num_segments_(-1),
-                                region_priority_(0), region_is_supplementary_(false)
+                                region_priority_(0), region_is_supplementary_(false),
+                                alt_region_count_(0),
+                                extra_tags_{}
     {
     }
 
@@ -225,7 +234,9 @@ class RegionAligned : public raptor::RegionBase {
                                 aln_(aln),
                                 path_id_(_path_id), num_paths_(_num_paths),
                                 segment_id_(_segment_id), num_segments_(_num_segments),
-                                region_priority_(0), region_is_supplementary_(false)
+                                region_priority_(0), region_is_supplementary_(false),
+                                alt_region_count_(0),
+                                extra_tags_{}
     {
     }
 
@@ -238,6 +249,7 @@ class RegionAligned : public raptor::RegionBase {
 
     int32_t region_priority_;           // Priority 0 is a primary alignment, and > 0 secondary. There can be more than 1 regions of priority "0" but only one is primary, others are supplementary.
     bool region_is_supplementary_;
+    int32_t alt_region_count_;
 
     // If there is any additional data which needs to be available for output, it
     // can be encoded here.
