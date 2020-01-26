@@ -288,7 +288,6 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                                             prefilter_bestn,
                                             params->bestn_threshold,
                                             params->min_map_len / 2,  // Ideally we wouldn't filter by min_map_len here because alignment can extend it, but realistically that can cause many short mappings to be aligned and thus slow down the process.
-                                            0,                        // Don't filter by mapq, scores may change after alignment.
                                             false);
 
             DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering mappings.\n"));
@@ -323,7 +322,6 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
 
             aln_result->Filter(params->bestn, params->bestn_threshold,
                                           params->min_map_len,
-                                          params->min_mapq,
                                           params->min_identity,
                                           false);
 
@@ -341,7 +339,6 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                 graph_mapping_result->Filter(params->bestn,
                                                 params->bestn_threshold,
                                                 params->min_map_len / 2,  // Ideally we wouldn't filter by min_map_len here because alignment can extend it, but realistically that can cause many short mappings to be aligned and thus slow down the process.
-                                                params->min_mapq,
                                                 false);
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (1/2).\n"));
 
@@ -362,7 +359,6 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                 graph_mapping_result->Filter(params->bestn,
                                                 params->bestn_threshold,
                                                 params->min_map_len,
-                                                params->min_mapq,
                                                 false);
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (2/2).\n"));
 
@@ -370,7 +366,6 @@ int Raptor::MappingWorker_(const mindex::SequenceFilePtr reads, const mindex::In
                 graph_mapping_result->Filter(params->bestn,
                                                 params->bestn_threshold,
                                                 params->min_map_len,
-                                                params->min_mapq,
                                                 false);
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Done filtering (1/1).\n"));
                 DEBUG_QSEQ(params, qseq, LOG_ALL("Not extending the flanks because flank_ext_len == 0."));

@@ -83,7 +83,6 @@ class ParamsRaptor {
     */
     double min_identity = 65.0;
     double max_evalue = 1e0;
-    int32_t min_mapq = 0;
     bool one_hit_per_target = false;
 
     /*

@@ -212,14 +212,13 @@ TEST(APIExamples, FullPipelineWithValueAccessAPI) {
         ///////////////////////////////////////////////////////////////////////
         // Align the graph-mapped regions.
         // Filter mappings, but leave room for error and mapq calculation.
-        graph_mapping_result->Filter(-1, 0.20, 0, 0, false);
+        graph_mapping_result->Filter(-1, 0.20, 0, false);
 
         auto aln_result = raptor_aligner->AlignPaths(seq, graph_mapping_result->paths());
 
         aln_result->Filter(10,      // bestn
                                    1.0,     // bestn_threshold
                                    0,       // min_map_len,
-                                   0,       // min_mapq,
                                    75,    // min_identity
                                    false);  // only sort, and ignore other filters
 

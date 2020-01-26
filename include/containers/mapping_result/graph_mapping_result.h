@@ -59,7 +59,7 @@ public:
                                 int32_t min_score_diff_margin,
                                 int32_t min_map_len);
 
-    void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, bool just_sort);
+    void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, bool just_sort);
 
     int64_t qseq_len() const { return qseq_len_; }
     int64_t qseq_id() const { return qseq_id_; }

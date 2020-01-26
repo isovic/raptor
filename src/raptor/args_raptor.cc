@@ -393,10 +393,6 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     //                       "Threshold for E-value. If E-value > FLT, read will be called unmapped. "
     //                       "If FLT < 0.0, threshold not applied.",
     //                       0, "Filtering options");
-    argparser.AddArgument(
-                          &parameters->min_mapq, VALUE_TYPE_INT32, "", "mapq", "0",
-                          "Threshold for mapping quality. If mapq < INT, read will be called unmapped.",
-                          0,"Filtering options");
     argparser.AddArgument(&parameters->min_identity, VALUE_TYPE_DOUBLE, "",
                           "min-idt", "65.0",
                           "Minimum percent alignment identity allowed to report the alignment.",

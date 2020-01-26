@@ -201,7 +201,7 @@ std::vector<std::shared_ptr<raptor::PathAlignment>> AlignedMappingResult::Genera
 }
 
 void AlignedMappingResult::Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len,
-                                   int32_t min_mapq, double min_idt, bool just_sort) {
+                                   double min_idt, bool just_sort) {
     path_alignments_ = GenerateFiltered(path_alignments_, bestn, max_fraction_diff, min_map_len, min_idt);
 }
 

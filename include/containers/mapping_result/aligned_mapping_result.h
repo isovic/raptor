@@ -80,7 +80,7 @@ public:
                                                     int32_t min_map_len,
                                                     double min_idt);
 
-    void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, int32_t min_mapq, double min_idt, bool just_sort);
+    void Filter(int32_t bestn, double max_fraction_diff, int32_t min_map_len, double min_idt, bool just_sort);
 
     /*
     * Sets the return value of the mapping method.
