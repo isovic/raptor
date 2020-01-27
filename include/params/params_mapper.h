@@ -55,6 +55,7 @@ class ParamsMapper {
     bool no_graph_mapping = false;
     bool relabel_secondary_supp = true;
     double min_secondary_to_primary_ratio = 0.80;
+    int32_t allowed_suppl_overlap = 0;
 
    private:
     ParamsMapper() = default;

@@ -58,7 +58,10 @@ class RaptorAligner {
     RaptorAligner(const RaptorAligner&) = delete;
     RaptorAligner& operator=(const RaptorAligner&) = delete;
 
-    void LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::PathAlignment>>& paths, bool do_relabel_sec_supp, double min_sec_to_prim_ratio);
+    void LabelSupplementaryAndSecondary_(
+            std::vector<std::shared_ptr<raptor::PathAlignment>>& paths,
+            bool do_relabel_sec_supp, double min_sec_to_prim_ratio,
+            int32_t allowed_suppl_overlap);
 
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::ParamsAligner> params_;

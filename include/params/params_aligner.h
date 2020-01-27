@@ -40,6 +40,7 @@ class ParamsAligner {
     bool is_rna = false;
     bool relabel_secondary_supp = true;
     double min_secondary_to_primary_ratio = 0.80;
+    int32_t allowed_suppl_overlap = 0;
 
    private:
     ParamsAligner() = default;

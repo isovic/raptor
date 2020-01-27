@@ -165,7 +165,9 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(
 
     tt_graph_dp.stop();
 
-    LabelSupplementaryAndSecondary_(paths, params_->relabel_secondary_supp, params_->min_secondary_to_primary_ratio);
+    LabelSupplementaryAndSecondary_(paths, params_->relabel_secondary_supp,
+                                    params_->min_secondary_to_primary_ratio,
+                                    params_->allowed_suppl_overlap);
 
     result->paths(paths);
     result->SetReturnValue(raptor::MapperReturnValueBase::OK);
@@ -181,7 +183,10 @@ std::shared_ptr<raptor::GraphMappingResult> GraphMapper::Map(
     return result;
 }
 
-void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<raptor::LocalPath>>& paths, bool do_relabel_sec_supp, double min_sec_to_prim_ratio) {
+void GraphMapper::LabelSupplementaryAndSecondary_(
+            std::vector<std::shared_ptr<raptor::LocalPath>>& paths,
+            bool do_relabel_sec_supp,double min_sec_to_prim_ratio,
+            int32_t allowed_suppl_overlap) {
 
     int32_t num_paths = static_cast<int32_t>(paths.size());
 
@@ -219,7 +224,7 @@ void GraphMapper::LabelSupplementaryAndSecondary_(std::vector<std::shared_ptr<ra
 
     if (do_relabel_sec_supp) {
         // The grace distance for mapq scaling is an arbitrary value.
-        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w));
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w), allowed_suppl_overlap);
     }
 }
 

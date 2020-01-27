@@ -215,7 +215,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     tt_score_anchors.stop();
 
     // Label supplementary and secondary alignments, and calculate the mapping quality.
-    LabelSupplementaryAndSecondary_(anchors, params_->relabel_secondary_supp, params_->min_secondary_to_primary_ratio);
+    LabelSupplementaryAndSecondary_(anchors, params_->relabel_secondary_supp,
+                                    params_->min_secondary_to_primary_ratio,
+                                    params_->allowed_suppl_overlap);
 
     // Store the results.
     result->target_anchors(anchors);
@@ -274,7 +276,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::Mapper::Map(const mindex::S
     return result;
 }
 
-void Mapper::LabelSupplementaryAndSecondary_(const raptor::TargetAnchorPtrVector& ta, bool do_relabel_sec_supp, double min_sec_to_prim_ratio) {
+void Mapper::LabelSupplementaryAndSecondary_(
+            const raptor::TargetAnchorPtrVector& ta, bool do_relabel_sec_supp,
+            double min_sec_to_prim_ratio, int32_t allowed_suppl_overlap) {
     std::vector<std::pair<int64_t, size_t>> path_scores;
     for (size_t path_id = 0; path_id < ta.size(); ++path_id) {
         const auto& path_aln = ta[path_id];
@@ -303,7 +307,7 @@ void Mapper::LabelSupplementaryAndSecondary_(const raptor::TargetAnchorPtrVector
     }
 
     if (do_relabel_sec_supp) {
-        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w));
+        raptor::RelabelSupplementary(sorted_regions, min_sec_to_prim_ratio, (index_->params()->k + index_->params()->w), allowed_suppl_overlap);
     }
 }
 

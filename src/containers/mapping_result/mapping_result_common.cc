@@ -18,7 +18,11 @@ namespace raptor {
  * Paths should ideally be sorted by score, so that the newly assigned region priority reflects
  * the score.
 */
-void RelabelSupplementary(std::vector<std::shared_ptr<raptor::RegionBase>>& alns, double min_sec_to_prim_ratio, int32_t grace_dist_for_mapq_scaling) {
+void RelabelSupplementary(
+            std::vector<std::shared_ptr<raptor::RegionBase>>& alns,
+            double min_sec_to_prim_ratio,
+            int32_t grace_dist_for_mapq_scaling,
+            int32_t allowed_overlap_bp) {
     /*
         General algorithm:
         1. Collect all regions and build 2 interval trees: one for query coordintes, and one for target coordinates.
@@ -42,7 +46,7 @@ void RelabelSupplementary(std::vector<std::shared_ptr<raptor::RegionBase>>& alns
                                 qi_prim, qt_prim, ti_prim, tt_prim);
 
     // Label the supplementary, and mark them as primary too.
-    FindSupplementary(qt_prim, qi_prim, tt_prim, ti_prim, alns, min_sec_to_prim_ratio);
+    FindSupplementary(qt_prim, qi_prim, tt_prim, ti_prim, alns, min_sec_to_prim_ratio, allowed_overlap_bp);
 
 
 
@@ -101,13 +105,23 @@ void CreateRegionIntervalTrees(
     }
 }
 
+inline int32_t CalcIntervalOverlap(int32_t a_start, int32_t a_end, int32_t b_start, int32_t b_end) {
+    if (b_start > a_end || a_start > b_end) {
+        return 0;
+    }
+    int32_t os = std::max(a_start, b_start);
+    int32_t oe = std::min(a_end, b_end);
+    return (oe - os);
+}
+
 void FindSupplementary(
                 IntervalTreeInt64& query_trees,
                 IntervalVectorInt64& query_intervals,
                 std::unordered_map<int64_t, IntervalTreeInt64>& target_trees,
                 std::unordered_map<int64_t, IntervalVectorInt64>& target_intervals,
                 std::vector<std::shared_ptr<raptor::RegionBase>>& alns,
-                double min_sec_to_prim_ratio) {
+                double min_sec_to_prim_ratio,
+                int32_t allowed_overlap_bp) {
 
     // Linear pass through the non-primary alignments to relabel them.
     // Here, we find only the SUPPLEMENTARY alignments. Secondary are ignored until
@@ -124,21 +138,64 @@ void FindSupplementary(
             continue;
         }
 
+        bool is_valid = true;
+
         // SECONDARY ALIGNMENTS based on the query coordinate overlaps.
         DEBUG_RUN(true, LOG_ALL("    - Checking query interval: (%ld, %ld)\n", aln->QueryStart(), aln->QueryEnd() - 1));
-        auto found_query_intervals = query_trees.findOverlapping(aln->QueryStart(), aln->QueryEnd() - 1);
-        if (found_query_intervals.size()) {
-            DEBUG_RUN(true, LOG_ALL("    - Skipping, overlaps in query.\n"));
+        auto found_qi = query_trees.findOverlapping(aln->QueryStart(), aln->QueryEnd() - 1);
+        // Check first, to improve speed.
+        // If we allow a slight overlap, then we need to check that the overlapping alignments
+        // are above a limit before considering them as secondary instead of supplementary.
+        if (allowed_overlap_bp > 0) {
+            for (const auto& interval: found_qi) {
+                auto& other_aln = alns[interval.value];
+                // Check if the overlap is within the allowed limit.
+                int32_t ovl = CalcIntervalOverlap(aln->QueryStart(), aln->QueryEnd(), other_aln->QueryStart(), other_aln->QueryEnd());
+                if (ovl <= allowed_overlap_bp) {
+                    continue;
+                }
+                // If it's above the allowed limit, this is not a valid supplementary.
+                is_valid = false;
+                break;
+            }
+        } else {
+            if (found_qi.size()) {
+                DEBUG_RUN(true, LOG_ALL("    - Skipping, overlaps in query.\n"));
+                is_valid = false;
+            }
+        }
+        if (is_valid == false) {
             continue;
         }
+
         // SECONDARY ALIGNMENTS based on the target coordinate overlaps.
         auto it_trees = target_trees.find(aln->TargetID());
         if (it_trees != target_trees.end()) {
-            auto found_target_intervals = it_trees->second.findOverlapping(aln->TargetFwdStart(), aln->TargetFwdEnd() - 1);
-            if (found_target_intervals.size()) {
-                DEBUG_RUN(true, LOG_ALL("    - Skipping, overlaps in target.\n"));
-                continue;
+            auto found_ti = it_trees->second.findOverlapping(aln->TargetFwdStart(), aln->TargetFwdEnd() - 1);
+            // Check first, to improve speed.
+            // If we allow a slight overlap, then we need to check that the overlapping alignments
+            // are above a limit before considering them as secondary instead of supplementary.
+            if (allowed_overlap_bp > 0) {
+                for (const auto& interval: found_ti) {
+                    auto& other_aln = alns[interval.value];
+                    // Check if the overlap is within the allowed limit.
+                    int32_t ovl = CalcIntervalOverlap(aln->TargetFwdStart(), aln->TargetFwdEnd(), other_aln->TargetFwdStart(), other_aln->TargetFwdEnd());
+                    if (ovl <= allowed_overlap_bp) {
+                        continue;
+                    }
+                    // If it's above the allowed limit, this is not a valid supplementary.
+                    is_valid = false;
+                    break;
+                }
+            } else {
+                if (found_ti.size()) {
+                    DEBUG_RUN(true, LOG_ALL("    - Skipping, overlaps in target.\n"));
+                    is_valid = false;
+                }
             }
+        }
+        if (is_valid == false) {
+            continue;
         }
 
         DEBUG_RUN(true, LOG_ALL("    - Supplementary region found.\n"));

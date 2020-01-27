@@ -19,7 +19,11 @@
 
 namespace raptor {
 
-void RelabelSupplementary(std::vector<std::shared_ptr<raptor::RegionBase>>& ret, double min_sec_to_prim_ratio, int32_t grace_dist_for_mapq_scaling);
+void RelabelSupplementary(
+                std::vector<std::shared_ptr<raptor::RegionBase>>& ret,
+                double min_sec_to_prim_ratio,
+                int32_t grace_dist_for_mapq_scaling,
+                int32_t allowed_overlap_bp);
 
 /*
  * Helper function.
@@ -50,7 +54,9 @@ void FindSupplementary(
                 std::unordered_map<int64_t, IntervalTreeInt64>& target_trees,
                 std::unordered_map<int64_t, IntervalVectorInt64>& target_intervals,
                 std::vector<std::shared_ptr<raptor::RegionBase>>& alns,
-                double min_sec_to_prim_ratio);
+                double min_sec_to_prim_ratio,
+                int32_t allowed_overlap_bp);
+
 void FindSecondary(
                 const IntervalTreeInt64& qt_prim,
                 const std::unordered_map<int64_t, IntervalTreeInt64>& tt_prim,

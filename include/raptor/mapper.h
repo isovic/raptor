@@ -61,7 +61,7 @@ class Mapper {
         const std::vector<std::shared_ptr<raptor::TargetHits<T>>>& target_hits, const mindex::SequencePtr& qseq);
 
     void LabelSupplementaryAndSecondary_(const raptor::TargetAnchorPtrVector& ta,
-        bool do_relabel_sec_supp, double min_sec_to_prim_ratio);
+        bool do_relabel_sec_supp, double min_sec_to_prim_ratio, int32_t allowed_suppl_overlap);
 
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::ParamsMapper> params_;

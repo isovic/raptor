@@ -327,6 +327,7 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
     int32_t end_bonus = 0;
     bool no_stop_ext_on_zero_score = false;
     double min_secondary_to_primary_ratio = 0.80;
+    int32_t allowed_suppl_overlap = 0;
 
     argparser.AddArgument(&parameters->do_align, VALUE_TYPE_BOOL, "", "align", "0",
                           "If selected, alignment will be produced for the mappings.", 0,
@@ -410,6 +411,11 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
                           "sec-ratio", "0.80",
                           "Minimum secondary/primary score ratio to retain the secondary "
                           "mapping/alignment.",
+                          0, "Filtering options");
+    argparser.AddArgument(&allowed_suppl_overlap, VALUE_TYPE_INT32, "",
+                          "suppl-ovl", "50",
+                          "Allowed supplementary/primary overlap in bp. If 0, even a single bp"
+                          "overlap will mark a region secondary instead of supplementary.",
                           0, "Filtering options");
     argparser.AddArgument(&parameters->min_map_len, VALUE_TYPE_INT64, "", "min-map-len", "0",
                           "Output only alignments/mappings/overlaps above this length.", 0,
@@ -755,6 +761,9 @@ int ProcessArgsRaptor(int argc, char **argv, std::shared_ptr<raptor::ParamsRapto
 
     parameters->mapper_params->min_secondary_to_primary_ratio = min_secondary_to_primary_ratio;
     parameters->aligner_params->min_secondary_to_primary_ratio = min_secondary_to_primary_ratio;
+
+    parameters->mapper_params->allowed_suppl_overlap = allowed_suppl_overlap;
+    parameters->aligner_params->allowed_suppl_overlap = allowed_suppl_overlap;
 
 #ifdef RAPTOR_TESTING_MODE
     if (parameters->verbose_level >= 5) {
