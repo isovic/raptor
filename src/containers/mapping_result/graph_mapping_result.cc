@@ -68,6 +68,7 @@ std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegi
                 query_target_pairs[pair_name] = 1;
             }
             // Priority of 0 are the primary alignments.
+            // Filter out any region with priority < 0. Those are marked for removal.
             auto priority = aln->GetRegionPriority();
             if (priority == 0) {
                 ret.emplace_back(aln);
@@ -76,8 +77,11 @@ std::vector<std::shared_ptr<raptor::RegionBase>> GraphMappingResult::CollectRegi
             }
         }
     }
-
-    // For now, output absolutely any alignment. Filtering should have happened earlier.
+    // Sort the primary alignment before supplementary ones.
+    std::sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
+    // Sort the secondary alignments by score.
+    std::sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return std::get<1>(a) > std::get<1>(b); });
+    // Output absolutely any alignment. Filtering should have happened earlier.
     for (const auto& vals: secondary) {
         ret.emplace_back(std::get<0>(vals));
     }

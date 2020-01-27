@@ -40,6 +40,7 @@ std::vector<std::shared_ptr<raptor::RegionBase>> LinearMappingResult::CollectReg
                 query_target_pairs[pair_name] = 1;
             }
             // Priority of 0 are the primary alignments.
+            // Filter out any region with priority < 0. Those are marked for removal.
             auto priority = aln->GetRegionPriority();
             if (priority == 0) {
                 ret.emplace_back(aln);
