@@ -53,8 +53,8 @@ Simple synthetic test for supplementary mapping. There are three regions of the 
 
 Same simple synthetic test for supplementary mapping, but with alignment.
   $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/secondary-suppl/test-3-supp_3_regions/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/secondary-suppl/test-3-supp_3_regions/read-1.fasta -v 0 --align --aligner ksw2-double
-  gi|545778205|gb|U00096.3|:1-5000	15002	5000	10001	+	gi|545778205|gb|U00096.3|	100000	69999	75000	5001	5001	60	cm:i:5001	NM:i:0	AS:i:10002	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5001=
   gi|545778205|gb|U00096.3|:1-5000	15002	10001	15002	+	gi|545778205|gb|U00096.3|	100000	29999	35000	5001	5001	60	cm:i:5001	NM:i:0	AS:i:10002	fg:i:0	pi:i:1	pj:i:0	pn:i:1	ps:i:0	cg:Z:5001=
+  gi|545778205|gb|U00096.3|:1-5000	15002	5000	10001	+	gi|545778205|gb|U00096.3|	100000	69999	75000	5001	5001	60	cm:i:5001	NM:i:0	AS:i:10002	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5001=
   gi|545778205|gb|U00096.3|:1-5000	15002	0	5000	+	gi|545778205|gb|U00096.3|	100000	0	5000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:2	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
 
 ##############
@@ -62,19 +62,19 @@ Same simple synthetic test for supplementary mapping, but with alignment.
 ##############
 Synthetic example. Two pieces of a query, one is primary, the other supplementary.
   $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-1.ref.fasta -q ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-1.reads.fasta -v 0 --align --aligner ksw2-double
-  read-1	10000	5000	10000	+	ref	10000	0	5000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
   read-1	10000	0	5000	+	ref	10000	5000	10000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:0	pi:i:1	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
+  read-1	10000	5000	10000	+	ref	10000	0	5000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
 
 Synthetic example. Two pieces of a query, one is primary, the other supplementary. The primary portion also has a secondary alignment.
   $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-2.ref.fasta -q ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-2.reads.fasta -v 0 --align --aligner ksw2-double
-  read-1	10000	5000	10000	+	ref	25000	0	5000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
   read-1	10000	0	5000	+	ref	25000	20000	25000	5000	5000	3	cm:i:5000	NM:i:0	AS:i:10000	fg:i:0	pi:i:2	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
+  read-1	10000	5000	10000	+	ref	25000	0	5000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
   read-1	10000	0	5000	+	ref	25000	5000	10000	5000	5000	3	cm:i:5000	NM:i:0	AS:i:10000	fg:i:256	pi:i:1	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
 
 Synthetic example. Two pieces of a query, one is primary, the other supplementary. The supplementary also has a secondary alignment.
   $ ${BIN_DIR}/raptor -r ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-3.ref.fasta -q ${PROJECT_DIR}/test-data/secondary-suppl/test-4-synth-sec_supp_linear/case-3.reads.fasta -v 0 --align --aligner ksw2-double
-  read-1	10000	5000	10000	+	ref	25000	20000	25000	5000	5000	3	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:1	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
   read-1	10000	0	5000	+	ref	25000	5000	10000	5000	5000	60	cm:i:5000	NM:i:0	AS:i:10000	fg:i:0	pi:i:2	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
+  read-1	10000	5000	10000	+	ref	25000	20000	25000	5000	5000	3	cm:i:5000	NM:i:0	AS:i:10000	fg:i:2048	pi:i:1	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
   read-1	10000	5000	10000	+	ref	25000	0	5000	5000	5000	3	cm:i:5000	NM:i:0	AS:i:10000	fg:i:256	pi:i:0	pj:i:0	pn:i:1	ps:i:0	cg:Z:5000=
 
 Synthetic example, graph-based mapping with primary, supplementary and secondary mappings. The graph consists of three nodes. The query has 4 adjacent mapped portions: Part1 maps to the end of "ref-a", Part2 to the beginning of "ref-b" (and covers whole of "ref-b"), Part3 maps to the  beginning of the third node "ref-c", and Part4 is slightly further in the "ref-c" node. Part1 also has a secondary alignment to "ref-c".
