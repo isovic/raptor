@@ -293,9 +293,10 @@ void Mapper::LabelSupplementaryAndSecondary_(
         auto path_score = std::get<0>(path_scores[i]);
         auto path_id = std::get<1>(path_scores[i]);
         auto& tanchors = ta[path_id];
-        for (auto& aln: tanchors->hits()) {
+        for (size_t aln_id = 0; aln_id < tanchors->hits().size(); ++aln_id) {
+            auto& aln = tanchors->hits()[aln_id];
             aln->SetRegionPriority(i);
-            aln->SetRegionIsSupplementary(false);
+            aln->SetRegionIsSupplementary(aln_id > 0);
             aln->SetAltRegionCount(1);
             aln->SetMappingQuality(255);
             aln->path_id(-1);

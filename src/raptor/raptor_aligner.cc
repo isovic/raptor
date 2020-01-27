@@ -83,6 +83,8 @@ void RaptorAligner::LabelSupplementaryAndSecondary_(
             auto& aln = curr_path->alns()[aln_id];
             aln->SetRegionPriority(i);
             aln->SetRegionIsSupplementary(aln_id > 0);
+            aln->SetAltRegionCount(1);
+            aln->SetMappingQuality(255);
             aln->path_id(static_cast<int32_t>(path_id));
             aln->num_paths(num_paths);
             aln->segment_id(static_cast<int32_t>(aln_id));
