@@ -76,6 +76,8 @@ void APIExample() {
 void RunRaptor(std::shared_ptr<raptor::ParamsRaptor> parameters) {
 	TicToc tt_all;
 
+    LOG_ALL("Raptor version: %d.%d.%d-%s\n", RAPTOR_VERSION_MAJOR, RAPTOR_VERSION_MINOR,
+            RAPTOR_VERSION_PATCH, RAPTOR_VERSION_COMMIT.c_str());
 	LOG_ALL("Num threads: %ld\n", parameters->num_threads);
 
 	/*
