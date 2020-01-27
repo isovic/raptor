@@ -109,7 +109,7 @@ void Sequence::ReverseComplement() {
 
 void Sequence::ToUppercase() {
     for (size_t i = 0; i < data_.size(); ++i) {
-        data_[i] = std::toupper(data_[i]);
+        data_[i] = mindex::ascii_to_uppercase[data_[i]];
     }
 }
 

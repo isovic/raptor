@@ -57,10 +57,12 @@ SequencePtr SequenceFileParserFastx::YieldSequence() {
         header += std::string(" ") + std::string(fp_kseq_->comment.s);
     }
 
-    seq->data().insert(seq->data().end(), (int8_t *) fp_kseq_->seq.s, (int8_t *) (fp_kseq_->seq.s + fp_kseq_->seq.l));
+    seq->data().resize(fp_kseq_->seq.l);
+    memcpy(&seq->data()[0], reinterpret_cast<int8_t *>(fp_kseq_->seq.s), fp_kseq_->seq.l);
 
     if (fp_kseq_->qual.l > 0) {
-        seq->qual().insert(seq->qual().end(), (int8_t *) fp_kseq_->qual.s, (int8_t *) (fp_kseq_->qual.s + fp_kseq_->qual.l));
+        seq->qual().resize(fp_kseq_->qual.l);
+        memcpy(&seq->qual()[0], reinterpret_cast<int8_t *>(fp_kseq_->qual.s), fp_kseq_->qual.l);
     }
 
     seq->header(header);
