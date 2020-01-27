@@ -1,5 +1,13 @@
 # Raptor Changelog
 
+## 0.19.3 -> 0.20.0.
+- Major update: redesigned how the secondary and supplementary alignments are labeled, and mapping quality computed. This feature should work properly now.
+- Added a large number of unit and cram tests to test for secondary/supplementary labels and the mapping quality.
+- Fixed the alignment identity - for an overlap A->B and B->A the alignment identity used to be inconsistent (depending on the aligner). It should be symmetric now, because now we take the lower of the two options (either query or reference identity).
+- Removed the `--min-mapq` option. It could cause usage issues if the primary alignment is filterd out but secondary/supplementary not.
+- Added a new command line option `--suppl-ovl` which specifies the allowed amount of overlap between the primary/supplementary alignments. By default, it's set to 50bp. Overlaps larger than this will be marked as secondary alignments.
+- Raptor now prints out the version at the beginning of the run log.
+
 ## 0.19.2 -> 0.19.3.
 - Fixed a bug during the AnchorGraph construction, where predecessors of the anchors on reverse strand segments weren't properly detected.
 - Added a test to capture this issue. The test demonstrates unrolled alignment of a polymerase read around an interesting graph construct.
