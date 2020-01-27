@@ -375,11 +375,13 @@ void AssignMappingQuality(std::vector<std::shared_ptr<raptor::RegionBase>>& alns
 
     for (int64_t i = 0; i < static_cast<int64_t>(alns.size()); ++i) {
         auto& aln = alns[i];
+        if (aln->GetRegionPriority() < 0) {
+            aln->SetMappingQuality(0);
+            continue;
+        }
         int32_t mapq_clean = CalcMapq(aln->GetAltRegionCount());
         int32_t next_mapq = CalcMapq(aln->GetAltRegionCount() + 1);
-
         int32_t mapq = next_mapq + static_cast<int32_t>(std::ceil((mapq_clean - next_mapq) * factor));
-
         aln->SetMappingQuality(mapq);
     }
 }
