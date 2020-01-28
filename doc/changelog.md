@@ -1,5 +1,9 @@
 # Raptor Changelog
 
+## 0.20.1 -> 0.20.2
+- Fixed the identity value in the output when only edit distance calculation is used and not the full alignment.
+- Added Cram tests for hifi overlapping to catch this case.
+
 ## 0.20.0 -> 0.20.1
 - Using std::stable_sort in CollectRegions to preserve the order of supplementary regions in the output. Fixes the Cram test issue where GCC and Clang would produce different ordering of regions.
 
