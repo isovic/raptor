@@ -62,6 +62,11 @@ raptor_cpp_flags = []
 # raptor_cpp_flags = ['-march=native']
 # raptor_cpp_flags = ['-march=native', '-DRAPTOR_TESTING_MODE']
 
+# raptor_cpp_flags = ['-pg']
+# add_project_arguments(raptor_cpp_flags, language: 'cpp')
+# add_project_link_arguments(raptor_cpp_flags,  language: 'cpp')
+
+
 opt_testing_mode = get_option('RAPTOR_TESTING_MODE')
 if opt_testing_mode
   raptor_cpp_flags += ['-DRAPTOR_TESTING_MODE']
