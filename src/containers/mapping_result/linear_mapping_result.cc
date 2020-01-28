@@ -50,9 +50,9 @@ std::vector<std::shared_ptr<raptor::RegionBase>> LinearMappingResult::CollectReg
         }
     }
     // Sort the primary alignment before supplementary ones.
-    std::sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
+    std::stable_sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
     // Sort the secondary alignments by score.
-    std::sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return a->Score() > b->Score(); });
+    std::stable_sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return a->Score() > b->Score(); });
     ret.insert(ret.end(), secondary.begin(), secondary.end());
 
     return ret;

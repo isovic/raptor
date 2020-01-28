@@ -56,9 +56,9 @@ std::vector<std::shared_ptr<raptor::RegionBase>> AlignedMappingResult::CollectRe
         }
     }
     // Sort the primary alignment before supplementary ones.
-    std::sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
+    std::stable_sort(ret.begin(), ret.end(), [](const auto& a, const auto&b){ return a->GetRegionIsSupplementary() < b->GetRegionIsSupplementary(); });
     // Sort the secondary alignments by score.
-    std::sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return std::get<1>(a) > std::get<1>(b); });
+    std::stable_sort(secondary.begin(), secondary.end(), [](const auto& a, const auto& b){ return std::get<1>(a) > std::get<1>(b); });
     // Output absolutely any alignment. Filtering should have happened earlier.
     for (const auto& vals: secondary) {
         ret.emplace_back(std::get<0>(vals));
