@@ -22,9 +22,10 @@ double OutputFormatter::CalcIdentity_(
     double identity_min = std::min(identity_q, identity_t);
 
     if (edit_dist >= 0) {
-        double edit_dist_double = edit_dist;
-        identity_q = (qspan != 0) ? (match_bases / qspan) : 0.0;
-        identity_t = (tspan != 0) ? (match_bases / tspan) : 0.0;
+        double match_bases_q = (match_bases > 0) ? match_bases : std::max(0.0, qspan  - edit_dist);
+        double match_bases_t = (match_bases > 0) ? match_bases : std::max(0.0, tspan  - edit_dist);
+        identity_q = (qspan != 0) ? (match_bases_q / qspan) : 0.0;
+        identity_t = (tspan != 0) ? (match_bases_t / tspan) : 0.0;
         identity_min = std::min(identity_q, identity_t);
     }
 
