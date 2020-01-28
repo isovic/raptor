@@ -96,20 +96,22 @@ Sequence::Sequence(const std::string& _header, const std::vector<mindex::seq_t>&
 }
 
 void Sequence::ReverseComplement() {
+    int8_t* data = &data_[0];
     size_t max_i = data_.size() / 2;
     for (size_t i = 0, j = (data_.size() - 1); i < max_i; i++, j--) {
-        data_[i] = mindex::nuc_to_complement[data_[i]];
-        data_[j] = mindex::nuc_to_complement[data_[j]];
-        std::swap(data_[i], data_[j]);
+        auto tmp = data[i];
+        data[i] = mindex::nuc_to_complement[data[j]];
+        data[j] = mindex::nuc_to_complement[tmp];
     }
     if ((data_.size() & 0x01) != 0) {
-        data_[max_i] = mindex::nuc_to_complement[data_[max_i]];
+        data[max_i] = mindex::nuc_to_complement[data[max_i]];
     }
 }
 
 void Sequence::ToUppercase() {
+    int8_t* data = &data_[0];
     for (size_t i = 0; i < data_.size(); ++i) {
-        data_[i] = mindex::ascii_to_uppercase[data_[i]];
+        data[i] = mindex::ascii_to_uppercase[data[i]];
     }
 }
 
