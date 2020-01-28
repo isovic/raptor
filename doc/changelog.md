@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.20.0 -> 0.20.1
+- Using std::stable_sort in CollectRegions to preserve the order of supplementary regions in the output. Fixes the Cram test issue where GCC and Clang would produce different ordering of regions.
+
 ## 0.19.3 -> 0.20.0.
 - Major update: redesigned how the secondary and supplementary alignments are labeled, and mapping quality computed. This feature should work properly now.
 - Added a large number of unit and cram tests to test for secondary/supplementary labels and the mapping quality.
