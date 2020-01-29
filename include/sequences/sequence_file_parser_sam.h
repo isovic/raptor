@@ -31,7 +31,7 @@ public:
 
    bool Open(const std::string& path);
 
-   SequencePtr YieldSequence();
+   SequencePtr YieldSequence(bool to_uppercase);
    std::string GetFileHeaderAsString() const;
    int64_t GetFileOffset() const;
    std::string GetFilePath() const;

@@ -154,7 +154,7 @@ mindex::SequencePtr SequenceFileCompositeFofn::YieldSequence() {
     mindex::SequencePtr seq = nullptr;
     int64_t num_in_files = files_.size();
 
-    while ((curr_open_file_ + 1) <= num_in_files && (seq = parser_->YieldSequence()) == nullptr) {
+    while ((curr_open_file_ + 1) <= num_in_files && (seq = parser_->YieldSequence(convert_to_uppercase_)) == nullptr) {
         ++curr_open_file_;
         if (curr_open_file_ >= files_.size()) {
             break;
@@ -167,9 +167,9 @@ mindex::SequencePtr SequenceFileCompositeFofn::YieldSequence() {
 
     open_file_seq_offset_curr_ = GetOpenFileTell_();
 
-    if (seq != nullptr && convert_to_uppercase_) {
-        seq->ToUppercase();
-    }
+    // if (seq != nullptr && convert_to_uppercase_) {
+    //     seq->ToUppercase();
+    // }
 
     return seq;
 }

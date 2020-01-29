@@ -33,7 +33,7 @@ SequenceFileParserGfa2::~SequenceFileParserGfa2() {
     }
 }
 
-SequencePtr SequenceFileParserGfa2::YieldSequence() {
+SequencePtr SequenceFileParserGfa2::YieldSequence(bool to_uppercase) {
     int64_t id = -1;
     int64_t abs_id = -1;
 

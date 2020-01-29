@@ -13,7 +13,7 @@ TEST(SequenceFileParserSam, YieldSequence) {
     std::vector<std::string> result_seqs;
     std::vector<std::string> result_quals;
 
-    while ((seq = parser->YieldSequence()) != nullptr) {
+    while ((seq = parser->YieldSequence(true)) != nullptr) {
         result_headers.emplace_back(seq->header());
         result_seqs.emplace_back(seq->GetSequenceAsString());
         result_quals.emplace_back(seq->GetQualityAsString());
@@ -89,7 +89,7 @@ TEST(SequenceFileParserSam, FileSeek1) {
     int64_t prev_offset = parser->GetFileOffset();
 
     // Create a mini index of the sequences.
-    while ((seq = parser->YieldSequence()) != nullptr) {
+    while ((seq = parser->YieldSequence(true)) != nullptr) {
         seqs.emplace_back(std::move(seq));
         offsets.emplace_back(prev_offset);
         prev_offset = parser->GetFileOffset();
@@ -105,7 +105,7 @@ TEST(SequenceFileParserSam, FileSeek1) {
     // Lookup all the same sequences, in a random order.
     for (const auto& seq_id: permutation) {
         parser->FileSeek(offsets[seq_id]);
-        seq = parser->YieldSequence();
+        seq = parser->YieldSequence(true);
         ASSERT_NE(seq, nullptr);
         ASSERT_EQ(seq->header(), seqs[seq_id]->header());
         ASSERT_EQ(seq->GetSequenceAsString(), seqs[seq_id]->GetSequenceAsString());

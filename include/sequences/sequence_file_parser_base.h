@@ -28,7 +28,7 @@ public:
    virtual ~SequenceFileParserBase() {}
 
    virtual bool Open(const std::string& in_path) = 0;
-   virtual SequencePtr YieldSequence() = 0;
+   virtual SequencePtr YieldSequence(bool to_uppercase) = 0;
    virtual std::string GetFileHeaderAsString() const = 0;
    virtual int64_t GetFileOffset() const = 0;
    virtual std::string GetFilePath() const = 0;

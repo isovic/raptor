@@ -28,7 +28,8 @@ RandomAccessSequenceFile::RandomAccessSequenceFile(size_t max_num_streams)
                     db_version_(-1.0f), db_files_(), db_seqs_(), db_blocks_(),
                     seq_id_to_vec_(), file_id_to_vec_(), block_id_to_vec_(), qname_to_vec_(),
                     parsers_(), fid_stream_priority_(),
-                    header_groups_() {
+                    header_groups_(),
+                    convert_to_uppercase_(true) {
 }
 
 bool RandomAccessSequenceFile::LoadDB(const std::string& in_path) {
@@ -142,11 +143,7 @@ mindex::SequencePtr RandomAccessSequenceFile::FetchSequence_(int64_t db_seq_id) 
 
     parsers_[db_file_id]->FileSeek(db_seq.data_start);
 
-    mindex::SequencePtr ret = parsers_[db_file_id]->YieldSequence();
-
-    if (ret != nullptr) {
-        ret->ToUppercase();
-    }
+    mindex::SequencePtr ret = parsers_[db_file_id]->YieldSequence(convert_to_uppercase_);
 
     if (ret == nullptr) {
         WARNING_REPORT(ERR_UNEXPECTED_VALUE, "Deserialized sequence is nullptr! db_seq_id = %ld, db_seq.name = %s, db_seq.data_start = %ld, db_seq.seq_len = %ld\n", db_seq_id, db_seq.name.c_str(), db_seq.data_start, db_seq.seq_len);

@@ -140,7 +140,7 @@ mindex::SequencePtr SequenceFileCompositePbXml::YieldSequence() {
     }
 
     parser_->FileSeek(file_offsets_[open_file_id_][open_file_offset_id_]);
-    seq = parser_->YieldSequence();
+    seq = parser_->YieldSequence(convert_to_uppercase_);
 
     open_file_seq_offset_prev_ = file_offsets_[open_file_id_][open_file_offset_id_];
     open_file_seq_offset_curr_ = parser_->GetFileOffset();

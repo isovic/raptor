@@ -114,6 +114,7 @@ private:
     std::vector<mindex::SequenceFileParserBasePtr> parsers_;
     std::deque<int64_t> fid_stream_priority_;
     HeaderGroupType header_groups_;
+    bool convert_to_uppercase_;
 };
 
 }

@@ -59,7 +59,7 @@ void SequenceFileParserBam::ParseHeader_() {
     sam_header_ = input_header.ToSam();
 }
 
-SequencePtr SequenceFileParserBam::YieldSequence() {
+SequencePtr SequenceFileParserBam::YieldSequence(bool to_uppercase) {
     mindex::SequencePtr seq = nullptr;
 
     int64_t id = -1;

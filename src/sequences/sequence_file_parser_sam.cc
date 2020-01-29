@@ -33,7 +33,7 @@ SequenceFileParserSam::~SequenceFileParserSam() {
     }
 }
 
-SequencePtr SequenceFileParserSam::YieldSequence() {
+SequencePtr SequenceFileParserSam::YieldSequence(bool to_uppercase) {
     int64_t id = -1;
     int64_t abs_id = -1;
 

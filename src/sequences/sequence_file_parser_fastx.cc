@@ -9,6 +9,7 @@
 #include <utility/stringutil.h>
 #include <utility/files.hpp>
 #include <log/log_tools.h>
+#include <index/lookups.h>
 
 namespace mindex {
 
@@ -37,7 +38,7 @@ SequenceFileParserFastx::~SequenceFileParserFastx() {
     }
 }
 
-SequencePtr SequenceFileParserFastx::YieldSequence() {
+SequencePtr SequenceFileParserFastx::YieldSequence(bool to_uppercase) {
     int64_t id = -1;
     int64_t abs_id = -1;
 
@@ -57,8 +58,18 @@ SequencePtr SequenceFileParserFastx::YieldSequence() {
         header += std::string(" ") + std::string(fp_kseq_->comment.s);
     }
 
-    seq->data().resize(fp_kseq_->seq.l);
-    memcpy(&seq->data()[0], reinterpret_cast<int8_t *>(fp_kseq_->seq.s), fp_kseq_->seq.l);
+    if (to_uppercase) {
+        // Converting to uppercase is surprisingly expensive. Do it while setting
+        // the bases here instead of a separate pass.
+        seq->data().resize(fp_kseq_->seq.l);
+        int8_t* data = &seq->data()[0];
+        for (size_t i = 0; i < fp_kseq_->seq.l; ++i) {
+            data[i] = mindex::ascii_to_uppercase[fp_kseq_->seq.s[i]];
+        }
+    } else {
+        seq->data().resize(fp_kseq_->seq.l);
+        memcpy(&seq->data()[0], reinterpret_cast<int8_t *>(fp_kseq_->seq.s), fp_kseq_->seq.l);
+    }
 
     if (fp_kseq_->qual.l > 0) {
         seq->qual().resize(fp_kseq_->qual.l);
