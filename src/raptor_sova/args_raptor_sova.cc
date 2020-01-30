@@ -53,7 +53,8 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
     std::string batch_size_str("0");
 
     // Define the composite options which can be expanded internally.
-    std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
+    // std::string composite_str_ovl_hifi("--overlap-skip-self --min-map-len 1000 --bestn 0 --bestn-threshold 1.0 --one-hit-per-target -k 25 -w 10 --end-bonus 200 --diff --flank-ext-len 100 --no-sezs");
+    std::string composite_str_ovl_hifi("--max-seed-dist 5000 --min-num-seeds 3 --min-cov-bases 30 --min-chain-span 1000 --chain-bw 100 --aln-bw 0.01 --aln-maxd 0.03 --min-idt 98.0 --min-map-len 1000 --overlap-skip-self");
     argparser.AddCompositeArgument("ovl", composite_str_ovl_hifi);
 
     argparser.AddArgument(&parameters->ref_paths, VALUE_TYPE_STRING_LIST, "r", "ref", "",
