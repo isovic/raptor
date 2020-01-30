@@ -83,7 +83,6 @@ struct ParamsRaptorSova {
     /*
      These need to be classified in categories:
     */
-    int64_t bestn = 0;
     bool strict_format = false;
 
     std::string composite;

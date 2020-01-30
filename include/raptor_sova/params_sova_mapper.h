@@ -38,6 +38,8 @@ class ParamsSovaMapper {
     double align_max_diff = 0.03;
     double min_identity = 0.98;
     int32_t min_map_len = 1000;
+    int32_t bestn = 0;
+    bool bestn_flanks = false;
 
    private:
     ParamsSovaMapper() = default;

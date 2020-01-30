@@ -230,9 +230,13 @@ int ProcessArgsRaptorSova(int argc, char **argv, std::shared_ptr<raptor::sova::P
         0, "Overlapping options");
 
     // Filtering options.
-    argparser.AddArgument(&parameters->bestn, VALUE_TYPE_INT64, "", "bestn", "0",
+    argparser.AddArgument(&parameters->mapper_params->bestn, VALUE_TYPE_INT64, "", "bestn", "0",
                           "Output best N alignments/mappings/overlaps. If <= 0 all mappings within "
                           "bestn-threshold from best score will be output.",
+                          0, "Filtering options");
+    argparser.AddArgument(&parameters->mapper_params->bestn_flanks, VALUE_TYPE_BOOL, "",
+                          "bestn-flanks", "0",
+                          "Take bestn overlaps from 5' and bestn from 3' end of an A-read.",
                           0, "Filtering options");
     argparser.AddArgument(&parameters->one_hit_per_target, VALUE_TYPE_BOOL, "",
                           "one-hit-per-target", "0",
