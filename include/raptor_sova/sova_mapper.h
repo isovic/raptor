@@ -59,6 +59,9 @@ class SovaMapper {
             const mindex::IndexPtr& index, const mindex::SequencePtr& qseq,
             const std::vector<raptor::sova::OverlapPtr>& overlaps,
             double min_idt, int32_t min_map_span) const;
+    std::vector<raptor::sova::OverlapPtr> FilterBestn_(
+            const std::vector<raptor::sova::OverlapPtr>& overlaps,
+            int32_t bestn, bool bestn_flanks) const;
 
     const mindex::IndexPtr index_;
     const std::shared_ptr<raptor::sova::ParamsSovaMapper> params_;

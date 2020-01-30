@@ -649,6 +649,56 @@ std::vector<raptor::sova::OverlapPtr> SovaMapper::FilterAlignments_(
     return ret;
 }
 
+std::vector<raptor::sova::OverlapPtr> SovaMapper::FilterBestn_(
+        const std::vector<raptor::sova::OverlapPtr>& overlaps,
+        int32_t bestn, bool bestn_flanks) const {
+
+    std::vector<raptor::sova::OverlapPtr> ret;
+
+    auto cmp = [&](size_t a, size_t b) {
+        return overlaps[a]->ASpan() > overlaps[b]->ASpan();
+    };
+
+    if (bestn_flanks) {
+        // This is a little bit ugly because the OverlapPtr is a unique_ptr.
+        std::vector<size_t> ovl5p;
+        std::vector<size_t> ovl3p;
+
+        for (size_t i = 0; i < overlaps.size(); ++i) {
+            const auto& ovl = overlaps[i];
+            if (ovl->a_start == 0) {
+                ovl5p.emplace_back(i);
+            }
+            if (ovl->a_end == ovl->a_len) {
+                ovl3p.emplace_back(i);
+            }
+        }
+
+        std::sort(ovl5p.begin(), ovl5p.end(), cmp);
+        std::sort(ovl3p.begin(), ovl3p.end(), cmp);
+
+        // Create new overlap objects instead of moving. Otherwise, we could have edited
+        // the vector in place.
+        for (int32_t i = 0; i < bestn && i < static_cast<int32_t>(ovl5p.size()); ++i) {
+            ret.emplace_back(raptor::sova::createOverlap(overlaps[ovl5p[i]]));
+        }
+        for (int32_t i = 0; i < bestn && i < static_cast<int32_t>(ovl3p.size()); ++i) {
+            ret.emplace_back(raptor::sova::createOverlap(overlaps[ovl3p[i]]));
+        }
+    } else {
+        std::vector<size_t> ovl_sorted(overlaps.size());
+        for (size_t i = 0; i < overlaps.size(); ++i) {
+            ovl_sorted[i] = i;
+        }
+        std::sort(ovl_sorted.begin(), ovl_sorted.end(), cmp);
+        for (int32_t i = 0; i < bestn && i < static_cast<int32_t>(ovl_sorted.size()); ++i) {
+            ret.emplace_back(raptor::sova::createOverlap(overlaps[ovl_sorted[i]]));
+        }
+    }
+
+    return ret;
+}
+
 std::vector<std::shared_ptr<raptor::TargetAnchorType>> OverlapsToTargetAnchors(const std::vector<raptor::sova::OverlapPtr>& overlaps) {
     std::vector<std::shared_ptr<raptor::TargetAnchorType>> ta;
 
@@ -808,6 +858,9 @@ std::shared_ptr<raptor::LinearMappingResult> raptor::sova::SovaMapper::Map(const
     overlaps = FilterOverlaps_(index_, qseq, overlaps, 0, 0.0, 0);
     AlignOverlaps(index_, qseq, overlaps, params_->align_bandwidth, params_->align_max_diff, params_->verbose_level == 9);
     overlaps = FilterAlignments_(index_, qseq, overlaps, params_->min_identity, params_->min_map_len);
+    if (params_->bestn > 0) {
+        overlaps = FilterBestn_(overlaps, params_->bestn, params_->bestn_flanks);
+    }
     auto anchors = OverlapsToTargetAnchors(overlaps);
     // std::vector<std::shared_ptr<raptor::TargetAnchorType>> anchors;
     tt_chain.stop();
