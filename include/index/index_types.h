@@ -38,9 +38,10 @@ struct SeedSpan {
 /*
  * Experimental code test performance with different hash maps.
  */
-#define MINIMIZER_INDEX2_USING_DENSEHASH
+// #define MINIMIZER_INDEX2_USING_DENSEHASH
 // #define MINIMIZER_INDEX2_USING_SPARSEHASH
 // #define MINIMIZER_INDEX2_USING_UNORDERED_MAP
+#define MINIMIZER_INDEX2_USING_FLAT_HASH_MAP
 
 #ifdef MINIMIZER_INDEX2_USING_UNORDERED_MAP
 #include <unordered_map>
@@ -59,6 +60,12 @@ using SeedHashType2 = dense_hash_map<minkey_t, int64_t, std::hash<minkey_t>>;
 using google::sparse_hash_map;  // namespace where class lives by default
 // typedef sparse_hash_map<minkey_t, int64_t, std::hash<minkey_t> > SeedHashType2;
 using SeedHashType2 = sparse_hash_map<minkey_t, int64_t, std::hash<minkey_t>>;
+#endif
+
+#ifdef MINIMIZER_INDEX2_USING_FLAT_HASH_MAP
+#include <lib/flat_hash_map/flat_hash_map.hpp>
+#include <lib/flat_hash_map/flat_hash_map.hpp>
+using SeedHashType2 = ska::flat_hash_map<minkey_t, int64_t>;
 #endif
 
 const minkey_t MINIMIZER_INDEX_EMPTY_HASH_KEY = (minkey_t)0xFFFFFFFFFFFFFFFF;
