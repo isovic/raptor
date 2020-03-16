@@ -1,12 +1,33 @@
 #ifndef SRC_UTILITY_FILES_H_
 #define SRC_UTILITY_FILES_H_
 
+#include <memory>
 #include <unistd.h>
 #include <zlib.h>
 #include <algorithm>
 #include <string>
+#include <sstream>
 
 namespace raptor {
+
+struct FileDeleter
+{
+    void operator()(std::FILE* fp) const { fclose(fp); }
+};
+
+inline std::unique_ptr<FILE, FileDeleter> OpenFile(const std::string& filename,
+                                                   const std::string& mode)
+{
+    auto ret = std::unique_ptr<FILE, FileDeleter>(fopen(filename.c_str(), mode.c_str()));
+    if (ret == nullptr) {
+        std::ostringstream err_oss;
+        err_oss << "Could not open file '" << filename << "'!";
+        throw std::runtime_error(err_oss.str());
+    }
+    return ret;
+}
+
+using FilePtr = std::unique_ptr<FILE, FileDeleter>;
 
 inline bool FileExists(const std::string& fname) {
     /* from
