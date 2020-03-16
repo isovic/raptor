@@ -20,7 +20,7 @@ Writing to BAM.
 
 Writing to MHAP.
   $ ${BIN_DIR}/raptor --align --out-fmt mhap -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fasta -v 0
-  0 0 0.928643 22267 0 314 24292 24292 0 24804 47863 100000
+  0 0 0.9286 22267 0 314 24292 24292 0 24804 47863 100000
 
 Writing to M4.
   $ ${BIN_DIR}/raptor --align --out-fmt m4 -r ${PROJECT_DIR}/test-data/ecoli-small/ecoli-0-100000.fasta -q ${PROJECT_DIR}/test-data/ecoli-small/single_long_read.fasta -v 0

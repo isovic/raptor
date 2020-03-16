@@ -15,13 +15,13 @@ Graph alignment on a circular reference, simplest exact mapping test case. Align
 
 Another synthetic circular test case.
   $ ${BIN_DIR}/raptor --out-fmt m4 -r ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/ecoli-0-100000.fasta -g ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/graph.gfa2 -q ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/read-1-12kbp_rotated-fwd.fasta -v 0 --align
-  read-1-12kbp_rotated-fwd gi|545778205|gb|U00096.3| -176000 100 0 0 88000 100000 0 12000 100000 100000
-  read-1-12kbp_rotated-fwd gi|545778205|gb|U00096.3| -24000 100 0 88000 100000 100000 0 0 12000 100000
+  read-1-12kbp_rotated-fwd gi|545778205|gb|U00096.3| -176000 100.0000 0 0 88000 100000 0 12000 100000 100000
+  read-1-12kbp_rotated-fwd gi|545778205|gb|U00096.3| -24000 100.0000 0 88000 100000 100000 0 0 12000 100000
 
 Yet another synthetic circular test case.
   $ ${BIN_DIR}/raptor --out-fmt m4 -r ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/ecoli-0-100000.fasta -g ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/graph.gfa2 -q ${PROJECT_DIR}/test-data/graph-mapping/synth-1-rotation/read-2-12kbp_rotated-rev.fasta -v 0 --align
-  read-2-12kbp_rotated-ref gi|545778205|gb|U00096.3| -24000 100 0 0 12000 100000 1 0 12000 100000
-  read-2-12kbp_rotated-ref gi|545778205|gb|U00096.3| -176000 100 0 12000 100000 100000 1 12000 100000 100000
+  read-2-12kbp_rotated-ref gi|545778205|gb|U00096.3| -24000 100.0000 0 0 12000 100000 1 0 12000 100000
+  read-2-12kbp_rotated-ref gi|545778205|gb|U00096.3| -176000 100.0000 0 12000 100000 100000 1 12000 100000 100000
 
 Graph alignment of the reference sequences on a small plasmid contig set. Here, contigs are used as the target, and the contig graph as the input graph. Reference sequences are used as queries.
 The 4 short alignments are all secondary alignments, and are correctly marked as secondary.

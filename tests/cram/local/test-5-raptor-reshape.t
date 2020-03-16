@@ -112,30 +112,30 @@ Running Raptor using the RaptorDB as the reference file, ref block < 0, so all b
 
 Running Raptor using the RaptorDB as the reference file, loading all blocks.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0
-  1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
+  1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, ref block 0 and query block 0.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 0
-  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
+  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, ref block 0 and query block 1.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-ref 0 --rdb-block-query 1
-  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block 1.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && ${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query 1
-  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block < 0 so all blocks should be processed.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query -1)
-  1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
-  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.014 0 0 99986 100000 0 0 99986 100000
+  1-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  1-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 2-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
+  2-gi|545778205|gb|U00096.3| 1-gi|545778205|gb|U00096.3| -100000 100.0140 0 0 99986 100000 0 0 99986 100000
 
 Running Raptor using the RaptorDB as the reference file, entire ref, and query block out of range.
   $ ${BIN_DIR}/raptor-reshape -i ${PROJECT_DIR}/test-data/ecoli-small/double-ecoli-0-100000.fasta -o out --block-size 0.09 -v 0 && (${BIN_DIR}/raptor -r out.rdb -q out.rdb --out-fmt m4 -v 0 --rdb-block-query 5 2>&1 | sed 's/.*#5: //')
