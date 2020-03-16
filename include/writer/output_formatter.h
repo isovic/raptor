@@ -45,6 +45,24 @@ public:
                                 bool write_custom_tags,
                                 const std::string& timings);
 
+    static void UnmappedSAM(FILE* fp_out, const mindex::SequencePtr& qseq, bool write_custom_tags);
+    static void ToSAM(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                             const std::shared_ptr<raptor::RegionBase> mapping,
+                             bool write_custom_tags,
+                             const std::string& timings);
+    static void ToPAF(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                             const std::shared_ptr<raptor::RegionBase> mapping,
+                             bool write_custom_tags,
+                             const std::string& timings);
+    static void ToMHAP(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                              const std::shared_ptr<raptor::RegionBase> mapping);
+    static void ToM4(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                            const std::shared_ptr<raptor::RegionBase> mapping);
+    static void ToGFA2Edge(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                                const std::shared_ptr<raptor::RegionBase> mapping,
+                                bool write_custom_tags,
+                                const std::string& timings);
+
 private:
     static double CalcIdentity_(
                 int32_t q_start, int32_t q_end,

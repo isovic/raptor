@@ -77,6 +77,25 @@ std::string OutputFormatter::UnmappedSAM(const mindex::SequencePtr& qseq, bool w
     return ss.str();
 }
 
+void OutputFormatter::UnmappedSAM(FILE* fp_out, const mindex::SequencePtr& qseq, bool write_custom_tags) {
+    std::stringstream ss;
+
+    std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    uint32_t flag = 4;
+    std::string seq = qseq->GetSequenceAsString();
+    std::string qual = (qseq->qual().size() > 0) ? qseq->GetQualityAsString() : std::string("*");
+
+    // Mandatory fields.
+    fprintf(fp_out, "%s\t%d\t%s\t%d\t%d\t%s\t*\t0\t0\t%s\t%s",
+            q_name.c_str(), flag, "*", 0, 255,
+            "*", seq.c_str(), qual.c_str());
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        ss << "\t" << vals.FormatAsSAM();
+    }
+    fprintf(fp_out, "\n");
+}
+
 std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
                             bool write_custom_tags,
@@ -98,10 +117,10 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
     int32_t score = mapping->Score();
     int32_t mapq = mapping->MappingQuality();
 
-    int64_t path_id = mapping->PathId();
-    int64_t num_paths = mapping->PathsNum();
-    int64_t segment_in_path = mapping->SegmentId();
-    int64_t num_segments_in_path = mapping->SegmentsNum();
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
 
     uint32_t flag = (t_is_rev) ? 16 : 0;
     if (mapping->IsSupplementary()) {
@@ -171,6 +190,77 @@ std::string OutputFormatter::ToSAM(const mindex::IndexPtr index, const mindex::S
     return ss.str();
 }
 
+void OutputFormatter::ToSAM(FILE *fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                            const std::shared_ptr<raptor::RegionBase> mapping,
+                            bool write_custom_tags,
+                            const std::string& timings) {
+    // int32_t q_id = mapping->QueryID();
+    int32_t q_start = mapping->QueryStart();
+    int32_t q_end = mapping->QueryEnd();
+    int32_t q_len = qseq->data().size();
+    int32_t t_id = mapping->TargetID();
+    int32_t t_start = mapping->TargetStart();
+    int32_t t_end = mapping->TargetEnd();
+    int32_t t_len = mapping->TargetLen();
+    bool t_is_rev = mapping->TargetRev();
+    std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
+    int32_t edit_dist = mapping->EditDistance();
+    int32_t score = mapping->Score();
+    int32_t num_seeds = mapping->NumSeeds();
+    int32_t mapq = mapping->MappingQuality();
+
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
+
+    uint32_t flag = (t_is_rev) ? 16 : 0;
+    if (mapping->IsSupplementary()) {
+        flag |= 2048;
+    }
+    if (mapping->IsSecondary()) {
+        flag |= 256;
+    }
+
+    std::string seq = qseq->GetSequenceAsString();
+    std::string qual = (qseq->qual().size() > 0) ? qseq->GetQualityAsString() : std::string("*");
+
+    std::string cigar = CigarToString(mapping->Cigar(), false);
+    if (cigar.size() == 0) {
+        cigar = "*";
+    }
+
+    if (t_is_rev) {
+        std::swap(t_start, t_end);
+        t_start = t_len - t_start;
+        t_end = t_len - t_end;
+
+        seq = ReverseComplement(seq);
+        std::reverse(qual.begin(), qual.end());
+    }
+
+    // Mandatory fields.
+    fprintf(fp_out, "%s\t%d\t%s\t%d\t%d\t%s\t*\t0\t0\t%s\t%s",
+            q_name.c_str(), flag, t_name.c_str(), t_start + 1, mapq,
+            cigar.c_str(), seq.c_str(), qual.c_str());
+    // Custom Raptor tags.
+    if (write_custom_tags) {
+        fprintf(fp_out, "\tNM:i:%d\tAS:i:%d\tQS:i:%d\tQE:i:%d\tQL:i:%d\tTS:i:%d\tTE:i:%d\tTL:i:%d\tpi:i:%d\tpj:i:%d\tpn:i:%d\tps:i:%d",
+                edit_dist, score, q_start, q_end, q_len, t_start, t_end, t_len, path_id, segment_in_path,
+                num_segments_in_path, ((num_segments_in_path > 1) ? 1 : 0));
+
+        #ifdef RAPTOR_DEBUG_TIMINGS
+            fprintf(fp_out, "\ttt:Z:%s", timings.c_str());
+        #endif
+    }
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        fprintf(fp_out, "\t%s", vals.FormatAsSAM().c_str());
+    }
+    fprintf(fp_out,"\n");
+}
+
 std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
                             bool write_custom_tags,
@@ -194,10 +284,10 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
     int32_t num_seeds = mapping->NumSeeds();
     int32_t mapq = mapping->MappingQuality();
 
-    int64_t path_id = mapping->PathId();
-    int64_t num_paths = mapping->PathsNum();
-    int64_t segment_in_path = mapping->SegmentId();
-    int64_t num_segments_in_path = mapping->SegmentsNum();
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
 
     // This is how a flag is calculated for SAM/BAM alignments. It's not a standard in PAF
     // but will  be output as an optional tag named "fg".
@@ -262,6 +352,75 @@ std::string OutputFormatter::ToPAF(const mindex::IndexPtr index, const mindex::S
     return ss.str();
 }
 
+void OutputFormatter::ToPAF(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                            const std::shared_ptr<raptor::RegionBase> mapping,
+                            bool write_custom_tags,
+                            const std::string& timings) {
+    // int32_t q_id = mapping->QueryID();
+    int32_t q_start = mapping->QueryStart();
+    int32_t q_end = mapping->QueryEnd();
+    int32_t q_len = qseq->data().size();
+    int32_t t_id = mapping->TargetID();
+    int32_t t_start = mapping->TargetStart();
+    int32_t t_end = mapping->TargetEnd();
+    int32_t t_len = mapping->TargetLen();
+    bool t_is_rev = mapping->TargetRev();
+    std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
+    int32_t edit_dist = mapping->EditDistance();
+    int32_t score = mapping->Score();
+    int32_t cov_bases_q = mapping->CoveredBasesQuery();
+    int32_t num_seeds = mapping->NumSeeds();
+    int32_t mapq = mapping->MappingQuality();
+
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
+
+    // This is how a flag is calculated for SAM/BAM alignments. It's not a standard in PAF
+    // but will  be output as an optional tag named "fg".
+    uint32_t flag = (t_is_rev) ? 16 : 0;
+    if (mapping->IsSupplementary()) {
+        flag |= 2048;
+    }
+    if (mapping->IsSecondary()) {
+        flag |= 256;
+    }
+
+    if (t_is_rev) {
+        std::swap(t_start, t_end);
+        t_start = t_len - t_start;
+        t_end = t_len - t_end;
+    }
+
+    std::string cigar = CigarToString(mapping->Cigar(), true);
+    if (cigar.size() == 0) {
+        cigar = "*";
+    }
+
+    fprintf(fp_out, "%s\t%d\t%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d",
+            q_name.c_str(), q_len, q_start, q_end, ((t_is_rev) ? "-" : "+"),
+            t_name.c_str(), t_len, t_start, t_end, cov_bases_q, (t_end - t_start), mapq);
+
+    if (write_custom_tags) {
+        fprintf(fp_out, "\tcm:i:%d\tNM:i:%d\tAS:i:%d\tfg:i:%d\tpi:i:%d\tpj:i:%d\tpn:i:%d\tps:i:%d\tcg:Z:%s",
+                num_seeds, edit_dist, score, flag, path_id, segment_in_path,
+                num_segments_in_path, ((num_segments_in_path > 1) ? 1 : 0), cigar.c_str());
+
+        #ifdef RAPTOR_DEBUG_TIMINGS
+            fprintf(fp_out, "\ttt:Z:%s", timings.c_str());
+        #endif
+    }
+
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        fprintf(fp_out, "\t%s", vals.FormatAsSAM().c_str());
+    }
+
+    fprintf(fp_out,"\n");
+}
+
 std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                               const std::shared_ptr<raptor::RegionBase> mapping) {
     std::stringstream ss;
@@ -310,6 +469,43 @@ std::string OutputFormatter::ToMHAP(const mindex::IndexPtr index, const mindex::
     ss << std::endl;
 
     return ss.str();
+}
+
+void OutputFormatter::ToMHAP(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                              const std::shared_ptr<raptor::RegionBase> mapping) {
+    std::stringstream ss;
+
+    int32_t q_id = mapping->QueryID();
+    int32_t q_start = mapping->QueryStart();
+    int32_t q_end = mapping->QueryEnd();
+    int32_t q_len = qseq->data().size();
+    int32_t t_id = mapping->TargetID();
+    int32_t t_start = mapping->TargetStart();
+    int32_t t_end = mapping->TargetEnd();
+    int32_t t_len = mapping->TargetLen();
+    bool t_is_rev = mapping->TargetRev();
+    // std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    // std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
+    int32_t edit_dist = mapping->EditDistance();
+    // int32_t score = mapping->Score();
+    int32_t cov_bases_q = mapping->CoveredBasesQuery();
+    int32_t cov_bases_t = mapping->CoveredBasesTarget();
+    int32_t match_bases = mapping->MatchBases();
+    int32_t num_seeds = mapping->NumSeeds();
+
+    double identity = CalcIdentity_(
+                    q_start, q_end, t_start, t_end,
+                    cov_bases_q, cov_bases_t, edit_dist, match_bases);
+
+    if (t_is_rev) {
+        std::swap(t_start, t_end);
+        t_start = t_len - t_start;
+        t_end = t_len - t_end;
+    }
+
+    fprintf(fp_out, "%d %d %.4f %d %d %d %d %d %d %d %d %d\n",
+            q_id, t_id, identity, num_seeds, 0, q_start, q_end, q_len,
+            static_cast<int32_t>(t_is_rev), t_start, t_end, t_len);
 }
 
 std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
@@ -365,6 +561,45 @@ std::string OutputFormatter::ToM4(const mindex::IndexPtr index, const mindex::Se
     return ss.str();
 }
 
+void OutputFormatter::ToM4(FILE *fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                            const std::shared_ptr<raptor::RegionBase> mapping) {
+    std::stringstream ss;
+
+    // int32_t q_id = mapping->QueryID();
+    int32_t q_start = mapping->QueryStart();
+    int32_t q_end = mapping->QueryEnd();
+    int32_t q_len = qseq->data().size();
+    int32_t t_id = mapping->TargetID();
+    int32_t t_start = mapping->TargetStart();
+    int32_t t_end = mapping->TargetEnd();
+    int32_t t_len = mapping->TargetLen();
+    bool t_is_rev = mapping->TargetRev();
+    std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
+    int32_t edit_dist = mapping->EditDistance();
+    int32_t score = mapping->Score();
+    int32_t cov_bases_q = mapping->CoveredBasesQuery();
+    int32_t cov_bases_t = mapping->CoveredBasesTarget();
+    int32_t match_bases = mapping->MatchBases();
+    // int32_t num_seeds = mapping->NumSeeds();
+
+    double identity = CalcIdentity_(
+                    q_start, q_end, t_start, t_end,
+                    cov_bases_q, cov_bases_t, edit_dist, match_bases);
+
+    if (t_is_rev) {
+        // Output in the fwd strand always.
+        std::swap(t_start, t_end);
+        t_start = t_len - t_start;
+        t_end = t_len - t_end;
+    }
+
+    fprintf(fp_out, "%s %s %d %.4f %d %d %d %d %d %d %d %d\n",
+            q_name.c_str(), t_name.c_str(), -score, 100.0 * identity,
+            0, q_start, q_end, q_len,
+            static_cast<int32_t>(t_is_rev), t_start, t_end, t_len);
+}
+
 std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
                             const std::shared_ptr<raptor::RegionBase> mapping,
                             bool write_custom_tags,
@@ -387,10 +622,10 @@ std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mind
     int32_t cov_bases_q = mapping->CoveredBasesQuery();
     int32_t num_seeds = mapping->NumSeeds();
 
-    int64_t path_id = mapping->PathId();
-    int64_t num_paths = mapping->PathsNum();
-    int64_t segment_in_path = mapping->SegmentId();
-    int64_t num_segments_in_path = mapping->SegmentsNum();
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
 
     // This is how a flag is calculated for SAM/BAM alignments. It's not a standard in PAF
     // but will  be output as an optional tag named "fg".
@@ -451,6 +686,82 @@ std::string OutputFormatter::ToGFA2Edge(const mindex::IndexPtr index, const mind
     return ss.str();
 }
 
+void OutputFormatter::ToGFA2Edge(FILE* fp_out, const mindex::IndexPtr index, const mindex::SequencePtr& qseq,
+                            const std::shared_ptr<raptor::RegionBase> mapping,
+                            bool write_custom_tags,
+                            const std::string& timings) {
+    std::stringstream ss;
 
+    int32_t q_id = mapping->QueryID();
+    int32_t q_start = mapping->QueryStart();
+    int32_t q_end = mapping->QueryEnd();
+    int32_t q_len = qseq->data().size();
+    int32_t t_id = mapping->TargetID();
+    int32_t t_start = mapping->TargetStart();
+    int32_t t_end = mapping->TargetEnd();
+    int32_t t_len = mapping->TargetLen();
+    bool t_is_rev = mapping->TargetRev();
+    std::string q_name = raptor::TrimToFirstSpace(qseq->header());
+    std::string t_name = raptor::TrimToFirstSpace(index->header(t_id));
+    int32_t edit_dist = mapping->EditDistance();
+    int32_t score = mapping->Score();
+    int32_t cov_bases_q = mapping->CoveredBasesQuery();
+    int32_t num_seeds = mapping->NumSeeds();
+
+    int32_t path_id = mapping->PathId();
+    int32_t num_paths = mapping->PathsNum();
+    int32_t segment_in_path = mapping->SegmentId();
+    int32_t num_segments_in_path = mapping->SegmentsNum();
+
+    // This is how a flag is calculated for SAM/BAM alignments. It's not a standard in PAF
+    // but will  be output as an optional tag named "fg".
+    uint32_t flag = (t_is_rev) ? 16 : 0;
+    if (mapping->IsSupplementary()) {
+        flag |= 2048;
+    }
+    if (mapping->IsSecondary()) {
+        flag |= 256;
+    }
+
+    if (t_is_rev) {
+        std::swap(t_start, t_end);
+        t_start = t_len - t_start;
+        t_end = t_len - t_end;
+    }
+
+    std::string cigar = CigarToString(mapping->Cigar(), true);
+    if (cigar.size() == 0) {
+        cigar = "*";
+    }
+
+    std::ostringstream edge_name;
+    edge_name << "aln-" << q_id << "-" << t_id << ":" << path_id << "-" << segment_in_path;
+
+    std::string q_end_symbol = (q_end == q_len) ? "$" : "";
+    std::string t_end_symbol = (t_end == t_len) ? "$" : "";
+
+    // Mandatory fields.
+    fprintf(fp_out, "E\t%s\t%s%c\t%s%c\t%d\t%d%s\t%d\t%d%s\t%s",
+            edge_name.str().c_str(),
+            q_name.c_str(), '+',
+            t_name.c_str(), (t_is_rev ? '-' : '+'),
+            q_start, q_end, q_end_symbol.c_str(),
+            t_start, t_end, t_end_symbol.c_str(),
+            cigar.c_str());
+    // Custom Raptor tags.
+    if (write_custom_tags) {
+        fprintf(fp_out, "\tcm:i:%d\tNM:i:%d\tAS:i:%d\tfg:i:%d\tpi:i:%d\tpj:i:%d\tpn:i:%d\tps:i:%d\tcg:Z:%s",
+                num_seeds, edit_dist, score, flag, path_id, segment_in_path,
+                num_segments_in_path, ((num_segments_in_path > 1) ? 1 : 0), cigar.c_str());
+        #ifdef RAPTOR_DEBUG_TIMINGS
+            fprintf(fp_out, "\ttt:Z:%s", timings.c_str());
+        #endif
+    }
+    // Extra tags provided in the alignment.
+    for (const auto& vals: qseq->tags()) {
+        fprintf(fp_out, "\t%s", vals.FormatAsSAM().c_str());
+    }
+    fprintf(fp_out,"\n");
+}
 
 }

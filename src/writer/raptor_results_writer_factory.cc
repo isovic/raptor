@@ -7,6 +7,7 @@
 
 #include <writer/raptor_results_writer_factory.h>
 #include <writer/raptor_results_writer_base.h>
+#include <writer/raptor_results_writer_cstream.h>
 #include <writer/raptor_results_writer_stream.h>
 #include <writer/raptor_results_writer_bam.h>
 #include <log/log_tools.h>
@@ -24,7 +25,7 @@ std::unique_ptr<raptor::RaptorResultsWriterBase> createRaptorResultsWriter(const
         FATAL_REPORT(ERR_UNEXPECTED_VALUE, "Unknown output file format.");
         break;
     default:
-        return createRaptorResultsWriterStream(out_fn, index, out_fmt);
+        return createRaptorResultsWriterCStream(out_fn, index, out_fmt);
         break;
     }
     return nullptr;

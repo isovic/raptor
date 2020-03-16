@@ -97,6 +97,7 @@ raptor_cpp_sources = files([
 
   'writer/output_formatter.cc',
   'writer/raptor_results_writer_factory.cc',
+  'writer/raptor_results_writer_cstream.cc',
   'writer/raptor_results_writer_stream.cc',
   'writer/raptor_results_writer_bam.cc',
 
