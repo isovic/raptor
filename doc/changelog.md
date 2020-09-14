@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.20.2 -> 0.20.3
+- Fixed an edge case when computing the cutoff_id for the frequency percentile filter in minimizer_index.cc.
+
 ## 0.20.1 -> 0.20.2
 - Fixed the identity value in the output when only edit distance calculation is used and not the full alignment.
 - Added Cram tests for hifi overlapping to catch this case.
