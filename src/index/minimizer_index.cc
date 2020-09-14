@@ -441,7 +441,9 @@ void MinimizerIndex::CalcOccurrenceThreshold_(size_t& occ_max, size_t& occ_cutof
 
     // Calculate the cutoff threshold.
     occ_max = hit_counts.back();
-    int64_t cutoff_id = (size_t)floor(num_keys_ * (1.0 - params_->freq_percentil));
+
+    int64_t cutoff_id =
+        std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(num_keys_) - 1, static_cast<int64_t>(std::floor(num_keys_ * (1.0 - params_->freq_percentil)))));
     occ_cutoff = (size_t)hit_counts[cutoff_id];
     occ_cutoff = std::max((size_t) 1, std::max(occ_cutoff, (size_t)params_->min_occ_cutoff));
 
