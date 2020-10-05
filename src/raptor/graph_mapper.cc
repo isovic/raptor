@@ -660,6 +660,19 @@ void DiscoverPredecessorNodes_(
 
             continue;
         }
+        // Skip potential predecessors which are actually completely covering the current node (current node is contained). Query coordinates only, because query is linear
+        // and target is not, which means that multiple anchors can overlap in the target coordinates and one can be "contained" within the other. But if mulitple nodes overlap
+        // the same query coordinate, that shouldn't be connected.
+        if (pred_anchor->QueryStart() <= anchor->QueryStart() && pred_anchor->QueryEnd() >= anchor->QueryEnd()) {
+            #ifdef RAPTOR_TESTING_MODE
+                DEBUG_RUN(verbose_debug_qid,
+                    LOG_ALL("          Candidate (pred_anchor->id() = %ld, anchor->id() = %ld) not added because "
+                            "current query coordinates are contained within predecessor query coordinates. pred_anchor query coords: [%d, %d], anchor query coords: [%d, %d]\n",
+                            pred_anchor->id(), anchor->id(), pred_anchor->QueryStart(), pred_anchor->QueryEnd(), anchor->QueryStart(), anchor->QueryEnd())
+                );
+            #endif
+            continue;
+        }
         auto path_copy = path;
         std::reverse(path_copy.begin(), path_copy.end());
         auto new_edge = raptor::createAnchorGraphEdge(path_copy);
