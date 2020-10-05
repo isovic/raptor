@@ -1,5 +1,8 @@
 # Raptor Changelog
 
+## 0.20.2 -> 0.21.0
+- Fixed the graph construction, where an edge could have been added between nodes when one node is contained within the other. In most cases, this does not make any impact, but in some rare cases when the reference has a strange repeat or low-complexity region, this can come to play. Containment is only disallowed in query coordinates; containment in target is allowed because target is not linear and repeats can be represented via segment nodes.
+
 ## 0.20.1 -> 0.20.2
 - Fixed the identity value in the output when only edit distance calculation is used and not the full alignment.
 - Added Cram tests for hifi overlapping to catch this case.
